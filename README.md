@@ -10,7 +10,7 @@
 
 **A mobile-optimized, single-file solution that helps increase hotel review volume**
 
-[🚀 Live Demo](https://chrimar3.github.io/MVP_Hotel/) • [📋 Business Requirements](docs/BUSINESS_REQUIREMENTS.md) • [🔧 Deployment Guide](docs/DEPLOYMENT.md)
+[🚀 Download Demo](src/hotel-review-generator.html) • [📋 Business Requirements](docs/BUSINESS_REQUIREMENTS.md) • [🔧 Deployment Guide](docs/DEPLOYMENT.md)
 
 </div>
 
