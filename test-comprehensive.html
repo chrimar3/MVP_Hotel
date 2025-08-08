@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Hotel Review Generator - Comprehensive Test Suite</title>
+    <style>
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 20px;
+        }
+        
+        .test-section.pass {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .test-section.fail {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .test-section.warning {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        h1, h2, h3 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .status.pass {
+            background: #10b981;
+            color: white;
+        }
+        
+        .status.fail {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .status.warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .test-details {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #2563eb;
+        }
+        
+        .metric {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .error-log {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Hotel Review Generator - Rigorous Test Suite</h1>
+        <p><strong>Testing Date:</strong> <span id="test-date"></span></p>
+        <p><strong>Total Tests:</strong> <span id="total-tests">0</span> | <strong>Passed:</strong> <span id="passed-tests">0</span> | <strong>Failed:</strong> <span id="failed-tests">0</span></p>
+        
+        <div class="controls">
+            <button onclick="runAllTests()">🚀 Run All Tests</button>
+            <button onclick="runStressTest()">💥 Stress Test</button>
+            <button onclick="runSecurityTest()">🔒 Security Audit</button>
+            <button onclick="clearResults()">🧹 Clear Results</button>
+        </div>
+
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Test Suite Configuration
+        const TEST_CONFIG = {
+            baseUrl: 'hotel-review-generator.html',
+            testTimeout: 5000,
+            stressIterations: 100,
+            totalTests: 0,
+            passedTests: 0,
+            failedTests: 0
+        };
+
+        // Test Results Container
+        let testResults = [];
+
+        // Initialize Test Suite
+        function initTestSuite() {
+            document.getElementById('test-date').textContent = new Date().toLocaleString();
+            updateTestCounters();
+        }
+
+        // Test Execution Engine
+        async function runTest(testName, testFunction, severity = 'normal') {
+            TEST_CONFIG.totalTests++;
+            
+            const startTime = performance.now();
+            let result = {
+                name: testName,
+                status: 'running',
+                duration: 0,
+                error: null,
+                details: null,
+                severity: severity
+            };
+
+            try {
+                const testResult = await Promise.race([
+                    testFunction(),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Test timeout')), TEST_CONFIG.testTimeout)
+                    )
+                ]);
+                
+                result.status = testResult.pass ? 'pass' : 'fail';
+                result.details = testResult.details;
+                result.duration = performance.now() - startTime;
+                
+                if (result.status === 'pass') {
+                    TEST_CONFIG.passedTests++;
+                } else {
+                    TEST_CONFIG.failedTests++;
+                    result.error = testResult.error;
+                }
+            } catch (error) {
+                result.status = 'fail';
+                result.error = error.message;
+                result.duration = performance.now() - startTime;
+                TEST_CONFIG.failedTests++;
+            }
+
+            testResults.push(result);
+            updateTestDisplay();
+            updateTestCounters();
+            
+            return result;
+        }
+
+        // Core Functionality Tests
+        async function testBasicHTML() {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.src = TEST_CONFIG.baseUrl;
+                iframe.style.display = 'none';
+                
+                iframe.onload = () => {
+                    try {
+                        const doc = iframe.contentDocument;
+                        const hasTitle = doc.title.includes('Hotel Review Generator');
+                        const hasHeader = doc.querySelector('header') !== null;
+                        const hasForm = doc.querySelector('main') !== null;
+                        const hasScript = doc.querySelector('script') !== null;
+                        
+                        document.body.removeChild(iframe);
+                        
+                        resolve({
+                            pass: hasTitle && hasHeader && hasForm && hasScript,
+                            details: `Title: ${hasTitle}, Header: ${hasHeader}, Form: ${hasForm}, Script: ${hasScript}`,
+                            error: null
+                        });
+                    } catch (error) {
+                        document.body.removeChild(iframe);
+                        resolve({
+                            pass: false,
+                            details: 'HTML structure validation failed',
+                            error: error.message
+                        });
+                    }
+                };
+                
+                iframe.onerror = () => {
+                    document.body.removeChild(iframe);
+                    resolve({
+                        pass: false,
+                        details: 'Failed to load HTML file',
+                        error: 'File load error'
+                    });
+                };
+                
+                document.body.appendChild(iframe);
+            });
+        }
+
+        async function testMobileViewport() {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.src = TEST_CONFIG.baseUrl;
+                iframe.style.width = '320px';
+                iframe.style.height = '568px';
+                iframe.style.display = 'none';
+                
+                iframe.onload = () => {
+                    try {
+                        const doc = iframe.contentDocument;
+                        const viewport = doc.querySelector('meta[name="viewport"]');
+                        const hasViewport = viewport !== null;
+                        const hasCorrectViewport = viewport && viewport.content.includes('user-scalable=no');
+                        const hasResponsiveCSS = doc.querySelector('style').textContent.includes('@media');
+                        
+                        document.body.removeChild(iframe);
+                        
+                        resolve({
+                            pass: hasViewport && hasCorrectViewport && hasResponsiveCSS,
+                            details: `Viewport: ${hasViewport}, Scalable disabled: ${hasCorrectViewport}, Responsive CSS: ${hasResponsiveCSS}`,
+                            error: null
+                        });
+                    } catch (error) {
+                        document.body.removeChild(iframe);
+                        resolve({
+                            pass: false,
+                            details: 'Mobile viewport test failed',
+                            error: error.message
+                        });
+                    }
+                };
+                
+                document.body.appendChild(iframe);
+            });
+        }
+
+        async function testURLRouting() {
+            const testSources = ['booking', 'expedia', 'direct', 'invalid-source'];
+            let allPassed = true;
+            let details = [];
+            
+            for (const source of testSources) {
+                try {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `${TEST_CONFIG.baseUrl}?source=${source}`;
+                    iframe.style.display = 'none';
+                    
+                    await new Promise((resolve) => {
+                        iframe.onload = () => {
+                            try {
+                                const win = iframe.contentWindow;
+                                const detected = win.BookingDetector ? win.BookingDetector.getSource() : null;
+                                const expected = ['booking', 'expedia'].includes(source) ? source : 'direct';
+                                const passed = detected === expected;
+                                
+                                details.push(`${source}: ${passed ? 'PASS' : 'FAIL'} (detected: ${detected})`);
+                                if (!passed) allPassed = false;
+                                
+                                document.body.removeChild(iframe);
+                                resolve();
+                            } catch (error) {
+                                details.push(`${source}: FAIL (${error.message})`);
+                                allPassed = false;
+                                document.body.removeChild(iframe);
+                                resolve();
+                            }
+                        };
+                        
+                        document.body.appendChild(iframe);
+                    });
+                } catch (error) {
+                    details.push(`${source}: FAIL (${error.message})`);
+                    allPassed = false;
+                }
+            }
+            
+            return {
+                pass: allPassed,
+                details: details.join(', '),
+                error: allPassed ? null : 'Some URL routing tests failed'
+            };
+        }
+
+        async function testJavaScriptModules() {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.src = TEST_CONFIG.baseUrl;
+                iframe.style.display = 'none';
+                
+                iframe.onload = () => {
+                    try {
+                        const win = iframe.contentWindow;
+                        const hasBookingDetector = typeof win.BookingDetector === 'object';
+                        const hasReviewBuilder = typeof win.ReviewBuilder === 'object';
+                        const hasClipboardManager = typeof win.ClipboardManager === 'object';
+                        const hasUIController = typeof win.UIController === 'object';
+                        const hasConfig = typeof win.CONFIG === 'object';
+                        
+                        document.body.removeChild(iframe);
+                        
+                        resolve({
+                            pass: hasBookingDetector && hasReviewBuilder && hasClipboardManager && hasUIController && hasConfig,
+                            details: `BookingDetector: ${hasBookingDetector}, ReviewBuilder: ${hasReviewBuilder}, ClipboardManager: ${hasClipboardManager}, UIController: ${hasUIController}, CONFIG: ${hasConfig}`,
+                            error: null
+                        });
+                    } catch (error) {
+                        document.body.removeChild(iframe);
+                        resolve({
+                            pass: false,
+                            details: 'JavaScript module validation failed',
+                            error: error.message
+                        });
+                    }
+                };
+                
+                document.body.appendChild(iframe);
+            });
+        }
+
+        async function testTouchTargets() {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.src = TEST_CONFIG.baseUrl;
+                iframe.style.display = 'none';
+                
+                iframe.onload = () => {
+                    try {
+                        const doc = iframe.contentDocument;
+                        const checkboxItems = doc.querySelectorAll('.checkbox-item');
+                        const buttons = doc.querySelectorAll('button');
+                        
+                        let minHeight = 999;
+                        checkboxItems.forEach(item => {
+                            const height = parseFloat(getComputedStyle(item).minHeight);
+                            if (height < minHeight) minHeight = height;
+                        });
+                        
+                        buttons.forEach(btn => {
+                            const height = parseFloat(getComputedStyle(btn).minHeight);
+                            if (height < minHeight) minHeight = height;
+                        });
+                        
+                        const touchCompliant = minHeight >= 44;
+                        
+                        document.body.removeChild(iframe);
+                        
+                        resolve({
+                            pass: touchCompliant,
+                            details: `Minimum touch target height: ${minHeight}px (required: 44px)`,
+                            error: touchCompliant ? null : 'Touch targets below 44px minimum'
+                        });
+                    } catch (error) {
+                        document.body.removeChild(iframe);
+                        resolve({
+                            pass: false,
+                            details: 'Touch target validation failed',
+                            error: error.message
+                        });
+                    }
+                };
+                
+                document.body.appendChild(iframe);
+            });
+        }
+
+        // Stress Tests
+        async function testHighVolumeGeneration() {
+            let passed = true;
+            let generatedCount = 0;
+            const errors = [];
+            
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.src = TEST_CONFIG.baseUrl;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                await new Promise(resolve => {
+                    iframe.onload = async () => {
+                        try {
+                            const win = iframe.contentWindow;
+                            const doc = iframe.contentDocument;
+                            
+                            // Simulate rapid review generation
+                            for (let i = 0; i < 50; i++) {
+                                try {
+                                    // Check random aspects
+                                    const checkboxes = doc.querySelectorAll('input[type="checkbox"]');
+                                    checkboxes.forEach(cb => {
+                                        cb.checked = Math.random() > 0.5;
+                                    });
+                                    
+                                    // Generate review
+                                    const review = win.ReviewBuilder.generate();
+                                    if (review && review.length > 10) {
+                                        generatedCount++;
+                                    }
+                                    
+                                    // Small delay to prevent browser freeze
+                                    await new Promise(r => setTimeout(r, 10));
+                                } catch (error) {
+                                    errors.push(`Iteration ${i}: ${error.message}`);
+                                    passed = false;
+                                }
+                            }
+                        } catch (error) {
+                            errors.push(`Setup error: ${error.message}`);
+                            passed = false;
+                        }
+                        
+                        document.body.removeChild(iframe);
+                        resolve();
+                    };
+                });
+            } catch (error) {
+                errors.push(`Test framework error: ${error.message}`);
+                passed = false;
+            }
+            
+            return {
+                pass: passed && generatedCount >= 40,
+                details: `Generated ${generatedCount}/50 reviews successfully`,
+                error: errors.length > 0 ? errors.join('; ') : null
+            };
+        }
+
+        // Security Tests
+        async function testXSSPrevention() {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.src = TEST_CONFIG.baseUrl;
+                iframe.style.display = 'none';
+                
+                iframe.onload = () => {
+                    try {
+                        const doc = iframe.contentDocument;
+                        const win = iframe.contentWindow;
+                        
+                        // Test XSS in staff name field
+                        const staffInput = doc.getElementById('staff-name');
+                        const maliciousInput = '<script>alert("XSS")</script>';
+                        staffInput.value = maliciousInput;
+                        
+                        // Test XSS in comments field
+                        const commentsInput = doc.getElementById('comments');
+                        commentsInput.value = maliciousInput;
+                        
+                        // Generate review with malicious input
+                        const review = win.ReviewBuilder.generate();
+                        
+                        // Check if script tags are escaped/sanitized
+                        const containsScript = review.includes('<script>');
+                        const containsAlert = review.includes('alert(');
+                        
+                        document.body.removeChild(iframe);
+                        
+                        resolve({
+                            pass: !containsScript && !containsAlert,
+                            details: `Script tags found: ${containsScript}, Alert found: ${containsAlert}`,
+                            error: (containsScript || containsAlert) ? 'XSS vulnerability detected' : null
+                        });
+                    } catch (error) {
+                        document.body.removeChild(iframe);
+                        resolve({
+                            pass: false,
+                            details: 'XSS test execution failed',
+                            error: error.message
+                        });
+                    }
+                };
+                
+                document.body.appendChild(iframe);
+            });
+        }
+
+        // Performance Tests
+        async function testLoadTime() {
+            const startTime = performance.now();
+            
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.src = TEST_CONFIG.baseUrl;
+                iframe.style.display = 'none';
+                
+                iframe.onload = () => {
+                    const loadTime = performance.now() - startTime;
+                    document.body.removeChild(iframe);
+                    
+                    resolve({
+                        pass: loadTime < 1000, // 1 second threshold
+                        details: `Load time: ${loadTime.toFixed(2)}ms`,
+                        error: loadTime >= 1000 ? 'Load time exceeds 1 second' : null
+                    });
+                };
+                
+                iframe.onerror = () => {
+                    const loadTime = performance.now() - startTime;
+                    document.body.removeChild(iframe);
+                    
+                    resolve({
+                        pass: false,
+                        details: `Failed to load after ${loadTime.toFixed(2)}ms`,
+                        error: 'File failed to load'
+                    });
+                };
+                
+                document.body.appendChild(iframe);
+            });
+        }
+
+        // Test Execution Functions
+        async function runAllTests() {
+            clearResults();
+            
+            // Core Functionality Tests
+            await runTest('Basic HTML Structure', testBasicHTML, 'critical');
+            await runTest('Mobile Viewport Configuration', testMobileViewport, 'critical');
+            await runTest('URL Routing System', testURLRouting, 'critical');
+            await runTest('JavaScript Modules', testJavaScriptModules, 'critical');
+            await runTest('Touch Target Compliance', testTouchTargets, 'normal');
+            await runTest('Load Time Performance', testLoadTime, 'normal');
+            
+            // Security Tests
+            await runTest('XSS Prevention', testXSSPrevention, 'critical');
+        }
+
+        async function runStressTest() {
+            await runTest('High Volume Generation', testHighVolumeGeneration, 'stress');
+        }
+
+        async function runSecurityTest() {
+            await runTest('XSS Prevention (Detailed)', testXSSPrevention, 'security');
+        }
+
+        // UI Update Functions
+        function updateTestDisplay() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = '';
+            
+            testResults.forEach(result => {
+                const section = document.createElement('div');
+                section.className = `test-section ${result.status}`;
+                
+                section.innerHTML = `
+                    <h3>
+                        ${result.name}
+                        <span class="status ${result.status}">${result.status.toUpperCase()}</span>
+                    </h3>
+                    <div class="test-details">
+                        <div><strong>Duration:</strong> ${result.duration.toFixed(2)}ms</div>
+                        <div><strong>Details:</strong> ${result.details || 'No details available'}</div>
+                        ${result.error ? `<div class="error-log"><strong>Error:</strong> ${result.error}</div>` : ''}
+                    </div>
+                `;
+                
+                container.appendChild(section);
+            });
+        }
+
+        function updateTestCounters() {
+            document.getElementById('total-tests').textContent = TEST_CONFIG.totalTests;
+            document.getElementById('passed-tests').textContent = TEST_CONFIG.passedTests;
+            document.getElementById('failed-tests').textContent = TEST_CONFIG.failedTests;
+        }
+
+        function clearResults() {
+            TEST_CONFIG.totalTests = 0;
+            TEST_CONFIG.passedTests = 0;
+            TEST_CONFIG.failedTests = 0;
+            testResults = [];
+            updateTestDisplay();
+            updateTestCounters();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initTestSuite);
+    </script>
+</body>
+</html>
