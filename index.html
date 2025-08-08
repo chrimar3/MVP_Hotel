@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Review Generator - Live Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e40af;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .demo-button {
+            display: inline-block;
+            background: #1e40af;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 18px;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .demo-button:hover {
+            background: #1e3a8a;
+        }
+        .test-links {
+            margin-top: 40px;
+            text-align: left;
+        }
+        .test-links h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        .test-links ul {
+            list-style: none;
+            padding: 0;
+        }
+        .test-links li {
+            margin: 8px 0;
+        }
+        .test-links a {
+            color: #3b82f6;
+            text-decoration: none;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .test-links a:hover {
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 Hotel Review Generator</h1>
+        <p>A mobile-optimized solution for increasing hotel review volume across major booking platforms.</p>
+        
+        <a href="src/hotel-review-generator.html" class="demo-button">
+            🚀 Launch Demo
+        </a>
+        
+        <div class="test-links">
+            <h3>Test Different Booking Sources:</h3>
+            <ul>
+                <li>
+                    <a href="src/hotel-review-generator.html">
+                        Direct Booking (Default)
+                    </a>
+                </li>
+                <li>
+                    <a href="src/hotel-review-generator.html?source=booking">
+                        Booking.com Guest
+                    </a>
+                </li>
+                <li>
+                    <a href="src/hotel-review-generator.html?source=expedia">
+                        Expedia Guest
+                    </a>
+                </li>
+            </ul>
+            
+            <h3>Additional Resources:</h3>
+            <ul>
+                <li><a href="tests/test-comprehensive.html">Automated Test Suite</a></li>
+                <li><a href="docs/DEPLOYMENT.md">Deployment Guide</a></li>
+                <li><a href="docs/BUSINESS_REQUIREMENTS.md">Business Requirements</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
