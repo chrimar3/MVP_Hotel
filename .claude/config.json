@@ -1,0 +1,68 @@
+{
+  "name": "MVP_Hotel",
+  "version": "2.0.0",
+  "description": "Hotel Review Generator with OneRedOak Workflows",
+  
+  "workflows": {
+    "enabled": true,
+    "source": "github.com/OneRedOak/claude-code-workflows",
+    
+    "design-review": {
+      "enabled": true,
+      "autoRun": "pre-commit",
+      "checks": [
+        "visual-consistency",
+        "accessibility",
+        "mobile-optimization",
+        "i18n-completeness"
+      ]
+    },
+    
+    "tdd": {
+      "enabled": true,
+      "coverageThreshold": 85,
+      "testFirst": true,
+      "continuousRun": true
+    },
+    
+    "performance": {
+      "enabled": true,
+      "budgets": {
+        "LCP": 2500,
+        "FID": 100,
+        "CLS": 0.1,
+        "bundleSize": 400000
+      }
+    },
+    
+    "mobile-ux": {
+      "enabled": true,
+      "minTouchTarget": 44,
+      "supportGestures": true,
+      "hapticFeedback": true
+    }
+  },
+  
+  "automation": {
+    "beforeEdit": ["design-review"],
+    "afterSave": ["test", "perf"],
+    "beforeCommit": ["design-review", "test", "perf", "mobile-ux"],
+    "autoFix": true
+  },
+  
+  "commands": {
+    "shortcuts": {
+      "qr": "claude review",
+      "qt": "claude test",
+      "qp": "claude perf",
+      "qm": "claude mobile",
+      "qf": "claude fix"
+    }
+  },
+  
+  "integration": {
+    "vscode": true,
+    "git": true,
+    "ci": true
+  }
+}

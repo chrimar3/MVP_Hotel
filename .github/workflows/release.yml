@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Create Release Archive
+      run: |
+        mkdir -p dist
+        cp -r src/* dist/
+        cp README.md dist/
+        cp LICENSE dist/
+        tar -czf mvp-hotel-${{ github.ref_name }}.tar.gz dist/
+        zip -r mvp-hotel-${{ github.ref_name }}.zip dist/
+    
+    - name: Extract Changelog
+      id: changelog
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        CHANGELOG=$(awk "/## \[$VERSION\]/,/## \[/" CHANGELOG.md | sed '$ d')
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: ${{ steps.changelog.outputs.CHANGELOG }}
+        files: |
+          mvp-hotel-*.tar.gz
+          mvp-hotel-*.zip
+        generate_release_notes: true
+        draft: false
+        prerelease: false

@@ -1,0 +1,26 @@
+# Code Owners for MVP Hotel Review Generator
+# These owners will be automatically requested for review when someone opens a pull request
+
+# Global owners for all files
+* @chrism
+
+# Frontend files
+/src/ @chrism
+*.html @chrism
+*.css @chrism
+*.js @chrism
+
+# Documentation
+*.md @chrism
+/docs/ @chrism
+
+# GitHub configuration
+/.github/ @chrism
+
+# Testing
+/.claude/ @chrism
+/tests/ @chrism
+
+# Build and deployment
+/deployment/ @chrism
+/.env* @chrism

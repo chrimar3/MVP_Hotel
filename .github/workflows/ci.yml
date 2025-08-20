@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-html:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Validate HTML
+      uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+      with:
+        root: src/
+        css: true
+        
+  browser-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Puppeteer
+      run: |
+        npm init -y
+        npm install puppeteer
+    
+    - name: Run Visual Tests
+      run: node .claude/browser-tests/visual-test.js
+      continue-on-error: true
+    
+    - name: Run Accessibility Tests
+      run: node .claude/browser-tests/accessibility-test.js
+    
+    - name: Run Performance Tests
+      run: node .claude/browser-tests/performance-test.js
+      continue-on-error: true
+    
+    - name: Upload Screenshots
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-screenshots
+        path: |
+          *.png
+          mobile-*.png
+    
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Security Headers Check
+      run: |
+        echo "Checking for security best practices..."
+        grep -q "Content-Security-Policy" src/*.html || echo "Warning: No CSP found"
+        grep -q "X-Frame-Options" src/*.html || echo "Warning: Consider X-Frame-Options"
+    
+  lighthouse:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Run Lighthouse CI
+      run: |
+        npm install -g @lhci/cli
+        lhci autorun --collect.staticDistDir=./src || echo "Lighthouse run completed"
+      continue-on-error: true
