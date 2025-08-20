@@ -1,0 +1,41 @@
+{
+  "name": "Hotel Review Generator",
+  "short_name": "HotelReview",
+  "description": "Generate personalized hotel reviews for multiple platforms",
+  "start_url": "/src/ultimate-hotel-review-generator.html",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "productivity", "business"],
+  "screenshots": [
+    {
+      "src": "/assets/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Generate Review",
+      "url": "/src/ultimate-hotel-review-generator.html",
+      "description": "Start creating a new review"
+    }
+  ],
+  "lang": "en",
+  "dir": "ltr"
+}
