@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e40af">
+    <title>🏨 Hotel Review Generator - Ultimate UX Enhanced v2</title>
+    
+    <style>
+        /* Enhanced CSS Variables with Dark Mode Support */
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #ffffff;
+            --bg-light: #f9fafb;
+            --bg-elevated: #ffffff;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --touch-target: 48px;
+            --max-width: 480px;
+            --border-radius: 0.5rem;
+            --transition-fast: 150ms;
+            --transition-normal: 300ms;
+            --transition-slow: 500ms;
+        }
+
+        /* Dark Mode Theme */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #3b82f6;
+                --primary-dark: #2563eb;
+                --primary-light: #60a5fa;
+                --success: #10b981;
+                --error: #ef4444;
+                --warning: #f59e0b;
+                --text: #f3f4f6;
+                --text-light: #9ca3af;
+                --bg: #111827;
+                --bg-light: #0f172a;
+                --bg-elevated: #1f2937;
+                --border: #374151;
+            }
+        }
+
+        /* Confetti Animation Styles */
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fbbf24;
+            animation: confetti-fall 3s ease-out;
+        }
+
+        .confetti:nth-child(2n) { background: #f87171; }
+        .confetti:nth-child(3n) { background: #60a5fa; }
+        .confetti:nth-child(4n) { background: #34d399; }
+        .confetti:nth-child(5n) { background: #a78bfa; }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: var(--bg-light);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* Container */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Platform Badge */
+        .platform-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0 0 var(--border-radius) 0;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        /* Privacy Toggle */
+        .privacy-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .privacy-toggle input[type="checkbox"] {
+            width: 40px;
+            height: 20px;
+            appearance: none;
+            background: var(--border);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .privacy-toggle input[type="checkbox"]:checked {
+            background: var(--primary);
+        }
+
+        .privacy-toggle input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: transform var(--transition-fast);
+        }
+
+        .privacy-toggle input[type="checkbox"]:checked::after {
+            transform: translateX(20px);
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--bg-elevated);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-md);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background: var(--bg);
+            color: var(--text);
+            transition: all var(--transition-fast);
+            -webkit-appearance: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Template Selector */
+        .template-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .template-btn {
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: center;
+        }
+
+        .template-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .template-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Aspect Cards */
+        .aspects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .aspect-card {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: var(--touch-target);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .aspect-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .aspect-card.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .aspect-card .emoji {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .aspect-card .label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-height: var(--touch-target);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Output Section */
+        .output-section {
+            background: var(--bg-elevated);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow-md);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .output-section.hidden {
+            display: none;
+        }
+
+        .review-output {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        /* Social Sharing */
+        .social-share {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            border: none;
+            color: white;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all var(--transition-fast);
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .share-facebook { background: #1877f2; }
+        .share-twitter { background: #1da1f2; }
+        .share-whatsapp { background: #25d366; }
+        .share-email { background: #ea4335; }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-elevated);
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: calc(100% - 2rem);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Help Modal */
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .help-modal.hidden {
+            display: none;
+        }
+
+        .help-content {
+            background: var(--bg-elevated);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .help-content h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .shortcut-list {
+            list-style: none;
+        }
+
+        .shortcut-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shortcut-key {
+            background: var(--bg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            transition: width var(--transition-normal);
+            border-radius: 2px;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all var(--transition-fast);
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .aspects-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .template-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Print Styles */
+        @media print {
+            .privacy-toggle,
+            .fab,
+            .btn,
+            .social-share {
+                display: none !important;
+            }
+            
+            .review-output {
+                border: 1px solid #000;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Platform Detection -->
+        <header class="header">
+            <div id="platform-badge" class="platform-badge" style="display: none;"></div>
+            <div class="privacy-toggle">
+                <label>
+                    <input type="checkbox" id="privacy-mode">
+                    <span>🔒 Privacy Mode</span>
+                </label>
+            </div>
+            <h1>🏨 Hotel Review Generator</h1>
+            <p>Create authentic, personalized reviews in seconds</p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="form-card">
+            <!-- Template Selector -->
+            <div class="form-group">
+                <label>Quick Templates</label>
+                <div class="template-selector">
+                    <button class="template-btn" data-template="business">Business</button>
+                    <button class="template-btn" data-template="leisure">Leisure</button>
+                    <button class="template-btn" data-template="family">Family</button>
+                </div>
+            </div>
+
+            <!-- Hotel Name -->
+            <div class="form-group">
+                <label for="hotel-name">Hotel Name</label>
+                <input type="text" id="hotel-name" placeholder="e.g., Grand Plaza Hotel" autocomplete="off">
+            </div>
+
+            <!-- Aspects Grid -->
+            <div class="form-group">
+                <label>What You Loved (Select Multiple)</label>
+                <div class="aspects-grid" id="aspects-grid">
+                    <div class="aspect-card" data-aspect="Clean Rooms">
+                        <span class="emoji">🧹</span>
+                        <span class="label">Clean Rooms</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Friendly Staff">
+                        <span class="emoji">😊</span>
+                        <span class="label">Friendly Staff</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Great Location">
+                        <span class="emoji">📍</span>
+                        <span class="label">Great Location</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Comfortable Beds">
+                        <span class="emoji">🛏️</span>
+                        <span class="label">Comfortable</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Delicious Breakfast">
+                        <span class="emoji">🍳</span>
+                        <span class="label">Breakfast</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Excellent Value">
+                        <span class="emoji">💰</span>
+                        <span class="label">Great Value</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Amazing Pool">
+                        <span class="emoji">🏊</span>
+                        <span class="label">Pool/Spa</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Quiet Atmosphere">
+                        <span class="emoji">🤫</span>
+                        <span class="label">Quiet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Comments -->
+            <div class="form-group">
+                <label for="comments">Additional Comments (Optional)</label>
+                <textarea id="comments" rows="3" placeholder="Any specific details you'd like to mention..."></textarea>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generate-btn" class="btn btn-primary">
+                <span>Generate Review</span>
+                <span>✨</span>
+            </button>
+        </div>
+
+        <!-- Output Section -->
+        <div id="output-section" class="output-section hidden">
+            <h3>Your Review</h3>
+            <div id="review-output" class="review-output"></div>
+            
+            <button id="copy-btn" class="btn btn-secondary">
+                <span>Copy to Clipboard</span>
+                <span>📋</span>
+            </button>
+
+            <!-- Social Sharing -->
+            <div class="social-share" id="social-share" style="display: none;">
+                <button class="share-btn share-facebook" data-platform="facebook">
+                    <span>📘</span> Facebook
+                </button>
+                <button class="share-btn share-twitter" data-platform="twitter">
+                    <span>🐦</span> Twitter
+                </button>
+                <button class="share-btn share-whatsapp" data-platform="whatsapp">
+                    <span>💬</span> WhatsApp
+                </button>
+                <button class="share-btn share-email" data-platform="email">
+                    <span>📧</span> Email
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab" title="Quick Actions">
+        ⚡
+    </button>
+
+    <!-- Help Modal -->
+    <div class="help-modal hidden" id="help-modal">
+        <div class="help-content">
+            <h3>⌨️ Keyboard Shortcuts</h3>
+            <ul class="shortcut-list">
+                <li>
+                    <span>Generate Review</span>
+                    <span class="shortcut-key">G</span>
+                </li>
+                <li>
+                    <span>Save Draft</span>
+                    <span class="shortcut-key">S</span>
+                </li>
+                <li>
+                    <span>Copy Review</span>
+                    <span class="shortcut-key">C</span>
+                </li>
+                <li>
+                    <span>Reset Form</span>
+                    <span class="shortcut-key">R</span>
+                </li>
+                <li>
+                    <span>Show Help</span>
+                    <span class="shortcut-key">?</span>
+                </li>
+            </ul>
+            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="document.getElementById('help-modal').classList.add('hidden')">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Hotel Review Generator v2
+        class HotelReviewGenerator {
+            constructor() {
+                this.selectedAspects = new Set();
+                this.templates = {
+                    business: {
+                        aspects: ['Friendly Staff', 'Great Location', 'Quiet Atmosphere'],
+                        tone: 'professional'
+                    },
+                    leisure: {
+                        aspects: ['Comfortable Beds', 'Amazing Pool', 'Delicious Breakfast'],
+                        tone: 'enthusiastic'
+                    },
+                    family: {
+                        aspects: ['Friendly Staff', 'Amazing Pool', 'Excellent Value'],
+                        tone: 'warm'
+                    }
+                };
+                this.platform = null;
+                this.privacyMode = false;
+                this.draftTimer = null;
+                this.progressStep = 0;
+                this.totalSteps = 4;
+                
+                this.init();
+            }
+
+            init() {
+                this.detectPlatform();
+                this.setupEventListeners();
+                this.setupKeyboardShortcuts();
+                this.setupDraftManagement();
+                this.restoreDraft();
+                this.setupHapticFeedback();
+                this.updateProgress();
+            }
+
+            detectPlatform() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const source = urlParams.get('source');
+                
+                const platforms = {
+                    'booking': { name: 'Booking.com Guest', color: '#003580', aspects: ['Clean Rooms', 'Great Location', 'Friendly Staff'] },
+                    'expedia': { name: 'Expedia Guest', color: '#3A5F8B', aspects: ['Comfortable Beds', 'Delicious Breakfast', 'Excellent Value'] },
+                    'hotels': { name: 'Hotels.com Guest', color: '#D32F2F', aspects: ['Clean Rooms', 'Excellent Value', 'Delicious Breakfast'] },
+                    'tripadvisor': { name: 'TripAdvisor Guest', color: '#00AF87', aspects: ['Great Location', 'Friendly Staff', 'Clean Rooms'] },
+                    'direct': { name: 'Direct Guest', color: '#764ba2', aspects: ['Friendly Staff', 'Great Location', 'Clean Rooms'] }
+                };
+                
+                if (source && platforms[source]) {
+                    this.platform = platforms[source];
+                    const badge = document.getElementById('platform-badge');
+                    badge.style.display = 'block';
+                    badge.style.background = this.platform.color;
+                    badge.textContent = this.platform.name;
+                    
+                    // Pre-select platform-specific aspects
+                    setTimeout(() => {
+                        this.platform.aspects.forEach(aspect => {
+                            const card = document.querySelector(`[data-aspect="${aspect}"]`);
+                            if (card && !card.classList.contains('selected')) {
+                                card.click();
+                            }
+                        });
+                    }, 500);
+                }
+            }
+
+            setupEventListeners() {
+                // Template buttons
+                document.querySelectorAll('.template-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.applyTemplate(e.target.dataset.template);
+                    });
+                });
+
+                // Aspect cards
+                document.querySelectorAll('.aspect-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        this.toggleAspect(card);
+                    });
+                });
+
+                // Privacy mode
+                document.getElementById('privacy-mode').addEventListener('change', (e) => {
+                    this.togglePrivacyMode(e.target.checked);
+                });
+
+                // Generate button
+                document.getElementById('generate-btn').addEventListener('click', () => {
+                    this.generateReview();
+                });
+
+                // Copy button
+                document.getElementById('copy-btn').addEventListener('click', () => {
+                    this.copyToClipboard();
+                });
+
+                // FAB
+                document.getElementById('fab').addEventListener('click', () => {
+                    this.showQuickActions();
+                });
+
+                // Social sharing
+                document.querySelectorAll('.share-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.shareReview(e.target.dataset.platform);
+                    });
+                });
+
+                // Form changes for progress
+                document.getElementById('hotel-name').addEventListener('input', () => {
+                    this.updateProgress();
+                });
+                
+                document.getElementById('comments').addEventListener('input', () => {
+                    this.updateProgress();
+                });
+            }
+
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Don't trigger shortcuts when typing in inputs
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                        if (e.ctrlKey || e.metaKey) {
+                            if (e.key === 'g') {
+                                e.preventDefault();
+                                this.generateReview();
+                            } else if (e.key === 's') {
+                                e.preventDefault();
+                                this.saveDraft();
+                                this.showToast('Draft saved', 'success');
+                            }
+                        }
+                        return;
+                    }
+                    
+                    // Global shortcuts
+                    switch(e.key.toLowerCase()) {
+                        case 'g':
+                            e.preventDefault();
+                            this.generateReview();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            this.saveDraft();
+                            this.showToast('Draft saved', 'success');
+                            break;
+                        case 'c':
+                            if (document.getElementById('output-section').classList.contains('hidden') === false) {
+                                e.preventDefault();
+                                this.copyToClipboard();
+                            }
+                            break;
+                        case 'r':
+                            e.preventDefault();
+                            this.resetForm();
+                            break;
+                        case '?':
+                            e.preventDefault();
+                            this.showHelp();
+                            break;
+                    }
+                });
+            }
+
+            setupDraftManagement() {
+                if (this.privacyMode) return;
+                
+                // Auto-save every 5 seconds
+                this.draftTimer = setInterval(() => {
+                    this.saveDraft();
+                }, 5000);
+                
+                // Save on page unload
+                window.addEventListener('beforeunload', () => {
+                    this.saveDraft();
+                });
+            }
+
+            saveDraft() {
+                if (this.privacyMode) return;
+                
+                const draft = {
+                    hotelName: document.getElementById('hotel-name').value,
+                    aspects: Array.from(this.selectedAspects),
+                    comments: document.getElementById('comments').value,
+                    timestamp: Date.now()
+                };
+                
+                localStorage.setItem('hotelReviewDraft', JSON.stringify(draft));
+            }
+
+            restoreDraft() {
+                if (this.privacyMode) return;
+                
+                const savedDraft = localStorage.getItem('hotelReviewDraft');
+                if (savedDraft) {
+                    const draft = JSON.parse(savedDraft);
+                    
+                    // Check if draft is less than 24 hours old
+                    if (Date.now() - draft.timestamp < 86400000) {
+                        document.getElementById('hotel-name').value = draft.hotelName || '';
+                        document.getElementById('comments').value = draft.comments || '';
+                        
+                        // Restore selected aspects
+                        draft.aspects.forEach(aspect => {
+                            const card = document.querySelector(`[data-aspect="${aspect}"]`);
+                            if (card) {
+                                this.selectedAspects.add(aspect);
+                                card.classList.add('selected');
+                            }
+                        });
+                        
+                        if (draft.hotelName || draft.aspects.length > 0) {
+                            this.showToast('✨ Restored your previous draft', 'info');
+                        }
+                        
+                        this.updateProgress();
+                    } else {
+                        // Clear old draft
+                        localStorage.removeItem('hotelReviewDraft');
+                    }
+                }
+            }
+
+            togglePrivacyMode(enabled) {
+                this.privacyMode = enabled;
+                
+                if (enabled) {
+                    // Clear all stored data
+                    localStorage.clear();
+                    clearInterval(this.draftTimer);
+                    this.showToast('🔒 Privacy mode enabled - No data will be saved', 'info');
+                } else {
+                    // Re-enable draft saving
+                    this.setupDraftManagement();
+                    this.showToast('Draft saving re-enabled', 'info');
+                }
+            }
+
+            applyTemplate(templateName) {
+                const template = this.templates[templateName];
+                if (!template) return;
+                
+                // Clear current selections
+                document.querySelectorAll('.aspect-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                this.selectedAspects.clear();
+                
+                // Apply template aspects
+                template.aspects.forEach(aspect => {
+                    const card = document.querySelector(`[data-aspect="${aspect}"]`);
+                    if (card) {
+                        card.classList.add('selected');
+                        this.selectedAspects.add(aspect);
+                    }
+                });
+                
+                // Highlight selected template
+                document.querySelectorAll('.template-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-template="${templateName}"]`).classList.add('active');
+                
+                this.updateProgress();
+                if (window.haptic) window.haptic.light();
+            }
+
+            toggleAspect(card) {
+                const aspect = card.dataset.aspect;
+                
+                if (this.selectedAspects.has(aspect)) {
+                    this.selectedAspects.delete(aspect);
+                    card.classList.remove('selected');
+                } else {
+                    this.selectedAspects.add(aspect);
+                    card.classList.add('selected');
+                }
+                
+                this.updateProgress();
+                if (window.haptic) window.haptic.light();
+            }
+
+            updateProgress() {
+                let steps = 0;
+                
+                if (document.getElementById('hotel-name').value) steps++;
+                if (this.selectedAspects.size > 0) steps++;
+                if (document.getElementById('comments').value) steps++;
+                if (document.querySelector('.review-output')?.textContent) steps++;
+                
+                const percent = (steps / this.totalSteps) * 100;
+                document.getElementById('progress-fill').style.width = `${percent}%`;
+            }
+
+            generateReview() {
+                const hotelName = document.getElementById('hotel-name').value.trim();
+                
+                if (!hotelName) {
+                    this.showToast('Please enter the hotel name', 'error');
+                    return;
+                }
+                
+                if (this.selectedAspects.size === 0) {
+                    this.showToast('Please select at least one aspect', 'error');
+                    return;
+                }
+                
+                const btn = document.getElementById('generate-btn');
+                const output = document.getElementById('output-section');
+                
+                // Show loading
+                btn.innerHTML = '<span>Generating...</span><span class="loading">⏳</span>';
+                btn.disabled = true;
+                
+                if (window.haptic) window.haptic.medium();
+                
+                setTimeout(() => {
+                    const review = this.createReview(hotelName);
+                    
+                    // Show output
+                    document.getElementById('review-output').textContent = review;
+                    output.classList.remove('hidden');
+                    
+                    // Reset button
+                    btn.innerHTML = '<span>Generate Review</span><span>✨</span>';
+                    btn.disabled = false;
+                    
+                    // Show celebration
+                    this.celebrate();
+                    
+                    // Show social sharing after delay
+                    setTimeout(() => {
+                        document.getElementById('social-share').style.display = 'flex';
+                    }, 2000);
+                    
+                    // Scroll to output
+                    output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    this.updateProgress();
+                    
+                    if (window.haptic) window.haptic.success();
+                }, 1000);
+            }
+
+            createReview(hotelName) {
+                const aspects = Array.from(this.selectedAspects);
+                const comments = document.getElementById('comments').value.trim();
+                
+                // Review templates based on aspects
+                const templates = [
+                    `I had a wonderful stay at ${hotelName}! ${this.getAspectSentences(aspects)} ${comments ? comments + ' ' : ''}Would definitely recommend!`,
+                    `${hotelName} exceeded my expectations. ${this.getAspectSentences(aspects)} ${comments ? comments + ' ' : ''}Looking forward to staying here again!`,
+                    `Fantastic experience at ${hotelName}! ${this.getAspectSentences(aspects)} ${comments ? comments + ' ' : ''}Highly recommended for anyone visiting the area.`,
+                    `My stay at ${hotelName} was excellent. ${this.getAspectSentences(aspects)} ${comments ? comments + ' ' : ''}Great value for money!`,
+                    `Really enjoyed my time at ${hotelName}. ${this.getAspectSentences(aspects)} ${comments ? comments + ' ' : ''}Will definitely be back!`
+                ];
+                
+                return templates[Math.floor(Math.random() * templates.length)];
+            }
+
+            getAspectSentences(aspects) {
+                const sentences = {
+                    'Clean Rooms': 'The rooms were spotlessly clean and well-maintained.',
+                    'Friendly Staff': 'The staff were incredibly friendly and helpful throughout my stay.',
+                    'Great Location': 'The location was perfect, close to everything we needed.',
+                    'Comfortable Beds': 'The beds were extremely comfortable - I slept great!',
+                    'Delicious Breakfast': 'The breakfast was delicious with plenty of options.',
+                    'Excellent Value': 'Excellent value for money with all the amenities provided.',
+                    'Amazing Pool': 'The pool area was fantastic and well-maintained.',
+                    'Quiet Atmosphere': 'The atmosphere was peaceful and quiet, perfect for relaxation.'
+                };
+                
+                return aspects.map(aspect => sentences[aspect]).join(' ');
+            }
+
+            celebrate() {
+                // Create confetti
+                const container = document.createElement('div');
+                container.className = 'confetti-container';
+                document.body.appendChild(container);
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    container.appendChild(confetti);
+                }
+                
+                // Show success message
+                this.showToast('🎉 Review generated successfully!', 'success');
+                
+                // Clean up confetti after animation
+                setTimeout(() => {
+                    container.remove();
+                }, 5000);
+            }
+
+            copyToClipboard() {
+                const reviewText = document.getElementById('review-output').textContent;
+                
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(reviewText).then(() => {
+                        this.showToast('✅ Copied to clipboard!', 'success');
+                        if (window.haptic) window.haptic.light();
+                    });
+                } else {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = reviewText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    this.showToast('✅ Copied to clipboard!', 'success');
+                }
+            }
+
+            shareReview(platform) {
+                const review = document.getElementById('review-output').textContent;
+                const hotelName = document.getElementById('hotel-name').value;
+                const url = window.location.href;
+                
+                let shareUrl = '';
+                
+                switch(platform) {
+                    case 'facebook':
+                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(review)}`;
+                        break;
+                    case 'twitter':
+                        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(review.substring(0, 250) + '...')}&url=${encodeURIComponent(url)}`;
+                        break;
+                    case 'whatsapp':
+                        shareUrl = `https://wa.me/?text=${encodeURIComponent(`My review of ${hotelName}: ${review}`)}`;
+                        break;
+                    case 'email':
+                        shareUrl = `mailto:?subject=${encodeURIComponent(`My review of ${hotelName}`)}&body=${encodeURIComponent(review)}`;
+                        break;
+                }
+                
+                if (shareUrl) {
+                    window.open(shareUrl, '_blank');
+                }
+            }
+
+            resetForm() {
+                if (confirm('Are you sure you want to reset the form?')) {
+                    document.getElementById('hotel-name').value = '';
+                    document.getElementById('comments').value = '';
+                    document.querySelectorAll('.aspect-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    document.querySelectorAll('.template-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.selectedAspects.clear();
+                    document.getElementById('output-section').classList.add('hidden');
+                    this.updateProgress();
+                    this.showToast('Form reset', 'info');
+                }
+            }
+
+            showHelp() {
+                document.getElementById('help-modal').classList.remove('hidden');
+            }
+
+            showQuickActions() {
+                const actions = [
+                    { icon: '✨', text: 'Generate', action: () => this.generateReview() },
+                    { icon: '💾', text: 'Save Draft', action: () => { this.saveDraft(); this.showToast('Draft saved', 'success'); } },
+                    { icon: '🔄', text: 'Reset', action: () => this.resetForm() },
+                    { icon: '❓', text: 'Help', action: () => this.showHelp() }
+                ];
+                
+                // Create action menu
+                const menu = document.createElement('div');
+                menu.style.cssText = `
+                    position: fixed;
+                    bottom: 6rem;
+                    right: 2rem;
+                    background: var(--bg-elevated);
+                    border-radius: var(--border-radius);
+                    padding: 0.5rem;
+                    box-shadow: var(--shadow-xl);
+                    z-index: 101;
+                `;
+                
+                actions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.style.cssText = `
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        width: 100%;
+                        padding: 0.75rem;
+                        border: none;
+                        background: transparent;
+                        color: var(--text);
+                        cursor: pointer;
+                        font-size: 0.875rem;
+                        border-radius: var(--border-radius);
+                        transition: background var(--transition-fast);
+                    `;
+                    btn.innerHTML = `<span>${action.icon}</span><span>${action.text}</span>`;
+                    btn.onmouseover = () => btn.style.background = 'var(--bg-light)';
+                    btn.onmouseout = () => btn.style.background = 'transparent';
+                    btn.onclick = () => {
+                        action.action();
+                        menu.remove();
+                    };
+                    menu.appendChild(btn);
+                });
+                
+                document.body.appendChild(menu);
+                
+                // Remove menu when clicking outside
+                setTimeout(() => {
+                    document.addEventListener('click', function removeMenu(e) {
+                        if (!menu.contains(e.target) && e.target.id !== 'fab') {
+                            menu.remove();
+                            document.removeEventListener('click', removeMenu);
+                        }
+                    });
+                }, 100);
+            }
+
+            showToast(message, type = 'info') {
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    info: 'ℹ️',
+                    warning: '⚠️'
+                };
+                
+                toast.innerHTML = `<span>${icons[type] || icons.info}</span><span>${message}</span>`;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideUp 0.3s ease-out reverse';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            setupHapticFeedback() {
+                // Simple haptic feedback simulation for mobile
+                window.haptic = {
+                    light: () => {
+                        if (navigator.vibrate) navigator.vibrate(10);
+                    },
+                    medium: () => {
+                        if (navigator.vibrate) navigator.vibrate(20);
+                    },
+                    success: () => {
+                        if (navigator.vibrate) navigator.vibrate([10, 10, 10]);
+                    }
+                };
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            new HotelReviewGenerator();
+        });
+
+        // Service Worker Registration (for offline mode)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(err => {
+                console.log('Service Worker registration failed:', err);
+            });
+        }
+    </script>
+</body>
+</html>

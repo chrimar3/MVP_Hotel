@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e40af">
+    <title>🏨 Hotel Review Generator - Ultimate UX v3</title>
+    
+    <style>
+        /* Enhanced CSS Variables */
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #ffffff;
+            --bg-light: #f9fafb;
+            --bg-elevated: #ffffff;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --touch-target: 48px;
+            --max-width: 480px;
+            --border-radius: 0.5rem;
+            --transition-fast: 150ms;
+            --transition-normal: 300ms;
+            --transition-slow: 500ms;
+            --animation-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #3b82f6;
+                --primary-dark: #2563eb;
+                --primary-light: #60a5fa;
+                --success: #10b981;
+                --error: #ef4444;
+                --warning: #f59e0b;
+                --text: #f3f4f6;
+                --text-light: #9ca3af;
+                --bg: #111827;
+                --bg-light: #0f172a;
+                --bg-elevated: #1f2937;
+                --border: #374151;
+            }
+        }
+
+        /* Micro-animations */
+        @keyframes buttonPress {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes checkmark {
+            0% { 
+                stroke-dashoffset: 100;
+                opacity: 0;
+            }
+            50% { opacity: 1; }
+            100% { 
+                stroke-dashoffset: 0;
+                opacity: 1;
+            }
+        }
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--border) 25%,
+                var(--bg-light) 50%,
+                var(--border) 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--border-radius);
+        }
+
+        .skeleton-text {
+            height: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.25rem;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: var(--bg-light);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Container */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .lang-btn {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .lang-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Progressive Form Sections */
+        .form-section {
+            background: var(--bg-elevated);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        .form-section.hidden {
+            display: none;
+        }
+
+        .form-section.revealing {
+            animation: slideInUp 0.4s var(--animation-bounce);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background: var(--bg);
+            color: var(--text);
+            transition: all var(--transition-fast);
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Review Length Indicator */
+        .length-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            transition: all var(--transition-fast);
+        }
+
+        .length-indicator.perfect {
+            color: var(--success);
+        }
+
+        .length-indicator.good {
+            color: var(--primary);
+        }
+
+        .length-indicator.warning {
+            color: var(--warning);
+        }
+
+        .length-indicator.error {
+            color: var(--error);
+        }
+
+        .length-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .length-fill {
+            height: 100%;
+            transition: all var(--transition-normal);
+            border-radius: 2px;
+        }
+
+        /* Validation Indicator */
+        .validation-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            transition: all var(--transition-fast);
+        }
+
+        .validation-indicator.valid {
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--success);
+        }
+
+        .validation-indicator.invalid {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--error);
+        }
+
+        .validation-checkmark {
+            width: 20px;
+            height: 20px;
+        }
+
+        .validation-checkmark svg {
+            stroke: currentColor;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: checkmark 0.5s ease-out forwards;
+        }
+
+        /* Aspect Cards with Micro-animations */
+        .aspects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .aspect-card {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .aspect-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .aspect-card:active {
+            animation: buttonPress 0.2s ease-out;
+        }
+
+        .aspect-card.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Buttons with Micro-animations */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-height: var(--touch-target);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            animation: buttonPress 0.2s ease-out;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Platform Submit Buttons */
+        .platform-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+            animation: slideInUp 0.4s ease-out;
+        }
+
+        .platform-submit-btn {
+            padding: 0.75rem;
+            border: none;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .platform-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .platform-submit-btn:active {
+            animation: buttonPress 0.2s ease-out;
+        }
+
+        .platform-booking { background: #003580; }
+        .platform-google { background: #4285f4; }
+        .platform-tripadvisor { background: #00AF87; }
+        .platform-expedia { background: #3A5F8B; }
+
+        /* Output Section */
+        .output-section {
+            background: var(--bg-elevated);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow-md);
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        .output-section.hidden {
+            display: none;
+        }
+
+        .review-output {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: var(--text);
+            position: relative;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-elevated);
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            animation: slideInUp 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: calc(100% - 2rem);
+        }
+
+        /* Loading States */
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .aspects-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .platform-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .btn,
+            .platform-buttons,
+            .language-selector {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Language Selector -->
+        <header class="header">
+            <div class="language-selector" id="language-selector">
+                <button class="lang-btn active" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="es">ES</button>
+                <button class="lang-btn" data-lang="fr">FR</button>
+                <button class="lang-btn" data-lang="de">DE</button>
+                <button class="lang-btn" data-lang="it">IT</button>
+                <button class="lang-btn" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="el">ΕΛ</button>
+            </div>
+            <h1 data-i18n="title">🏨 Hotel Review Generator</h1>
+            <p data-i18n="subtitle">Create authentic reviews in seconds</p>
+        </header>
+
+        <!-- Progressive Form Section 1: Hotel Name -->
+        <div class="form-section" id="hotel-section">
+            <div class="form-group">
+                <label for="hotel-name" data-i18n="hotelName">Hotel Name</label>
+                <input 
+                    type="text" 
+                    id="hotel-name" 
+                    placeholder="e.g., Grand Plaza Hotel" 
+                    data-i18n-placeholder="hotelPlaceholder"
+                    autocomplete="off"
+                    aria-label="Hotel name input"
+                    aria-required="true"
+                >
+            </div>
+        </div>
+
+        <!-- Progressive Form Section 2: Aspects (Initially Hidden) -->
+        <div class="form-section hidden" id="aspects-section">
+            <div class="form-group">
+                <label data-i18n="aspects">What You Loved</label>
+                <div class="aspects-grid" id="aspects-grid">
+                    <div class="aspect-card" data-aspect="Clean Rooms" tabindex="0" role="button" aria-pressed="false">
+                        <span class="emoji">🧹</span>
+                        <span class="label" data-i18n="cleanRooms">Clean Rooms</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Friendly Staff" tabindex="0" role="button" aria-pressed="false">
+                        <span class="emoji">😊</span>
+                        <span class="label" data-i18n="friendlyStaff">Friendly Staff</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Great Location" tabindex="0" role="button" aria-pressed="false">
+                        <span class="emoji">📍</span>
+                        <span class="label" data-i18n="greatLocation">Great Location</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Comfortable Beds" tabindex="0" role="button" aria-pressed="false">
+                        <span class="emoji">🛏️</span>
+                        <span class="label" data-i18n="comfortable">Comfortable</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Delicious Breakfast" tabindex="0" role="button" aria-pressed="false">
+                        <span class="emoji">🍳</span>
+                        <span class="label" data-i18n="breakfast">Breakfast</span>
+                    </div>
+                    <div class="aspect-card" data-aspect="Excellent Value" tabindex="0" role="button" aria-pressed="false">
+                        <span class="emoji">💰</span>
+                        <span class="label" data-i18n="value">Great Value</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progressive Form Section 3: Comments (Initially Hidden) -->
+        <div class="form-section hidden" id="comments-section">
+            <div class="form-group">
+                <label for="comments" data-i18n="comments">Additional Comments (Optional)</label>
+                <textarea 
+                    id="comments" 
+                    rows="3" 
+                    placeholder="Any specific details..." 
+                    data-i18n-placeholder="commentsPlaceholder"
+                    aria-label="Additional comments"
+                ></textarea>
+                <div class="length-indicator" id="length-indicator">
+                    <span id="length-text"></span>
+                    <div class="length-bar">
+                        <div class="length-fill" id="length-fill"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Generate Button -->
+            <button id="generate-btn" class="btn btn-primary" aria-label="Generate review">
+                <span data-i18n="generate">Generate Review</span>
+                <span>✨</span>
+            </button>
+        </div>
+
+        <!-- Output Section (Initially Hidden) -->
+        <div id="output-section" class="output-section hidden">
+            <h3 data-i18n="yourReview">Your Review</h3>
+            
+            <!-- Validation Indicator -->
+            <div class="validation-indicator hidden" id="validation-indicator">
+                <div class="validation-checkmark">
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <span id="validation-text"></span>
+            </div>
+            
+            <div id="review-output" class="review-output"></div>
+            
+            <!-- Platform Submit Buttons -->
+            <div class="platform-buttons" id="platform-buttons">
+                <button class="platform-submit-btn platform-booking" data-platform="booking" aria-label="Submit to Booking.com">
+                    <span>📘</span>
+                    <span data-i18n="submitBooking">Post to Booking.com</span>
+                </button>
+                <button class="platform-submit-btn platform-google" data-platform="google" aria-label="Submit to Google">
+                    <span>🔍</span>
+                    <span data-i18n="submitGoogle">Post to Google</span>
+                </button>
+                <button class="platform-submit-btn platform-tripadvisor" data-platform="tripadvisor" aria-label="Submit to TripAdvisor">
+                    <span>🦉</span>
+                    <span data-i18n="submitTripadvisor">Post to TripAdvisor</span>
+                </button>
+                <button class="platform-submit-btn platform-expedia" data-platform="expedia" aria-label="Submit to Expedia">
+                    <span>✈️</span>
+                    <span data-i18n="submitExpedia">Post to Expedia</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen Reader Announcements -->
+    <div role="status" aria-live="polite" aria-atomic="true" class="sr-only" id="sr-announcements"></div>
+
+    <script>
+        /**
+         * Hotel Review Generator v3
+         * @description Enhanced with TDD-first approach and performance optimizations
+         */
+        class HotelReviewGeneratorV3 {
+            constructor() {
+                // State management
+                this.selectedAspects = new Set();
+                this.currentLanguage = 'en';
+                this.formData = {};
+                this.validationErrors = [];
+                this.draftTimer = null;
+                this.platformUrls = new Map(); // Cache for platform URLs
+                
+                // Translations (lazy-loaded)
+                this.translations = {
+                    en: {
+                        title: '🏨 Hotel Review Generator',
+                        subtitle: 'Create authentic reviews in seconds',
+                        hotelName: 'Hotel Name',
+                        hotelPlaceholder: 'e.g., Grand Plaza Hotel',
+                        aspects: 'What You Loved',
+                        comments: 'Additional Comments (Optional)',
+                        commentsPlaceholder: 'Any specific details...',
+                        generate: 'Generate Review',
+                        yourReview: 'Your Review',
+                        submitBooking: 'Post to Booking.com',
+                        submitGoogle: 'Post to Google',
+                        submitTripadvisor: 'Post to TripAdvisor',
+                        submitExpedia: 'Post to Expedia',
+                        cleanRooms: 'Clean Rooms',
+                        friendlyStaff: 'Friendly Staff',
+                        greatLocation: 'Great Location',
+                        comfortable: 'Comfortable',
+                        breakfast: 'Breakfast',
+                        value: 'Great Value',
+                        perfectLength: 'Perfect length!',
+                        addMoreDetail: 'Add a bit more detail',
+                        greatDetail: 'Great detail!',
+                        tooLong: 'Consider shortening',
+                        validReview: 'Review ready to submit!',
+                        invalidReview: 'Please fix the issues',
+                        profanityDetected: 'Please remove inappropriate language',
+                        tooShort: 'Review is too short (min 50 characters)',
+                        missingHotelName: 'Consider mentioning the hotel name'
+                    },
+                    es: {
+                        title: '🏨 Generador de Reseñas',
+                        subtitle: 'Crea reseñas auténticas en segundos',
+                        hotelName: 'Nombre del Hotel',
+                        hotelPlaceholder: 'ej., Hotel Grand Plaza',
+                        aspects: 'Lo que te encantó',
+                        comments: 'Comentarios Adicionales (Opcional)',
+                        commentsPlaceholder: 'Detalles específicos...',
+                        generate: 'Generar Reseña',
+                        yourReview: 'Tu Reseña',
+                        submitBooking: 'Publicar en Booking.com',
+                        submitGoogle: 'Publicar en Google',
+                        submitTripadvisor: 'Publicar en TripAdvisor',
+                        submitExpedia: 'Publicar en Expedia',
+                        cleanRooms: 'Habitaciones Limpias',
+                        friendlyStaff: 'Personal Amable',
+                        greatLocation: 'Excelente Ubicación',
+                        comfortable: 'Cómodo',
+                        breakfast: 'Desayuno',
+                        value: 'Buen Precio'
+                    },
+                    fr: {
+                        title: '🏨 Générateur d\'Avis',
+                        subtitle: 'Créez des avis authentiques en secondes',
+                        hotelName: 'Nom de l\'Hôtel',
+                        hotelPlaceholder: 'ex., Hôtel Grand Plaza',
+                        aspects: 'Ce que vous avez aimé',
+                        comments: 'Commentaires Supplémentaires (Optionnel)',
+                        commentsPlaceholder: 'Détails spécifiques...',
+                        generate: 'Générer l\'Avis',
+                        yourReview: 'Votre Avis',
+                        submitBooking: 'Publier sur Booking.com',
+                        submitGoogle: 'Publier sur Google',
+                        submitTripadvisor: 'Publier sur TripAdvisor',
+                        submitExpedia: 'Publier sur Expedia',
+                        cleanRooms: 'Chambres Propres',
+                        friendlyStaff: 'Personnel Sympathique',
+                        greatLocation: 'Excellent Emplacement',
+                        comfortable: 'Confortable',
+                        breakfast: 'Petit-déjeuner',
+                        value: 'Bon Rapport Qualité-Prix'
+                    },
+                    de: {
+                        title: '🏨 Bewertungsgenerator',
+                        subtitle: 'Erstellen Sie authentische Bewertungen in Sekunden',
+                        hotelName: 'Hotelname',
+                        hotelPlaceholder: 'z.B., Grand Plaza Hotel',
+                        aspects: 'Was Ihnen gefallen hat',
+                        comments: 'Zusätzliche Kommentare (Optional)',
+                        commentsPlaceholder: 'Spezifische Details...',
+                        generate: 'Bewertung Generieren',
+                        yourReview: 'Ihre Bewertung',
+                        submitBooking: 'Auf Booking.com veröffentlichen',
+                        submitGoogle: 'Auf Google veröffentlichen',
+                        submitTripadvisor: 'Auf TripAdvisor veröffentlichen',
+                        submitExpedia: 'Auf Expedia veröffentlichen',
+                        cleanRooms: 'Saubere Zimmer',
+                        friendlyStaff: 'Freundliches Personal',
+                        greatLocation: 'Tolle Lage',
+                        comfortable: 'Komfortabel',
+                        breakfast: 'Frühstück',
+                        value: 'Gutes Preis-Leistungs-Verhältnis'
+                    },
+                    it: {
+                        title: '🏨 Generatore di Recensioni',
+                        subtitle: 'Crea recensioni autentiche in secondi',
+                        hotelName: 'Nome Hotel',
+                        hotelPlaceholder: 'es., Hotel Grand Plaza',
+                        aspects: 'Cosa ti è piaciuto',
+                        comments: 'Commenti Aggiuntivi (Opzionale)',
+                        commentsPlaceholder: 'Dettagli specifici...',
+                        generate: 'Genera Recensione',
+                        yourReview: 'La Tua Recensione',
+                        submitBooking: 'Pubblica su Booking.com',
+                        submitGoogle: 'Pubblica su Google',
+                        submitTripadvisor: 'Pubblica su TripAdvisor',
+                        submitExpedia: 'Pubblica su Expedia',
+                        cleanRooms: 'Camere Pulite',
+                        friendlyStaff: 'Personale Cordiale',
+                        greatLocation: 'Ottima Posizione',
+                        comfortable: 'Confortevole',
+                        breakfast: 'Colazione',
+                        value: 'Ottimo Rapporto Qualità-Prezzo'
+                    },
+                    zh: {
+                        title: '🏨 酒店评价生成器',
+                        subtitle: '几秒钟内创建真实评价',
+                        hotelName: '酒店名称',
+                        hotelPlaceholder: '例如：格兰德广场酒店',
+                        aspects: '您喜欢的方面',
+                        comments: '其他评论（可选）',
+                        commentsPlaceholder: '具体细节...',
+                        generate: '生成评价',
+                        yourReview: '您的评价',
+                        submitBooking: '发布到 Booking.com',
+                        submitGoogle: '发布到 Google',
+                        submitTripadvisor: '发布到 TripAdvisor',
+                        submitExpedia: '发布到 Expedia',
+                        cleanRooms: '干净的房间',
+                        friendlyStaff: '友好的员工',
+                        greatLocation: '绝佳位置',
+                        comfortable: '舒适',
+                        breakfast: '早餐',
+                        value: '物超所值'
+                    },
+                    el: {
+                        title: '🏨 Δημιουργός Κριτικών Ξενοδοχείων',
+                        subtitle: 'Δημιουργήστε αυθεντικές κριτικές σε δευτερόλεπτα',
+                        hotelName: 'Όνομα Ξενοδοχείου',
+                        hotelPlaceholder: 'π.χ., Grand Plaza Hotel',
+                        aspects: 'Τι σας άρεσε',
+                        comments: 'Επιπλέον Σχόλια (Προαιρετικό)',
+                        commentsPlaceholder: 'Συγκεκριμένες λεπτομέρειες...',
+                        generate: 'Δημιουργία Κριτικής',
+                        yourReview: 'Η Κριτική σας',
+                        submitBooking: 'Δημοσίευση στο Booking.com',
+                        submitGoogle: 'Δημοσίευση στο Google',
+                        submitTripadvisor: 'Δημοσίευση στο TripAdvisor',
+                        submitExpedia: 'Δημοσίευση στο Expedia',
+                        cleanRooms: 'Καθαρά Δωμάτια',
+                        friendlyStaff: 'Φιλικό Προσωπικό',
+                        greatLocation: 'Εξαιρετική Τοποθεσία',
+                        comfortable: 'Άνετο',
+                        breakfast: 'Πρωινό',
+                        value: 'Καλή Τιμή',
+                        perfectLength: 'Τέλειο μήκος!',
+                        addMoreDetail: 'Προσθέστε λίγες ακόμη λεπτομέρειες',
+                        greatDetail: 'Εξαιρετικές λεπτομέρειες!',
+                        tooLong: 'Σκεφτείτε να το κάνετε πιο σύντομο',
+                        validReview: 'Η κριτική είναι έτοιμη για υποβολή!',
+                        invalidReview: 'Παρακαλώ διορθώστε τα προβλήματα',
+                        profanityDetected: 'Παρακαλώ αφαιρέστε ακατάλληλη γλώσσα',
+                        tooShort: 'Η κριτική είναι πολύ σύντομη (ελάχιστο 50 χαρακτήρες)',
+                        missingHotelName: 'Σκεφτείτε να αναφέρετε το όνομα του ξενοδοχείου'
+                    }
+                };
+                
+                // Profanity filter (basic)
+                this.profanityList = ['damn', 'hell', 'crap'];
+                
+                this.init();
+            }
+
+            init() {
+                this.detectLanguage();
+                this.setupEventListeners();
+                this.setupProgressiveDisclosure();
+                this.setupDraftManagement();
+                this.setupExitIntent();
+                this.restoreDraft();
+                this.addMicroAnimations();
+            }
+
+            /**
+             * Detect browser language and set default
+             */
+            detectLanguage() {
+                const browserLang = navigator.language.split('-')[0];
+                const supportedLangs = Object.keys(this.translations);
+                
+                if (supportedLangs.includes(browserLang)) {
+                    this.currentLanguage = browserLang;
+                } else {
+                    this.currentLanguage = 'en';
+                }
+                
+                // Check for saved preference
+                const savedLang = localStorage.getItem('preferred_language');
+                if (savedLang && supportedLangs.includes(savedLang)) {
+                    this.currentLanguage = savedLang;
+                }
+                
+                this.translateUI(this.currentLanguage);
+                return this.currentLanguage;
+            }
+
+            /**
+             * Translate UI elements
+             */
+            translateUI(lang) {
+                if (!this.translations[lang]) {
+                    lang = 'en'; // Fallback
+                }
+                
+                const t = this.translations[lang];
+                
+                // Update all elements with data-i18n attribute
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (t[key]) {
+                        el.textContent = t[key];
+                    }
+                });
+                
+                // Update placeholders
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                    const key = el.getAttribute('data-i18n-placeholder');
+                    if (t[key]) {
+                        el.placeholder = t[key];
+                    }
+                });
+                
+                // Update language buttons
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+                
+                this.currentLanguage = lang;
+                localStorage.setItem('preferred_language', lang);
+                
+                return { language: lang };
+            }
+
+            /**
+             * Setup all event listeners
+             */
+            setupEventListeners() {
+                // Language selector
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.translateUI(e.target.dataset.lang);
+                    });
+                });
+                
+                // Hotel name input
+                const hotelInput = document.getElementById('hotel-name');
+                hotelInput.addEventListener('input', () => {
+                    this.handleHotelNameInput();
+                });
+                
+                // Aspect cards
+                document.querySelectorAll('.aspect-card').forEach(card => {
+                    card.addEventListener('click', () => this.toggleAspect(card));
+                    card.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.toggleAspect(card);
+                        }
+                    });
+                });
+                
+                // Comments textarea with debounced save
+                const comments = document.getElementById('comments');
+                const debouncedSave = this.debounce(() => {
+                    this.saveDraft();
+                }, 1000);
+                
+                comments.addEventListener('input', () => {
+                    this.updateLengthIndicator();
+                    debouncedSave();
+                });
+                
+                // Generate button
+                document.getElementById('generate-btn').addEventListener('click', () => {
+                    this.generateReview();
+                });
+                
+                // Platform submit buttons
+                document.querySelectorAll('.platform-submit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.submitToPlatform(e.target.dataset.platform);
+                    });
+                });
+            }
+
+            /**
+             * Setup progressive form disclosure
+             */
+            setupProgressiveDisclosure() {
+                // Initially only show hotel name section
+                document.getElementById('aspects-section').classList.add('hidden');
+                document.getElementById('comments-section').classList.add('hidden');
+            }
+
+            /**
+             * Handle hotel name input
+             */
+            handleHotelNameInput() {
+                const hotelName = document.getElementById('hotel-name').value.trim();
+                
+                if (hotelName.length > 0) {
+                    // Reveal aspects section
+                    this.revealSection('aspects');
+                    
+                    // Check if aspects are selected
+                    if (this.selectedAspects.size > 0) {
+                        this.revealSection('comments');
+                    }
+                }
+                
+                this.saveDraft();
+            }
+
+            /**
+             * Reveal a form section with animation
+             */
+            revealSection(sectionName) {
+                const section = document.getElementById(`${sectionName}-section`);
+                if (section && section.classList.contains('hidden')) {
+                    section.classList.remove('hidden');
+                    section.classList.add('revealing');
+                    
+                    // Announce to screen readers
+                    this.announce(`${sectionName} section is now available`);
+                    
+                    setTimeout(() => {
+                        section.classList.remove('revealing');
+                    }, 400);
+                }
+            }
+
+            /**
+             * Toggle aspect selection
+             */
+            toggleAspect(card) {
+                const aspect = card.dataset.aspect;
+                
+                if (this.selectedAspects.has(aspect)) {
+                    this.selectedAspects.delete(aspect);
+                    card.classList.remove('selected');
+                    card.setAttribute('aria-pressed', 'false');
+                } else {
+                    this.selectedAspects.add(aspect);
+                    card.classList.add('selected');
+                    card.setAttribute('aria-pressed', 'true');
+                }
+                
+                // Reveal comments section if aspects are selected
+                if (this.selectedAspects.size > 0 && document.getElementById('hotel-name').value) {
+                    this.revealSection('comments');
+                }
+                
+                this.saveDraft();
+            }
+
+            /**
+             * Update review length indicator
+             */
+            updateLengthIndicator() {
+                const comments = document.getElementById('comments').value;
+                const totalLength = comments.length + (this.selectedAspects.size * 50); // Estimate
+                
+                const indicator = document.getElementById('length-indicator');
+                const text = document.getElementById('length-text');
+                const fill = document.getElementById('length-fill');
+                
+                let status, message, fillPercent, fillColor;
+                
+                if (totalLength < 50) {
+                    status = 'warning';
+                    message = this.translations[this.currentLanguage].addMoreDetail || 'Add more detail';
+                    fillPercent = (totalLength / 50) * 30;
+                    fillColor = 'var(--warning)';
+                } else if (totalLength >= 50 && totalLength <= 200) {
+                    status = 'perfect';
+                    message = this.translations[this.currentLanguage].perfectLength || 'Perfect length!';
+                    fillPercent = 30 + ((totalLength - 50) / 150) * 40;
+                    fillColor = 'var(--success)';
+                } else if (totalLength > 200 && totalLength <= 400) {
+                    status = 'good';
+                    message = this.translations[this.currentLanguage].greatDetail || 'Great detail!';
+                    fillPercent = 70 + ((totalLength - 200) / 200) * 20;
+                    fillColor = 'var(--primary)';
+                } else {
+                    status = 'warning';
+                    message = this.translations[this.currentLanguage].tooLong || 'Consider shortening';
+                    fillPercent = 90 + Math.min((totalLength - 400) / 100, 1) * 10;
+                    fillColor = 'var(--warning)';
+                }
+                
+                indicator.className = `length-indicator ${status}`;
+                text.textContent = `${message} (${totalLength} chars)`;
+                fill.style.width = `${fillPercent}%`;
+                fill.style.background = fillColor;
+                
+                return { status, message };
+            }
+
+            /**
+             * Validate review content
+             */
+            validateReview(review, hotelName) {
+                const errors = [];
+                const warnings = [];
+                
+                // Check for profanity
+                const lowerReview = review.toLowerCase();
+                for (const word of this.profanityList) {
+                    if (lowerReview.includes(word)) {
+                        errors.push(this.translations[this.currentLanguage].profanityDetected || 'inappropriate language');
+                        break;
+                    }
+                }
+                
+                // Check minimum length
+                if (review.length < 50) {
+                    errors.push(this.translations[this.currentLanguage].tooShort || 'too short');
+                }
+                
+                // Check if hotel name is mentioned
+                if (hotelName && !review.toLowerCase().includes(hotelName.toLowerCase())) {
+                    warnings.push(this.translations[this.currentLanguage].missingHotelName || 'hotel name not mentioned');
+                }
+                
+                const valid = errors.length === 0;
+                
+                // Show validation indicator
+                this.showValidation(valid, errors, warnings);
+                
+                return { valid, errors, warnings };
+            }
+
+            /**
+             * Show validation indicator
+             */
+            showValidation(valid, errors = [], warnings = []) {
+                const indicator = document.getElementById('validation-indicator');
+                const text = document.getElementById('validation-text');
+                
+                indicator.classList.remove('hidden');
+                
+                if (valid) {
+                    indicator.className = 'validation-indicator valid';
+                    text.textContent = this.translations[this.currentLanguage].validReview || 'Review ready!';
+                } else {
+                    indicator.className = 'validation-indicator invalid';
+                    text.textContent = errors[0] || this.translations[this.currentLanguage].invalidReview || 'Please fix issues';
+                }
+            }
+
+            /**
+             * Generate review
+             */
+            generateReview() {
+                const hotelName = document.getElementById('hotel-name').value.trim();
+                
+                if (!hotelName) {
+                    this.showToast('Please enter hotel name', 'error');
+                    return;
+                }
+                
+                if (this.selectedAspects.size === 0) {
+                    this.showToast('Please select at least one aspect', 'error');
+                    return;
+                }
+                
+                const btn = document.getElementById('generate-btn');
+                const output = document.getElementById('output-section');
+                
+                // Show loading with skeleton
+                btn.innerHTML = '<span>Generating...</span><span class="loading">⏳</span>';
+                btn.disabled = true;
+                
+                this.showSkeletonLoader();
+                
+                setTimeout(() => {
+                    // Generate review (always in English)
+                    const review = this.createReview(hotelName);
+                    
+                    // Validate review
+                    const validation = this.validateReview(review, hotelName);
+                    
+                    // Show output
+                    document.getElementById('review-output').textContent = review;
+                    output.classList.remove('hidden');
+                    
+                    // Reset button
+                    btn.innerHTML = `<span>${this.translations[this.currentLanguage].generate}</span><span>✨</span>`;
+                    btn.disabled = false;
+                    
+                    // Hide skeleton
+                    this.hideSkeletonLoader();
+                    
+                    // Scroll to output
+                    output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    // Announce to screen readers
+                    this.announce('Review generated successfully');
+                    
+                    // Clear draft after successful generation
+                    localStorage.removeItem('hotelReviewDraft');
+                }, 800);
+            }
+
+            /**
+             * Create review text (always in English)
+             */
+            createReview(hotelName) {
+                const aspects = Array.from(this.selectedAspects);
+                const comments = document.getElementById('comments').value.trim();
+                
+                const aspectSentences = {
+                    'Clean Rooms': 'The rooms were spotlessly clean and well-maintained.',
+                    'Friendly Staff': 'The staff were incredibly friendly and helpful.',
+                    'Great Location': 'The location was perfect for exploring the area.',
+                    'Comfortable Beds': 'The beds were extremely comfortable.',
+                    'Delicious Breakfast': 'The breakfast was delicious with great variety.',
+                    'Excellent Value': 'Excellent value for money.'
+                };
+                
+                const templates = [
+                    `I had a wonderful stay at ${hotelName}! ${aspects.map(a => aspectSentences[a]).join(' ')} ${comments ? comments + ' ' : ''}Highly recommended!`,
+                    `${hotelName} exceeded my expectations. ${aspects.map(a => aspectSentences[a]).join(' ')} ${comments ? comments + ' ' : ''}Would definitely stay again!`,
+                    `Great experience at ${hotelName}. ${aspects.map(a => aspectSentences[a]).join(' ')} ${comments ? comments + ' ' : ''}Perfect for anyone visiting the area.`
+                ];
+                
+                return templates[Math.floor(Math.random() * templates.length)];
+            }
+
+            /**
+             * Submit review to platform
+             */
+            submitToPlatform(platform, review, hotelName) {
+                review = review || document.getElementById('review-output').textContent;
+                hotelName = hotelName || document.getElementById('hotel-name').value;
+                
+                // Get cached URL or create new
+                let url = this.platformUrls.get(platform);
+                if (!url) {
+                    url = this.getPlatformUrl(platform, hotelName);
+                    this.platformUrls.set(platform, url);
+                }
+                
+                // Copy to clipboard first
+                this.copyToClipboard(review);
+                
+                // Open platform in new tab
+                const newWindow = window.open(url, '_blank');
+                
+                if (newWindow) {
+                    this.showToast(`Opening ${platform}... Review copied!`, 'success');
+                    
+                    // Track analytics
+                    if (this.analytics) {
+                        this.analytics.track('platform_submit', {
+                            platform,
+                            reviewLength: review.length
+                        });
+                    }
+                } else {
+                    // Popup blocked, provide fallback
+                    this.showToast('Review copied! Please paste on the platform.', 'info');
+                    return { error: true, fallback: 'copy_to_clipboard' };
+                }
+            }
+
+            /**
+             * Get platform submission URL
+             */
+            getPlatformUrl(platform, hotelName) {
+                const encodedHotel = encodeURIComponent(hotelName);
+                
+                const urls = {
+                    booking: `https://www.booking.com/reviewlist.html?q=${encodedHotel}`,
+                    google: `https://www.google.com/search?q=${encodedHotel}+review`,
+                    tripadvisor: `https://www.tripadvisor.com/Search?q=${encodedHotel}`,
+                    expedia: `https://www.expedia.com/Hotel-Search?destination=${encodedHotel}`
+                };
+                
+                return urls[platform] || urls.google;
+            }
+
+            /**
+             * Copy text to clipboard
+             */
+            copyToClipboard(text) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                } else {
+                    // Fallback
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
+            }
+
+            /**
+             * Setup draft management
+             */
+            setupDraftManagement() {
+                // Auto-save every 5 seconds (debounced)
+                this.draftTimer = setInterval(() => {
+                    this.saveDraft();
+                }, 5000);
+                
+                // Save on visibility change
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.saveDraft();
+                    }
+                });
+            }
+
+            /**
+             * Save draft to localStorage
+             */
+            saveDraft() {
+                try {
+                    const draft = {
+                        hotelName: document.getElementById('hotel-name').value,
+                        aspects: Array.from(this.selectedAspects),
+                        comments: document.getElementById('comments').value,
+                        timestamp: Date.now()
+                    };
+                    
+                    localStorage.setItem('hotelReviewDraft', JSON.stringify(draft));
+                } catch (e) {
+                    // Handle quota exceeded or other errors
+                    console.warn('Could not save draft:', e);
+                }
+            }
+
+            /**
+             * Restore draft from localStorage
+             */
+            restoreDraft() {
+                try {
+                    const saved = localStorage.getItem('hotelReviewDraft');
+                    if (saved) {
+                        const draft = JSON.parse(saved);
+                        
+                        // Only restore if less than 24 hours old
+                        if (Date.now() - draft.timestamp < 86400000) {
+                            document.getElementById('hotel-name').value = draft.hotelName || '';
+                            document.getElementById('comments').value = draft.comments || '';
+                            
+                            draft.aspects.forEach(aspect => {
+                                const card = document.querySelector(`[data-aspect="${aspect}"]`);
+                                if (card) {
+                                    this.selectedAspects.add(aspect);
+                                    card.classList.add('selected');
+                                    card.setAttribute('aria-pressed', 'true');
+                                }
+                            });
+                            
+                            // Trigger progressive disclosure
+                            if (draft.hotelName) {
+                                this.handleHotelNameInput();
+                            }
+                            
+                            if (draft.hotelName || draft.aspects.length > 0) {
+                                this.showToast('Draft restored', 'info');
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not restore draft:', e);
+                }
+            }
+
+            /**
+             * Setup exit intent handling
+             */
+            setupExitIntent() {
+                window.addEventListener('beforeunload', (e) => {
+                    return this.handleBeforeUnload(e);
+                });
+            }
+
+            /**
+             * Handle before unload event
+             */
+            handleBeforeUnload(e) {
+                const hotelName = document.getElementById('hotel-name').value;
+                const comments = document.getElementById('comments').value;
+                const hasChanges = hotelName || this.selectedAspects.size > 0 || comments;
+                const reviewGenerated = document.getElementById('review-output').textContent;
+                
+                if (hasChanges && !reviewGenerated) {
+                    // Save draft before leaving
+                    this.saveDraft();
+                    
+                    // Standard way to trigger browser warning
+                    e.preventDefault();
+                    e.returnValue = '';
+                    return '';
+                }
+            }
+
+            /**
+             * Add micro-animations to interactive elements
+             */
+            addMicroAnimations() {
+                // Add press animation to all buttons
+                document.querySelectorAll('.btn, .aspect-card, .platform-submit-btn').forEach(el => {
+                    el.addEventListener('mousedown', () => {
+                        el.style.animation = 'buttonPress 0.2s ease-out';
+                    });
+                    
+                    el.addEventListener('animationend', () => {
+                        el.style.animation = '';
+                    });
+                });
+            }
+
+            /**
+             * Show skeleton loader
+             */
+            showSkeletonLoader() {
+                const output = document.getElementById('output-section');
+                output.classList.remove('hidden');
+                
+                const skeleton = document.createElement('div');
+                skeleton.className = 'skeleton-loader';
+                skeleton.innerHTML = `
+                    <div class="skeleton skeleton-text" style="width: 80%;"></div>
+                    <div class="skeleton skeleton-text" style="width: 90%;"></div>
+                    <div class="skeleton skeleton-text" style="width: 75%;"></div>
+                `;
+                
+                const reviewOutput = document.getElementById('review-output');
+                reviewOutput.innerHTML = '';
+                reviewOutput.appendChild(skeleton);
+            }
+
+            /**
+             * Hide skeleton loader
+             */
+            hideSkeletonLoader() {
+                const skeleton = document.querySelector('.skeleton-loader');
+                if (skeleton) {
+                    skeleton.remove();
+                }
+            }
+
+            /**
+             * Show toast notification
+             */
+            showToast(message, type = 'info') {
+                const existing = document.querySelector('.toast');
+                if (existing) {
+                    existing.remove();
+                }
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideInUp 0.3s ease-out reverse';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            /**
+             * Announce to screen readers
+             */
+            announce(message) {
+                const announcer = document.getElementById('sr-announcements');
+                announcer.textContent = message;
+            }
+
+            /**
+             * Debounce utility
+             */
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            /**
+             * Get progress percentage
+             */
+            getProgressPercentage() {
+                let steps = 0;
+                if (document.getElementById('hotel-name').value) steps++;
+                if (this.selectedAspects.size > 0) steps++;
+                if (document.getElementById('comments').value) steps++;
+                if (document.getElementById('review-output').textContent) steps++;
+                
+                return (steps / 4) * 100;
+            }
+
+            /**
+             * Load translations (for lazy loading)
+             */
+            async loadTranslations(lang) {
+                // In production, this would fetch from a CDN
+                return this.translations[lang];
+            }
+
+            /**
+             * Set language
+             */
+            async setLanguage(lang) {
+                await this.loadTranslations(lang);
+                this.translateUI(lang);
+            }
+
+            /**
+             * Initialize analytics
+             */
+            analytics = {
+                track: (event, data) => {
+                    // Privacy-friendly local analytics
+                    const events = JSON.parse(localStorage.getItem('analytics_events') || '[]');
+                    events.push({ event, data, timestamp: Date.now() });
+                    
+                    // Keep only last 100 events
+                    if (events.length > 100) {
+                        events.splice(0, events.length - 100);
+                    }
+                    
+                    localStorage.setItem('analytics_events', JSON.stringify(events));
+                }
+            };
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            window.hotelReviewGenerator = new HotelReviewGeneratorV3();
+        });
+
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(console.log);
+        }
+    </script>
+</body>
+</html>
