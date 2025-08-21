@@ -30,9 +30,24 @@ jobs:
       with:
         node-version: '18'
     
-    - name: Install Puppeteer
+    - name: Install Puppeteer and Dependencies
       run: |
-        npm install puppeteer
+        # Create package.json if it doesn't exist
+        npm init -y || true
+        # Install Puppeteer
+        npm install puppeteer@24.0.0 --no-save
+        # Install Chrome dependencies for GitHub Actions
+        sudo apt-get update
+        sudo apt-get install -y \
+          libnss3 \
+          libatk-bridge2.0-0 \
+          libdrm2 \
+          libxkbcommon0 \
+          libxcomposite1 \
+          libxdamage1 \
+          libxrandr2 \
+          libgbm1 \
+          libgtk-3-0
     
     - name: Run Visual Tests
       run: node .claude/browser-tests/visual-test.js

@@ -16,7 +16,10 @@ const commands = {
    * Take a screenshot of a page
    */
   async screenshot(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     // Set viewport
@@ -42,7 +45,10 @@ const commands = {
    * Test mobile responsiveness
    */
   async testMobile(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     const devices = [
@@ -75,7 +81,10 @@ const commands = {
    * Check for console errors
    */
   async checkConsole(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     const consoleLogs = [];
@@ -112,7 +121,10 @@ const commands = {
    * Get performance metrics
    */
   async getMetrics(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     await page.goto(args.url, { waitUntil: 'networkidle2' });
@@ -148,7 +160,10 @@ const commands = {
    * Run accessibility audit
    */
   async checkAccessibility(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     await page.goto(args.url, { waitUntil: 'networkidle2' });
@@ -248,7 +263,10 @@ const commands = {
    * Test user interactions
    */
   async testInteraction(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     await page.goto(args.url, { waitUntil: 'networkidle2' });
@@ -316,7 +334,10 @@ const commands = {
    * Check page elements exist
    */
   async checkElements(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     await page.goto(args.url, { waitUntil: 'networkidle2' });
@@ -353,7 +374,10 @@ const commands = {
    * Compare visual regression
    */
   async compareVisual(args) {
-    const browser = await puppeteer.launch({ headless: 'new' });
+    const browser = await puppeteer.launch({ 
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
     const page = await browser.newPage();
     
     await page.setViewport({ width: 1280, height: 720 });
