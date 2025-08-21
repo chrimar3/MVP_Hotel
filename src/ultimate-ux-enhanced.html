@@ -363,6 +363,28 @@
             transition: width var(--transition-normal);
         }
 
+        /* Platform Badge Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Keyboard Shortcut Styles */
+        kbd {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
         /* Floating Action Button */
         .fab {
             position: fixed;
@@ -740,13 +762,23 @@
     <script>
         'use strict';
 
-        // Enhanced UX Controller
+        // Enhanced UX Controller with Adidas-inspired features
         class UXController {
             constructor() {
+                // Initialize privacy mode state
+                this.privacyMode = false;
+                this.draftSaveInterval = null;
+                this.platform = this.detectPlatform();
+                
                 this.init();
                 this.setupHaptics();
                 this.setupGestures();
                 this.setupMicroInteractions();
+                this.setupDraftManager();
+                this.setupPrivacyMode();
+                this.setupPlatformCustomization();
+                this.setupKeyboardShortcuts();
+                this.restoreDraft();
             }
 
             init() {
@@ -1022,7 +1054,7 @@
                 );
             }
 
-            // Save Draft
+            // Save Draft (existing method - keep it)
             saveDraft() {
                 const data = {
                     rating: document.querySelectorAll('.star.active').length,
@@ -1033,6 +1065,335 @@
                 
                 localStorage.setItem('reviewDraft', JSON.stringify(data));
                 this.showToast('Draft saved!', 'success');
+            }
+
+            // ========== ADIDAS-INSPIRED FEATURES ==========
+            
+            // 1. DRAFT MANAGER - Auto-save & restore
+            setupDraftManager() {
+                // Don't save in privacy mode
+                if (this.privacyMode) return;
+                
+                // Auto-save every 5 seconds
+                this.draftSaveInterval = setInterval(() => {
+                    if (!this.privacyMode) {
+                        this.autoSaveDraft();
+                    }
+                }, 5000);
+                
+                // Save on page unload
+                window.addEventListener('beforeunload', () => {
+                    if (!this.privacyMode) {
+                        this.autoSaveDraft();
+                    }
+                });
+            }
+            
+            autoSaveDraft() {
+                const draft = {
+                    hotel: document.getElementById('hotel-name').value,
+                    aspects: Array.from(document.querySelectorAll('.aspect-card.selected'))
+                        .map(card => card.querySelector('span').textContent),
+                    comments: document.getElementById('comments').value,
+                    timestamp: Date.now()
+                };
+                
+                // Only save if there's actual content
+                if (draft.hotel || draft.aspects.length || draft.comments) {
+                    localStorage.setItem('hotel_review_draft', JSON.stringify(draft));
+                    // Silent save - no toast to avoid interruption
+                }
+            }
+            
+            restoreDraft() {
+                if (this.privacyMode) return;
+                
+                const savedDraft = localStorage.getItem('hotel_review_draft');
+                if (!savedDraft) return;
+                
+                const draft = JSON.parse(savedDraft);
+                
+                // Check if draft is less than 24 hours old
+                if (Date.now() - draft.timestamp > 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem('hotel_review_draft');
+                    return;
+                }
+                
+                // Restore values
+                if (draft.hotel) {
+                    document.getElementById('hotel-name').value = draft.hotel;
+                }
+                
+                if (draft.comments) {
+                    document.getElementById('comments').value = draft.comments;
+                }
+                
+                // Restore selected aspects
+                if (draft.aspects && draft.aspects.length) {
+                    draft.aspects.forEach(aspectText => {
+                        const cards = document.querySelectorAll('.aspect-card');
+                        cards.forEach(card => {
+                            if (card.querySelector('span').textContent === aspectText) {
+                                card.classList.add('selected');
+                            }
+                        });
+                    });
+                }
+                
+                this.showToast('✨ Restored your previous draft', 'info');
+            }
+            
+            // 2. PRIVACY MODE - No data storage
+            setupPrivacyMode() {
+                // Create privacy toggle UI
+                const privacyHTML = `
+                    <div class="privacy-mode-container" style="
+                        position: fixed;
+                        top: 10px;
+                        right: 10px;
+                        z-index: 1000;
+                        background: rgba(255, 255, 255, 0.95);
+                        padding: 10px 15px;
+                        border-radius: 25px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                    ">
+                        <input type="checkbox" id="privacy-toggle" style="cursor: pointer;">
+                        <label for="privacy-toggle" style="cursor: pointer; user-select: none;">
+                            🔒 Privacy Mode
+                        </label>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', privacyHTML);
+                
+                const toggle = document.getElementById('privacy-toggle');
+                toggle.addEventListener('change', (e) => {
+                    this.privacyMode = e.target.checked;
+                    
+                    if (this.privacyMode) {
+                        // Clear all stored data
+                        clearInterval(this.draftSaveInterval);
+                        localStorage.removeItem('hotel_review_draft');
+                        localStorage.removeItem('reviewDraft');
+                        this.showToast('🔒 Privacy Mode: No data will be saved', 'lock');
+                    } else {
+                        // Re-enable draft saving
+                        this.setupDraftManager();
+                        this.showToast('📝 Draft saving enabled', 'success');
+                    }
+                });
+            }
+            
+            // 3. PLATFORM DETECTION & CUSTOMIZATION
+            detectPlatform() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const source = urlParams.get('source');
+                
+                // Check URL parameter first
+                if (source) return source;
+                
+                // Check referrer
+                const referrer = document.referrer.toLowerCase();
+                if (referrer.includes('booking.com')) return 'booking';
+                if (referrer.includes('expedia')) return 'expedia';
+                if (referrer.includes('hotels.com')) return 'hotels';
+                if (referrer.includes('tripadvisor')) return 'tripadvisor';
+                
+                return 'direct';
+            }
+            
+            setupPlatformCustomization() {
+                const platformMessages = {
+                    booking: {
+                        badge: 'Booking.com Guest',
+                        color: '#003580',
+                        preselect: ['Clean Rooms', 'Great Location', 'Friendly Staff'],
+                        message: 'Thank you for booking with Booking.com!'
+                    },
+                    expedia: {
+                        badge: 'Expedia Traveler',
+                        color: '#3A5F8B',
+                        preselect: ['Comfortable', 'Good Breakfast', 'Great Value'],
+                        message: 'We appreciate your Expedia booking!'
+                    },
+                    hotels: {
+                        badge: 'Hotels.com Member',
+                        color: '#D32F2F',
+                        preselect: ['Clean Rooms', 'Great Value', 'Good Breakfast'],
+                        message: 'Thanks for choosing us on Hotels.com!'
+                    },
+                    tripadvisor: {
+                        badge: 'TripAdvisor Guest',
+                        color: '#00AF87',
+                        preselect: ['Great Location', 'Friendly Staff', 'Clean Rooms'],
+                        message: 'Share your experience on TripAdvisor!'
+                    },
+                    direct: {
+                        badge: 'Valued Guest',
+                        color: '#764ba2',
+                        preselect: ['Friendly Staff', 'Great Location', 'Clean Rooms'],
+                        message: 'Thank you for booking directly with us!'
+                    }
+                };
+                
+                const config = platformMessages[this.platform] || platformMessages.direct;
+                
+                // Add platform badge
+                const badgeHTML = `
+                    <div class="platform-badge" style="
+                        position: absolute;
+                        top: 20px;
+                        left: 20px;
+                        background: ${config.color};
+                        color: white;
+                        padding: 5px 15px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        animation: slideIn 0.5s ease-out;
+                    ">
+                        ${config.badge}
+                    </div>
+                `;
+                
+                document.querySelector('.header').insertAdjacentHTML('beforeend', badgeHTML);
+                
+                // Pre-select aspects based on platform
+                setTimeout(() => {
+                    config.preselect.forEach(aspectText => {
+                        const cards = document.querySelectorAll('.aspect-card');
+                        cards.forEach(card => {
+                            const text = card.querySelector('span').textContent;
+                            if (text === aspectText) {
+                                card.classList.add('selected');
+                                // Trigger animation
+                                card.style.transform = 'scale(1.05)';
+                                setTimeout(() => {
+                                    card.style.transform = '';
+                                }, 300);
+                            }
+                        });
+                    });
+                    
+                    // Show platform-specific message
+                    this.showToast(config.message, 'success');
+                }, 1000);
+            }
+            
+            // 4. KEYBOARD SHORTCUTS
+            setupKeyboardShortcuts() {
+                const shortcuts = {
+                    'g': () => { 
+                        // G - Generate review
+                        document.getElementById('generate-btn').click();
+                    },
+                    'c': () => {
+                        // C - Copy (if review exists)
+                        const copyBtn = document.getElementById('copy-btn');
+                        if (copyBtn && !document.getElementById('review-output').classList.contains('hidden')) {
+                            copyBtn.click();
+                        }
+                    },
+                    'r': () => {
+                        // R - Reset form
+                        if (confirm('Reset all fields?')) {
+                            document.getElementById('hotel-name').value = '';
+                            document.getElementById('comments').value = '';
+                            document.querySelectorAll('.aspect-card.selected').forEach(card => {
+                                card.classList.remove('selected');
+                            });
+                            this.showToast('Form reset', 'info');
+                        }
+                    },
+                    's': () => {
+                        // S - Save draft manually
+                        if (!this.privacyMode) {
+                            this.autoSaveDraft();
+                            this.showToast('✅ Draft saved manually', 'success');
+                        }
+                    },
+                    '?': () => {
+                        // ? - Show help
+                        this.showKeyboardHelp();
+                    }
+                };
+                
+                // Ctrl/Cmd key combinations
+                document.addEventListener('keydown', (e) => {
+                    // Check for Ctrl/Cmd combinations
+                    if (e.ctrlKey || e.metaKey) {
+                        if (e.key === 'g') {
+                            e.preventDefault();
+                            shortcuts['g']();
+                        } else if (e.key === 's') {
+                            e.preventDefault();
+                            shortcuts['s']();
+                        }
+                    }
+                    
+                    // Single key shortcuts (when not in input field)
+                    const activeElement = document.activeElement;
+                    const isInputField = activeElement.tagName === 'INPUT' || 
+                                        activeElement.tagName === 'TEXTAREA';
+                    
+                    if (!isInputField && !e.ctrlKey && !e.metaKey) {
+                        if (shortcuts[e.key]) {
+                            e.preventDefault();
+                            shortcuts[e.key]();
+                        }
+                    }
+                });
+            }
+            
+            showKeyboardHelp() {
+                const helpHTML = `
+                    <div id="keyboard-help" style="
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: white;
+                        padding: 30px;
+                        border-radius: 15px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                        z-index: 10000;
+                        max-width: 400px;
+                    ">
+                        <h3 style="margin-top: 0; color: #764ba2;">⌨️ Keyboard Shortcuts</h3>
+                        <div style="line-height: 2;">
+                            <div><kbd>Ctrl+G</kbd> or <kbd>G</kbd> - Generate Review</div>
+                            <div><kbd>Ctrl+S</kbd> or <kbd>S</kbd> - Save Draft</div>
+                            <div><kbd>C</kbd> - Copy Review</div>
+                            <div><kbd>R</kbd> - Reset Form</div>
+                            <div><kbd>?</kbd> - Show This Help</div>
+                        </div>
+                        <button onclick="document.getElementById('keyboard-help').remove()" 
+                                style="margin-top: 20px; padding: 10px 20px; background: #764ba2; 
+                                       color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                // Remove existing help if any
+                const existing = document.getElementById('keyboard-help');
+                if (existing) existing.remove();
+                
+                document.body.insertAdjacentHTML('beforeend', helpHTML);
+                
+                // Close on escape
+                document.addEventListener('keydown', function closeHelp(e) {
+                    if (e.key === 'Escape') {
+                        const help = document.getElementById('keyboard-help');
+                        if (help) help.remove();
+                        document.removeEventListener('keydown', closeHelp);
+                    }
+                });
             }
         }
 
