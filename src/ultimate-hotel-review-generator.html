@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com;">
     
     <!-- PWA Meta Tags -->
@@ -34,7 +34,7 @@
             --bg: #ffffff;
             --bg-light: #f9fafb;
             --border: #e5e7eb;
-            --touch-target: 44px;
+            --touch-target: 48px; /* OneRedOak Enhanced */
             --max-width: 480px;
             --border-radius: 0.5rem;
         }
@@ -43,6 +43,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent; /* OneRedOak: Remove tap highlight */
         }
 
         body {
@@ -51,7 +52,11 @@
             color: var(--text);
             background: var(--bg-light);
             padding: 1rem;
+            padding-top: calc(1rem + env(safe-area-inset-top));
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
             min-height: 100vh;
+            touch-action: pan-y; /* OneRedOak: Optimize touch scrolling */
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Language Selector */
@@ -63,12 +68,14 @@
         }
 
         .language-selector select {
-            padding: 8px 12px;
+            min-height: var(--touch-target); /* OneRedOak: Enhanced touch target */
+            padding: 12px 16px;
             border-radius: 6px;
             border: 2px solid var(--border);
             background: white;
-            font-size: 14px;
+            font-size: 16px; /* Prevents zoom on iOS */
             cursor: pointer;
+            touch-action: manipulation;
         }
 
         /* Container */
@@ -246,19 +253,44 @@
             margin-top: 0.25rem;
         }
 
-        /* Buttons */
+        /* Enhanced Buttons with Ripple Effect */
         .button {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.75rem 1.5rem;
+            min-height: var(--touch-target); /* OneRedOak: Enhanced touch target */
+            padding: 14px 32px;
             border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 500;
+            touch-action: manipulation;
+            border-radius: 0.75rem;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: var(--touch-target);
+            transition: all var(--transition-fast, 150ms);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            transform: translateZ(0); /* GPU acceleration */
+        }
+
+        /* Ripple Effect */
+        .button::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .button:active::before {
+            width: 300px;
+            height: 300px;
         }
 
         .button-primary {
@@ -325,6 +357,11 @@
 </head>
 <body>
     <!-- Offline Banner -->
+    <!-- Enhanced Progress Bar -->
+    <div style="position: fixed; top: 0; left: 0; right: 0; height: 4px; background: rgba(0,0,0,0.1); z-index: 2000;">
+        <div id="global-progress" style="height: 100%; width: 0%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s;"></div>
+    </div>
+
     <div id="offline-banner" class="offline-banner">
         <span data-i18n="offline_message">📱 You're offline - but the app still works!</span>
     </div>
@@ -351,18 +388,55 @@
             <span id="error-text"></span>
         </div>
 
-        <!-- Header -->
-        <header>
-            <h1 id="hotel-name">Acme Hotel</h1>
-            <p class="subtitle" data-i18n="subtitle">Share your experience with other travelers</p>
+        <!-- Enhanced Header with Animation -->
+        <header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 3rem 1.5rem; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent); animation: shimmer 3s infinite;"></div>
+            <h1 id="hotel-name" style="font-size: 2.5rem; font-weight: 800; position: relative; z-index: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">🏨 Acme Hotel</h1>
+            <p class="subtitle" data-i18n="subtitle" style="font-size: 1.1rem; opacity: 0.95; position: relative; z-index: 1;">Share your experience with other travelers</p>
+            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 10px;">
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 14px;">⭐ 4.8 Rating</span>
+                <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 14px;">📝 2,341 Reviews</span>
+            </div>
         </header>
 
         <!-- Main Content -->
         <main>
-            <!-- Aspects Section -->
-            <section class="section">
-                <h2 class="section-title" data-i18n="aspects_title">What did you love about your stay?</h2>
-                <div class="aspects-grid" id="aspects-grid"></div>
+            <!-- Enhanced Aspects Section with Animations -->
+            <section class="section" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05)); padding: 1.5rem; border-radius: 1rem; margin: 1rem 0;">
+                <h2 class="section-title" data-i18n="aspects_title" style="font-size: 1.3rem; color: #764ba2; font-weight: 700;">✨ What did you love about your stay?</h2>
+                <div class="aspects-grid" id="aspects-grid" style="animation: fadeIn 0.5s ease-out;"></div>
+                <style>
+                    .aspect-item {
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                        animation: fadeInUp 0.5s ease-out !important;
+                        animation-fill-mode: both !important;
+                    }
+                    .aspect-item:nth-child(1) { animation-delay: 0.1s !important; }
+                    .aspect-item:nth-child(2) { animation-delay: 0.15s !important; }
+                    .aspect-item:nth-child(3) { animation-delay: 0.2s !important; }
+                    .aspect-item:nth-child(4) { animation-delay: 0.25s !important; }
+                    .aspect-item:nth-child(5) { animation-delay: 0.3s !important; }
+                    .aspect-item:nth-child(6) { animation-delay: 0.35s !important; }
+                    .aspect-item:nth-child(7) { animation-delay: 0.4s !important; }
+                    .aspect-item:nth-child(8) { animation-delay: 0.45s !important; }
+                    
+                    @keyframes fadeInUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    
+                    .aspect-item.selected {
+                        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+                        transform: translateY(-5px) scale(1.1) !important;
+                        box-shadow: 0 15px 30px -5px rgba(118, 75, 162, 0.4) !important;
+                    }
+                </style>
             </section>
 
             <!-- Staff Recognition -->
@@ -379,11 +453,30 @@
                 <div class="char-counter" id="comments-counter">0/500</div>
             </section>
 
-            <!-- Generate Button -->
-            <section style="text-align: center;">
-                <button id="generate-btn" class="button button-primary">
-                    <span data-i18n="generate_button">Generate My Review</span>
+            <!-- Enhanced Generate Button with Animation -->
+            <section style="text-align: center; margin: 2rem 0;">
+                <button id="generate-btn" class="button button-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 15px 35px -5px rgba(118, 75, 162, 0.5); padding: 20px 50px; font-size: 18px; font-weight: 700; animation: buttonPulse 2s infinite;">
+                    <span data-i18n="generate_button" style="display: flex; align-items: center; gap: 10px;">
+                        <span>Generate My Review</span>
+                        <span style="font-size: 24px;">✨</span>
+                    </span>
                 </button>
+                <style>
+                    @keyframes buttonPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.05); }
+                    }
+                    #generate-btn:hover {
+                        animation: none;
+                        transform: translateY(-3px) scale(1.1) !important;
+                        box-shadow: 0 20px 40px -5px rgba(118, 75, 162, 0.6) !important;
+                    }
+                </style>
+                <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px;">
+                    <span style="font-size: 13px; color: #6b7280;">⚡ Instant Generation</span>
+                    <span style="font-size: 13px; color: #6b7280;">🔒 100% Secure</span>
+                    <span style="font-size: 13px; color: #6b7280;">📱 Mobile Optimized</span>
+                </div>
             </section>
 
             <!-- Review Output -->
@@ -1055,6 +1148,71 @@
         }
 
         /**
+         * OneRedOak Enhancement: Haptic Feedback Manager
+         */
+        class HapticFeedback {
+            static vibrate(pattern = 10) {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(pattern);
+                }
+            }
+            
+            static light() { this.vibrate(10); }
+            static medium() { this.vibrate(20); }
+            static heavy() { this.vibrate(30); }
+            static success() { this.vibrate([10, 50, 10]); }
+            static error() { this.vibrate([50, 100, 50]); }
+        }
+
+        /**
+         * OneRedOak Enhancement: Pull to Refresh
+         */
+        class PullToRefresh {
+            constructor() {
+                this.threshold = 80;
+                this.startY = 0;
+                this.currentY = 0;
+                this.pulling = false;
+                this.init();
+            }
+            
+            init() {
+                document.addEventListener('touchstart', (e) => {
+                    if (window.scrollY === 0) {
+                        this.startY = e.touches[0].clientY;
+                        this.pulling = true;
+                    }
+                }, { passive: true });
+                
+                document.addEventListener('touchmove', (e) => {
+                    if (!this.pulling) return;
+                    
+                    this.currentY = e.touches[0].clientY;
+                    const diff = this.currentY - this.startY;
+                    
+                    if (diff > this.threshold) {
+                        HapticFeedback.light();
+                    }
+                }, { passive: true });
+                
+                document.addEventListener('touchend', () => {
+                    const diff = this.currentY - this.startY;
+                    
+                    if (diff > this.threshold && this.pulling) {
+                        this.refresh();
+                    }
+                    
+                    this.pulling = false;
+                });
+            }
+            
+            refresh() {
+                HapticFeedback.success();
+                location.reload();
+            }
+        }
+
+        /**
          * Main Application Controller
          * Integrates all phases: Analytics, i18n, and PWA
          */
@@ -1064,6 +1222,7 @@
                 this.analytics = new HotelAnalytics();
                 this.i18n = new I18n();
                 this.pwa = new PWAManager();
+                this.pullToRefresh = new PullToRefresh(); // OneRedOak Enhancement
                 
                 // Configuration
                 this.config = {
@@ -1107,17 +1266,95 @@
             }
 
             setupEventListeners() {
-                // Generate button
+                // Generate button with enhanced feedback
                 const generateBtn = document.getElementById('generate-btn');
                 if (generateBtn) {
-                    generateBtn.addEventListener('click', () => this.generateReview());
+                    generateBtn.addEventListener('click', () => {
+                        HapticFeedback.medium(); // OneRedOak Enhancement
+                        this.addRippleEffect(generateBtn);
+                        this.generateReview();
+                    });
                 }
                 
-                // Copy button
+                // Copy button with enhanced feedback
                 const copyBtn = document.getElementById('copy-btn');
                 if (copyBtn) {
-                    copyBtn.addEventListener('click', () => this.copyReview());
+                    copyBtn.addEventListener('click', () => {
+                        HapticFeedback.light(); // OneRedOak Enhancement
+                        this.addRippleEffect(copyBtn);
+                        this.copyReview();
+                    });
                 }
+                
+                // Add micro-interactions to all aspect items
+                document.querySelectorAll('.aspect-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        HapticFeedback.light();
+                        this.addRippleEffect(item);
+                        item.classList.add('pulse-animation');
+                        setTimeout(() => item.classList.remove('pulse-animation'), 300);
+                    });
+                });
+            }
+            
+            // Add ripple effect animation
+            addRippleEffect(element) {
+                const ripple = document.createElement('span');
+                ripple.style.cssText = `
+                    position: absolute;
+                    background: rgba(255,255,255,0.5);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    width: 20px;
+                    height: 20px;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    animation: ripple 0.6s ease-out;
+                `;
+                element.style.position = 'relative';
+                element.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            }
+            
+            // Show toast notification
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: calc(100px + env(safe-area-inset-bottom));
+                    left: 50%;
+                    transform: translateX(-50%) translateY(100px);
+                    background: ${type === 'success' ? 'var(--success)' : 'var(--error)'};
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 50px;
+                    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgb(0 0 0 / 0.1));
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    opacity: 0;
+                    transition: all 300ms;
+                    z-index: 2000;
+                `;
+                toast.innerHTML = `
+                    <span>${type === 'success' ? '✓' : '✕'}</span>
+                    <span>${message}</span>
+                `;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateX(-50%) translateY(0)';
+                }, 10);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(-50%) translateY(100px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
                 
                 // Track aspect selections
                 document.addEventListener('change', (e) => {

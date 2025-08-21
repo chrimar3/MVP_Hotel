@@ -1,0 +1,61 @@
+name: Site Health Monitor
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check Site Availability
+      run: |
+        echo "🔍 Checking site health..."
+        
+        # Check main site
+        STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://chrimar3.github.io/MVP_Hotel/)
+        echo "Main page status: $STATUS"
+        
+        if [ $STATUS -eq 200 ] || [ $STATUS -eq 301 ] || [ $STATUS -eq 302 ]; then
+          echo "✅ Site is accessible"
+        else
+          echo "❌ Site is down or inaccessible (Status: $STATUS)"
+          exit 1
+        fi
+        
+        # Check main app file
+        APP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://chrimar3.github.io/MVP_Hotel/src/ultimate-ux-enhanced.html)
+        echo "App page status: $APP_STATUS"
+        
+        if [ $APP_STATUS -eq 200 ]; then
+          echo "✅ Application is accessible"
+        else
+          echo "⚠️ Application page issue (Status: $APP_STATUS)"
+        fi
+        
+    - name: Performance Check
+      run: |
+        echo "⚡ Checking load time..."
+        
+        # Measure response time
+        TIME=$(curl -s -o /dev/null -w "%{time_total}" https://chrimar3.github.io/MVP_Hotel/)
+        echo "Response time: ${TIME}s"
+        
+        # Check if response time is acceptable (under 3 seconds)
+        if (( $(echo "$TIME < 3" | bc -l) )); then
+          echo "✅ Good response time"
+        else
+          echo "⚠️ Slow response time"
+        fi
+        
+    - name: Create Status Report
+      if: always()
+      run: |
+        echo "📊 Health Check Summary"
+        echo "======================="
+        echo "Time: $(date)"
+        echo "Repository: ${{ github.repository }}"
+        echo "Status: Complete"
