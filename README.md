@@ -1,5 +1,12 @@
 # Hotel Review Generator MVP 🏨
 
+## 🚀 Live Demo
+
+### Try it now on your device:
+- **📱 [Mobile Demo](https://chrimar3.github.io/MVP_Hotel/src/ultimate-ux-enhanced-v3.html)** - Optimized for smartphones
+- **💻 [Desktop Demo](https://chrimar3.github.io/MVP_Hotel/src/ultimate-ux-enhanced-v3.html)** - Full desktop experience
+- **🏠 [Demo Hub](https://chrimar3.github.io/MVP_Hotel/)** - All versions and features
+
 ## Project Overview
 
 A sophisticated, production-ready Hotel Review Generator built using the **BMAD-METHOD™** (Business-driven Multi-Agent Development) approach. This project demonstrates enterprise-grade development practices with 100% test coverage and comprehensive quality assurance.
