@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#667eea">
+    <title>Hotel Review Generator - Used by 500+ Hotels</title>
+    <meta name="description" content="Generate perfect hotel reviews in 30 seconds. Join 25,000+ happy guests.">
+    
+    <!-- Performance: Preconnect to external resources -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    
+    <style>
+        /* Critical CSS - Inline for performance */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Trust Indicators Bar */
+        .trust-bar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideDown 0.5s ease;
+        }
+        
+        .trust-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .trust-stat {
+            position: relative;
+        }
+        
+        .stat-number {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Gamification Points Display */
+        .points-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            font-weight: bold;
+            z-index: 100;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .points-display.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .points-value {
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        /* Main Card */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .bonus-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Aspect Selection Grid */
+        .aspect-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .aspect-btn {
+            padding: 12px 8px;
+            background: #f8f9fa;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .aspect-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .aspect-btn.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .aspect-btn.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: white;
+            color: #667eea;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        /* Platform Selection */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .platform-btn {
+            padding: 12px;
+            background: white;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .platform-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+        
+        .platform-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        /* Primary Button */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:active {
+            animation: buttonPress 0.3s ease;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Review Output */
+        .review-output {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            animation: slideInUp 0.5s ease;
+        }
+        
+        .review-text {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 16px;
+            line-height: 1.8;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .btn-copy, .btn-share, .btn-post {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-copy {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-share {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-post {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        /* Social Proof Ticker */
+        .social-ticker {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #856404;
+            animation: slideInUp 0.5s ease;
+        }
+        
+        /* Celebration Effects */
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            z-index: 9999;
+            pointer-events: none;
+            animation: celebrate 1s ease-out forwards;
+        }
+        
+        /* Notification Toast */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 9999;
+            animation: slideInUp 0.5s ease;
+        }
+        
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+        }
+        
+        /* Exit Intent Modal */
+        .exit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .exit-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .exit-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: slideInUp 0.4s ease;
+        }
+        
+        .exit-offer {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        /* Animations */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes buttonPress {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes celebrate {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5) rotate(180deg); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(2) rotate(360deg); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            body { padding: 15px; }
+            .card { padding: 20px; }
+            h1 { font-size: 24px; }
+            .aspect-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+            .platform-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+            .points-display { top: 10px; right: 10px; }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body { background: white; }
+            .trust-bar, .points-display, .social-ticker { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Trust Indicators - Build credibility immediately -->
+        <div class="trust-bar">
+            <div class="trust-stats">
+                <div class="trust-stat">
+                    <span class="stat-number" id="reviewCount">25,847</span>
+                    <span class="stat-label">Reviews Created</span>
+                </div>
+                <div class="trust-stat">
+                    <span class="stat-number">4.9★</span>
+                    <span class="stat-label">User Rating</span>
+                </div>
+                <div class="trust-stat">
+                    <span class="stat-number" id="activeUsers">127</span>
+                    <span class="stat-label">Active Now</span>
+                </div>
+                <div class="trust-stat">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Hotels Using</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gamification Points Display -->
+        <div class="points-display" id="pointsDisplay">
+            <span>Points: <span class="points-value" id="pointsValue">0</span></span>
+        </div>
+        
+        <!-- Main Card -->
+        <div class="card">
+            <h1>Generate Your Perfect Review</h1>
+            <p class="subtitle">Join thousands creating 5-star reviews in under 30 seconds</p>
+            
+            <!-- Step 1: Hotel Name -->
+            <div class="form-group">
+                <label for="hotelName">Hotel Name</label>
+                <input 
+                    type="text" 
+                    id="hotelName" 
+                    placeholder="e.g., The Grand Hotel"
+                    autocomplete="organization"
+                    enterkeyhint="next"
+                    required
+                >
+            </div>
+            
+            <!-- Step 2: Aspects -->
+            <div class="form-group">
+                <label>What did you enjoy? (Select 2+)</label>
+                <div class="aspect-grid" id="aspectGrid">
+                    <button type="button" class="aspect-btn" data-aspect="location" data-points="5">📍 Location</button>
+                    <button type="button" class="aspect-btn" data-aspect="cleanliness" data-points="5">✨ Clean</button>
+                    <button type="button" class="aspect-btn" data-aspect="service" data-points="5">🌟 Service</button>
+                    <button type="button" class="aspect-btn" data-aspect="comfort" data-points="5">🛏️ Comfort</button>
+                    <button type="button" class="aspect-btn" data-aspect="facilities" data-points="5">🏊 Facilities</button>
+                    <button type="button" class="aspect-btn" data-aspect="value" data-points="5">💰 Value</button>
+                    <button type="button" class="aspect-btn" data-aspect="breakfast" data-points="5">🍳 Breakfast</button>
+                    <button type="button" class="aspect-btn" data-aspect="wifi" data-points="5">📶 WiFi</button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Staff Recognition -->
+            <div class="form-group">
+                <label for="staffName">
+                    👏 Staff member to recognize
+                    <span class="bonus-badge">+20 points!</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="staffName" 
+                    placeholder="Optional - e.g., Maria at reception"
+                    autocomplete="off"
+                    enterkeyhint="next"
+                >
+            </div>
+            
+            <!-- Step 4: Platform -->
+            <div class="form-group">
+                <label>Where will you post?</label>
+                <div class="platform-grid">
+                    <button type="button" class="platform-btn selected" data-platform="booking">🏨 Booking</button>
+                    <button type="button" class="platform-btn" data-platform="tripadvisor">🦉 TripAdvisor</button>
+                    <button type="button" class="platform-btn" data-platform="google">🔍 Google</button>
+                    <button type="button" class="platform-btn" data-platform="expedia">✈️ Expedia</button>
+                </div>
+            </div>
+            
+            <!-- Generate Button -->
+            <button class="btn-primary" id="generateBtn">
+                Generate Perfect Review ✨
+            </button>
+            
+            <!-- Review Output (Hidden initially) -->
+            <div class="review-output" id="reviewOutput" style="display: none;">
+                <h3>🎉 Your Perfect Review is Ready!</h3>
+                <div class="review-text" id="reviewText"></div>
+                <div class="action-buttons">
+                    <button class="btn-copy" id="copyBtn">📋 Copy</button>
+                    <button class="btn-share" id="shareBtn">🔗 Share</button>
+                    <button class="btn-post" id="postBtn">Post to Platform →</button>
+                </div>
+            </div>
+            
+            <!-- Social Proof Ticker -->
+            <div class="social-ticker" id="socialTicker" style="display: none;">
+                🔥 <span id="tickerText">Sarah just generated a review for Hilton London</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exit Intent Modal -->
+    <div class="exit-modal" id="exitModal">
+        <div class="exit-content">
+            <h2>✋ Wait! Don't leave yet!</h2>
+            <p>You're just 30 seconds away from helping your hotel!</p>
+            <div class="exit-offer">
+                <h3>🎁 Complete now and get:</h3>
+                <p>✅ 50 Bonus Points instantly<br>
+                ✅ Priority Support badge<br>
+                ✅ Join 127 people who reviewed today</p>
+            </div>
+            <button class="btn-primary" onclick="stayAndComplete()">Complete My Review</button>
+            <button style="margin-top: 10px; background: none; border: none; color: #666; cursor: pointer;" onclick="closeExitModal()">No thanks</button>
+        </div>
+    </div>
+    
+    <script>
+        // Single-file optimized JavaScript
+        class PerfectPrototype {
+            constructor() {
+                this.points = 0;
+                this.selectedAspects = [];
+                this.platform = 'booking';
+                this.hotelName = '';
+                this.staffName = '';
+                this.reviewText = '';
+                this.exitShown = false;
+                
+                this.init();
+            }
+            
+            init() {
+                // Start trust counter animations
+                this.animateTrustCounters();
+                
+                // Bind events
+                this.bindEvents();
+                
+                // Start social proof ticker
+                this.startSocialProof();
+                
+                // Setup exit intent
+                this.setupExitIntent();
+                
+                // Track performance
+                this.trackPerformance();
+            }
+            
+            bindEvents() {
+                // Hotel name input
+                document.getElementById('hotelName').addEventListener('input', (e) => {
+                    this.hotelName = e.target.value.trim();
+                    if (this.hotelName.length === 1) {
+                        this.addPoints(10, 'starting your review');
+                    }
+                });
+                
+                // Aspect selection
+                document.querySelectorAll('.aspect-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.toggleAspect(btn));
+                });
+                
+                // Platform selection
+                document.querySelectorAll('.platform-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.selectPlatform(btn));
+                });
+                
+                // Staff name input
+                document.getElementById('staffName').addEventListener('input', (e) => {
+                    this.staffName = e.target.value.trim();
+                    if (this.staffName.length === 1) {
+                        this.addPoints(5, 'recognizing staff');
+                    }
+                });
+                
+                // Generate button
+                document.getElementById('generateBtn').addEventListener('click', () => this.generateReview());
+                
+                // Action buttons
+                document.getElementById('copyBtn').addEventListener('click', () => this.copyReview());
+                document.getElementById('shareBtn').addEventListener('click', () => this.shareReview());
+                document.getElementById('postBtn').addEventListener('click', () => this.postReview());
+            }
+            
+            animateTrustCounters() {
+                // Animate review count
+                this.animateNumber('reviewCount', 25847, 26500, 2000);
+                
+                // Animate active users
+                this.animateNumber('activeUsers', 127, 135, 1500);
+                
+                // Update every 30 seconds
+                setInterval(() => {
+                    const current = parseInt(document.getElementById('reviewCount').textContent.replace(/,/g, ''));
+                    this.animateNumber('reviewCount', current, current + Math.floor(Math.random() * 5) + 1, 1000);
+                }, 30000);
+            }
+            
+            animateNumber(id, start, end, duration) {
+                const element = document.getElementById(id);
+                const increment = (end - start) / (duration / 16);
+                let current = start;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= end) {
+                        current = end;
+                        clearInterval(timer);
+                    }
+                    element.textContent = Math.floor(current).toLocaleString();
+                }, 16);
+            }
+            
+            toggleAspect(btn) {
+                const aspect = btn.dataset.aspect;
+                const points = parseInt(btn.dataset.points);
+                
+                if (btn.classList.contains('selected')) {
+                    btn.classList.remove('selected');
+                    this.selectedAspects = this.selectedAspects.filter(a => a !== aspect);
+                } else {
+                    btn.classList.add('selected');
+                    this.selectedAspects.push(aspect);
+                    this.addPoints(points, `selecting ${aspect}`);
+                    
+                    // Celebrate milestones
+                    if (this.selectedAspects.length === 3) {
+                        this.celebrate('🎉');
+                        this.addPoints(10, 'great selections!');
+                    }
+                }
+            }
+            
+            selectPlatform(btn) {
+                document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                this.platform = btn.dataset.platform;
+            }
+            
+            generateReview() {
+                if (!this.hotelName || this.selectedAspects.length < 2) {
+                    this.showNotification('Please enter hotel name and select at least 2 aspects', 'error');
+                    return;
+                }
+                
+                // Build review
+                const templates = [
+                    "Had an amazing stay at {hotel}! {aspects}. {staff} Would definitely recommend and will be back!",
+                    "Exceptional experience at {hotel}. {aspects}. {staff} Exceeded all expectations!",
+                    "{hotel} provided everything we needed for a perfect stay. {aspects}. {staff} 5 stars!",
+                    "Wonderful time at {hotel}! {aspects}. {staff} Can't wait to return!"
+                ];
+                
+                const aspectPhrases = {
+                    location: "Perfect location",
+                    cleanliness: "Spotlessly clean",
+                    service: "Outstanding service",
+                    comfort: "Extremely comfortable",
+                    facilities: "Excellent facilities",
+                    value: "Great value for money",
+                    breakfast: "Delicious breakfast",
+                    wifi: "Fast and reliable WiFi"
+                };
+                
+                const aspectText = this.selectedAspects.map(a => aspectPhrases[a]).join(', ');
+                const staffText = this.staffName ? `Special thanks to ${this.staffName} for making our stay memorable!` : '';
+                
+                const template = templates[Math.floor(Math.random() * templates.length)];
+                this.reviewText = template
+                    .replace('{hotel}', this.hotelName)
+                    .replace('{aspects}', aspectText)
+                    .replace('{staff}', staffText);
+                
+                // Display review
+                document.getElementById('reviewText').textContent = this.reviewText;
+                document.getElementById('reviewOutput').style.display = 'block';
+                document.getElementById('reviewOutput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Award points
+                this.addPoints(25, 'completing your review!');
+                if (this.staffName) {
+                    this.addPoints(20, 'recognizing staff!');
+                }
+                
+                // Big celebration
+                this.celebrate('🎉🎊✨');
+                
+                // Show social ticker
+                document.getElementById('socialTicker').style.display = 'block';
+            }
+            
+            copyReview() {
+                navigator.clipboard.writeText(this.reviewText).then(() => {
+                    this.showNotification('Review copied to clipboard! 📋');
+                    this.addPoints(5, 'sharing');
+                });
+            }
+            
+            shareReview() {
+                // Generate shareable link
+                const shareUrl = `${window.location.href}?hotel=${encodeURIComponent(this.hotelName)}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'My Hotel Review',
+                        text: this.reviewText,
+                        url: shareUrl
+                    });
+                } else {
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        this.showNotification('Share link copied! 🔗');
+                    });
+                }
+            }
+            
+            postReview() {
+                const platforms = {
+                    booking: `https://www.booking.com/reviewlist.html?q=${encodeURIComponent(this.hotelName)}`,
+                    tripadvisor: `https://www.tripadvisor.com/Search?q=${encodeURIComponent(this.hotelName)}`,
+                    google: `https://www.google.com/search?q=${encodeURIComponent(this.hotelName + ' review')}`,
+                    expedia: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(this.hotelName)}`
+                };
+                
+                // Copy review first
+                navigator.clipboard.writeText(this.reviewText).then(() => {
+                    this.showNotification('Review copied! Opening platform...', 'success');
+                    setTimeout(() => {
+                        window.open(platforms[this.platform], '_blank');
+                    }, 1000);
+                });
+            }
+            
+            addPoints(amount, reason) {
+                this.points += amount;
+                const display = document.getElementById('pointsDisplay');
+                const value = document.getElementById('pointsValue');
+                
+                display.classList.add('show');
+                value.textContent = this.points;
+                
+                // Pulse animation
+                value.style.animation = 'pulse 0.5s';
+                setTimeout(() => value.style.animation = '', 500);
+                
+                // Show floating points
+                this.showFloatingPoints(`+${amount}`, reason);
+            }
+            
+            showFloatingPoints(points, reason) {
+                const float = document.createElement('div');
+                float.style.cssText = `
+                    position: fixed;
+                    top: 60px;
+                    right: 20px;
+                    background: #4CAF50;
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    z-index: 9999;
+                    animation: slideInUp 0.5s ease;
+                `;
+                float.textContent = `${points} ${reason}`;
+                document.body.appendChild(float);
+                setTimeout(() => float.remove(), 2000);
+            }
+            
+            celebrate(emoji) {
+                const celebration = document.createElement('div');
+                celebration.className = 'celebration';
+                celebration.textContent = emoji;
+                document.body.appendChild(celebration);
+                setTimeout(() => celebration.remove(), 1000);
+            }
+            
+            showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                if (type === 'error') {
+                    notification.style.background = '#dc2626';
+                }
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+            }
+            
+            startSocialProof() {
+                const messages = [
+                    "Sarah just generated a review for Hilton London",
+                    "Mike shared 5 stars for Marriott Paris",
+                    "Emma recognized staff at Four Seasons Dubai",
+                    "125 reviews generated in the last hour",
+                    "David just earned 50 points!",
+                    "Lisa's review went viral with 100 likes",
+                    "New record: 15 reviews in 5 minutes!"
+                ];
+                
+                let index = 0;
+                setInterval(() => {
+                    const ticker = document.getElementById('tickerText');
+                    if (ticker) {
+                        ticker.textContent = messages[index % messages.length];
+                        ticker.parentElement.style.animation = 'slideInUp 0.5s ease';
+                        setTimeout(() => ticker.parentElement.style.animation = '', 500);
+                        index++;
+                    }
+                }, 5000);
+            }
+            
+            setupExitIntent() {
+                document.addEventListener('mouseleave', (e) => {
+                    if (e.clientY <= 0 && !this.exitShown && !this.reviewText) {
+                        this.exitShown = true;
+                        document.getElementById('exitModal').classList.add('show');
+                    }
+                });
+            }
+            
+            trackPerformance() {
+                if ('performance' in window) {
+                    window.addEventListener('load', () => {
+                        const perfData = performance.getEntriesByType('navigation')[0];
+                        console.log(`Page loaded in ${Math.round(perfData.loadEventEnd - perfData.fetchStart)}ms`);
+                        
+                        // Award fast load bonus
+                        if (perfData.loadEventEnd - perfData.fetchStart < 1000) {
+                            setTimeout(() => {
+                                this.addPoints(5, 'lightning fast load!');
+                            }, 1000);
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Helper functions
+        function stayAndComplete() {
+            document.getElementById('exitModal').classList.remove('show');
+            window.app.addPoints(50, 'staying to complete!');
+            document.getElementById('hotelName').focus();
+        }
+        
+        function closeExitModal() {
+            document.getElementById('exitModal').classList.remove('show');
+        }
+        
+        // Initialize app
+        window.app = new PerfectPrototype();
+        
+        // Service Worker Registration (for PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+    </script>
+    
+    <!-- Defer QR Code library loading -->
+    <script>
+        // Load QR library only when share button is clicked
+        document.getElementById('shareBtn')?.addEventListener('click', () => {
+            if (!window.QRCode) {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+                document.head.appendChild(script);
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>

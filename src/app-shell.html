@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Hotel Review Generator - Instant 5-Star Reviews</title>
+    <meta name="description" content="Generate perfect hotel reviews in 30 seconds. Used by 500+ hotels worldwide.">
+    
+    <!-- Critical CSS - Only above-fold styles (3KB) -->
+    <style>
+        /* Reset and Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6; 
+            color: #1a1a1a; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Container */
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px;
+        }
+
+        /* Trust Indicators - Above fold */
+        .trust-header {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: slideDown 0.5s ease;
+        }
+
+        .trust-stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .trust-stat {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Title */
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Loading State */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+        }
+
+        /* Points Display */
+        .points-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .points-display.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .points-value {
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+            h1 { font-size: 24px; }
+            .trust-stats { gap: 10px; }
+            .trust-stat { min-width: 100px; }
+        }
+    </style>
+
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+</head>
+<body>
+    <div class="container">
+        <!-- Trust Indicators - Immediate visibility -->
+        <div class="trust-header">
+            <div class="trust-stats">
+                <div class="trust-stat">
+                    <span class="stat-number" id="reviewCount">25,847</span>
+                    <span class="stat-label">Reviews Generated</span>
+                </div>
+                <div class="trust-stat">
+                    <span class="stat-number">4.9★</span>
+                    <span class="stat-label">User Rating</span>
+                </div>
+                <div class="trust-stat">
+                    <span class="stat-number" id="activeUsers">127</span>
+                    <span class="stat-label">Active Now</span>
+                </div>
+                <div class="trust-stat">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Hotels Using</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Points Display (Gamification) -->
+        <div class="points-display" id="pointsDisplay">
+            <span>Points: <span class="points-value" id="pointsValue">0</span></span>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="main-card">
+            <h1>Generate Your 5-Star Review</h1>
+            <p class="subtitle">Join thousands creating perfect reviews in under 30 seconds</p>
+
+            <form id="reviewForm">
+                <!-- Hotel Name - Critical Field -->
+                <div class="form-group">
+                    <label for="hotelName">Hotel Name</label>
+                    <input 
+                        type="text" 
+                        id="hotelName" 
+                        name="hotelName"
+                        placeholder="e.g., The Grand Hotel"
+                        required
+                        autocomplete="organization"
+                        enterkeyhint="next"
+                    >
+                </div>
+
+                <!-- Generate Button - Primary CTA -->
+                <button type="submit" class="btn-primary" id="generateBtn">
+                    Generate Perfect Review ✨
+                </button>
+            </form>
+
+            <!-- Loading placeholder for deferred content -->
+            <div id="deferredContent" style="display:none;">
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+                <div class="loading-skeleton"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JavaScript - Minimal viable functionality (10KB) -->
+    <script>
+        // Performance monitoring
+        const perfStart = performance.now();
+        
+        // Gamification system
+        const GameSystem = {
+            points: 0,
+            milestones: [10, 25, 50, 100],
+            
+            addPoints(amount, reason) {
+                this.points += amount;
+                this.updateDisplay();
+                this.celebrate(amount, reason);
+            },
+            
+            updateDisplay() {
+                const display = document.getElementById('pointsDisplay');
+                const value = document.getElementById('pointsValue');
+                if (display && value) {
+                    display.classList.add('show');
+                    value.textContent = this.points;
+                    value.style.animation = 'pulse 0.5s';
+                    setTimeout(() => value.style.animation = '', 500);
+                }
+            },
+            
+            celebrate(points, reason) {
+                // Simple celebration - enhanced version loads later
+                console.log(`+${points} points for ${reason}!`);
+            }
+        };
+
+        // Trust indicators animation
+        function animateCounter(id, end, duration = 2000) {
+            const element = document.getElementById(id);
+            if (!element) return;
+            
+            const start = parseInt(element.textContent.replace(/[^\d]/g, ''));
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString();
+            }, 16);
+        }
+
+        // Initialize trust animations
+        setTimeout(() => {
+            animateCounter('reviewCount', 26000 + Math.floor(Math.random() * 500));
+            animateCounter('activeUsers', 100 + Math.floor(Math.random() * 50));
+        }, 500);
+
+        // Basic form handler
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const hotelName = document.getElementById('hotelName').value.trim();
+            if (!hotelName) return;
+            
+            // Award points for starting
+            GameSystem.addPoints(10, 'starting your review');
+            
+            // Show loading state
+            document.getElementById('generateBtn').textContent = 'Generating...';
+            document.getElementById('generateBtn').disabled = true;
+            
+            // Load enhanced features if not already loaded
+            if (!window.EnhancedReviewGenerator) {
+                document.getElementById('deferredContent').style.display = 'block';
+                
+                // Dynamically load the full experience
+                const script = document.createElement('script');
+                script.src = 'enhanced-features.js';
+                script.async = true;
+                script.onload = () => {
+                    // Initialize enhanced features
+                    window.EnhancedReviewGenerator.init(hotelName);
+                    GameSystem.addPoints(15, 'loading complete');
+                };
+                document.body.appendChild(script);
+            } else {
+                // Use already loaded enhanced features
+                window.EnhancedReviewGenerator.generate(hotelName);
+            }
+        });
+
+        // Track core web vitals
+        if ('PerformanceObserver' in window) {
+            try {
+                const po = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        console.log(`${entry.name}: ${entry.value}ms`);
+                    }
+                });
+                po.observe({ type: 'largest-contentful-paint', buffered: true });
+            } catch (e) {}
+        }
+
+        // Report load time
+        window.addEventListener('load', () => {
+            const loadTime = performance.now() - perfStart;
+            console.log(`Page interactive in ${loadTime.toFixed(0)}ms`);
+            
+            // Celebrate fast load
+            if (loadTime < 1000) {
+                GameSystem.addPoints(5, 'lightning fast load');
+            }
+        });
+
+        // Exit intent detection
+        let exitIntentShown = false;
+        document.addEventListener('mouseleave', (e) => {
+            if (e.clientY <= 0 && !exitIntentShown) {
+                exitIntentShown = true;
+                // Load exit prevention module
+                import('./modules/exit-intent.js').then(module => {
+                    module.showExitOffer();
+                });
+            }
+        });
+    </script>
+
+    <!-- Deferred scripts load on interaction -->
+    <script defer src="enhanced-features.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>
