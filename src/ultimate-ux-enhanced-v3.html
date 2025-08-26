@@ -6,6 +6,18 @@
     <meta name="theme-color" content="#1e40af">
     <title>🏨 Hotel Review Generator - Ultimate UX v3</title>
     
+    <!-- Performance: Preload Critical Resources -->
+    <link rel="preconnect" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
+    <!-- Preload critical fonts if using web fonts -->
+    <link rel="preload" as="style" href="data:text/css;charset=UTF-8," onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+    
     <style>
         /* Enhanced CSS Variables */
         :root {
@@ -331,6 +343,11 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            min-height: var(--touch-target);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .aspect-card:hover {
@@ -385,6 +402,135 @@
         .btn-primary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* Sharing Section */
+        .sharing-section {
+            background: var(--bg-elevated);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: var(--shadow-md);
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        .sharing-section.hidden {
+            display: none;
+        }
+
+        .sharing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border);
+        }
+
+        .qr-code {
+            max-width: 120px;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .share-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .share-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-weight: 600;
+            font-size: 0.875rem;
+            min-height: var(--touch-target);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .share-btn:active {
+            animation: buttonPress 0.2s ease-out;
+        }
+
+        .share-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+        .share-facebook {
+            background: #1877F2;
+            color: white;
+        }
+
+        .share-twitter {
+            background: #1DA1F2;
+            color: white;
+        }
+
+        .share-email {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .share-copy {
+            background: var(--primary);
+            color: white;
+        }
+
+        .share-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .share-counter {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .copy-success {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(5, 150, 105, 0.9);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .copy-success.show {
+            opacity: 1;
         }
 
         /* Platform Submit Buttons */
@@ -503,13 +649,27 @@
             .platform-buttons {
                 grid-template-columns: 1fr;
             }
+
+            .sharing-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .qr-container {
+                order: 2;
+            }
+
+            .share-options {
+                order: 1;
+            }
         }
 
         /* Print Styles */
         @media print {
             .btn,
             .platform-buttons,
-            .language-selector {
+            .language-selector,
+            .sharing-section {
                 display: none !important;
             }
         }
@@ -541,7 +701,10 @@
                     id="hotel-name" 
                     placeholder="e.g., Grand Plaza Hotel" 
                     data-i18n-placeholder="hotelPlaceholder"
-                    autocomplete="off"
+                    autocomplete="organization"
+                    inputmode="text"
+                    enterkeyhint="next"
+                    spellcheck="true"
                     aria-label="Hotel name input"
                     aria-required="true"
                 >
@@ -590,6 +753,12 @@
                     rows="3" 
                     placeholder="Any specific details..." 
                     data-i18n-placeholder="commentsPlaceholder"
+                    autocomplete="off"
+                    inputmode="text"
+                    enterkeyhint="done"
+                    spellcheck="true"
+                    autocorrect="on"
+                    autocapitalize="sentences"
                     aria-label="Additional comments"
                 ></textarea>
                 <div class="length-indicator" id="length-indicator">
@@ -622,6 +791,60 @@
             </div>
             
             <div id="review-output" class="review-output"></div>
+            
+            <!-- Link Distribution System -->
+            <div id="sharing-section" class="sharing-section hidden">
+                <h4 data-i18n="shareReview">Share Your Review</h4>
+                
+                <div class="sharing-grid">
+                    <div class="qr-container">
+                        <p data-i18n="qrCode">QR Code</p>
+                        <canvas id="qr-canvas" class="qr-code"></canvas>
+                        <p data-i18n="qrInstructions">Scan to share</p>
+                    </div>
+                    
+                    <div class="share-options">
+                        <button class="share-btn share-whatsapp" id="share-whatsapp" aria-label="Share via WhatsApp">
+                            <span>💬</span>
+                            <span data-i18n="shareWhatsApp">WhatsApp</span>
+                        </button>
+                        
+                        <button class="share-btn share-facebook" id="share-facebook" aria-label="Share on Facebook">
+                            <span>👥</span>
+                            <span data-i18n="shareFacebook">Facebook</span>
+                        </button>
+                        
+                        <button class="share-btn share-twitter" id="share-twitter" aria-label="Share on Twitter">
+                            <span>🐦</span>
+                            <span data-i18n="shareTwitter">Twitter</span>
+                        </button>
+                        
+                        <button class="share-btn share-email" id="share-email" aria-label="Share via Email">
+                            <span>📧</span>
+                            <span data-i18n="shareEmail">Email</span>
+                        </button>
+                        
+                        <button class="share-btn share-copy" id="share-copy" aria-label="Copy link">
+                            <span>📋</span>
+                            <span data-i18n="copyLink">Copy Link</span>
+                            <div class="copy-success" id="copy-success" data-i18n="linkCopied">✓ Copied!</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="share-stats">
+                    <div class="share-counter">
+                        <span>📊</span>
+                        <span data-i18n="shareCount">Shares:</span>
+                        <span id="share-count">0</span>
+                    </div>
+                    <div class="share-counter">
+                        <span>👁️</span>
+                        <span data-i18n="viewCount">Views:</span>
+                        <span id="view-count">0</span>
+                    </div>
+                </div>
+            </div>
             
             <!-- Platform Submit Buttons -->
             <div class="platform-buttons" id="platform-buttons">
@@ -662,6 +885,11 @@
                 this.validationErrors = [];
                 this.draftTimer = null;
                 this.platformUrls = new Map(); // Cache for platform URLs
+                this.shareData = {
+                    trackingId: this.generateTrackingId(),
+                    shareCount: 0,
+                    viewCount: 0
+                };
                 
                 // Translations (lazy-loaded)
                 this.translations = {
@@ -693,7 +921,19 @@
                         invalidReview: 'Please fix the issues',
                         profanityDetected: 'Please remove inappropriate language',
                         tooShort: 'Review is too short (min 50 characters)',
-                        missingHotelName: 'Consider mentioning the hotel name'
+                        missingHotelName: 'Consider mentioning the hotel name',
+                        shareReview: 'Share Your Review',
+                        qrCode: 'QR Code',
+                        qrInstructions: 'Scan to share',
+                        shareWhatsApp: 'WhatsApp',
+                        shareFacebook: 'Facebook',
+                        shareTwitter: 'Twitter',
+                        shareEmail: 'Email',
+                        copyLink: 'Copy Link',
+                        shareCount: 'Shares:',
+                        viewCount: 'Views:',
+                        linkCopied: '✓ Link copied!',
+                        shareSuccess: 'Share successful!'
                     },
                     es: {
                         title: '🏨 Generador de Reseñas',
@@ -714,7 +954,19 @@
                         greatLocation: 'Excelente Ubicación',
                         comfortable: 'Cómodo',
                         breakfast: 'Desayuno',
-                        value: 'Buen Precio'
+                        value: 'Buen Precio',
+                        shareReview: 'Comparte tu Reseña',
+                        qrCode: 'Código QR',
+                        qrInstructions: 'Escanea para compartir',
+                        shareWhatsApp: 'WhatsApp',
+                        shareFacebook: 'Facebook',
+                        shareTwitter: 'Twitter',
+                        shareEmail: 'Email',
+                        copyLink: 'Copiar Enlace',
+                        shareCount: 'Compartidos:',
+                        viewCount: 'Vistas:',
+                        linkCopied: '✓ Enlace copiado!',
+                        shareSuccess: '¡Compartido con éxito!'
                     },
                     fr: {
                         title: '🏨 Générateur d\'Avis',
@@ -735,7 +987,28 @@
                         greatLocation: 'Excellent Emplacement',
                         comfortable: 'Confortable',
                         breakfast: 'Petit-déjeuner',
-                        value: 'Bon Rapport Qualité-Prix'
+                        value: 'Bon Rapport Qualité-Prix',
+                        perfectLength: 'Longueur parfaite !',
+                        addMoreDetail: 'Ajoutez plus de détails',
+                        greatDetail: 'Excellents détails !',
+                        tooLong: 'Envisagez de raccourcir',
+                        validReview: 'Avis prêt à soumettre !',
+                        invalidReview: 'Veuillez corriger les problèmes',
+                        profanityDetected: 'Veuillez supprimer le langage inapproprié',
+                        tooShort: 'L\'avis est trop court (minimum 50 caractères)',
+                        missingHotelName: 'Envisagez de mentionner le nom de l\'hôtel',
+                        shareReview: 'Partagez votre Avis',
+                        qrCode: 'Code QR',
+                        qrInstructions: 'Scannez pour partager',
+                        shareWhatsApp: 'WhatsApp',
+                        shareFacebook: 'Facebook',
+                        shareTwitter: 'Twitter',
+                        shareEmail: 'Email',
+                        copyLink: 'Copier le Lien',
+                        shareCount: 'Partages:',
+                        viewCount: 'Vues:',
+                        linkCopied: '✓ Lien copié!',
+                        shareSuccess: 'Partagé avec succès!'
                     },
                     de: {
                         title: '🏨 Bewertungsgenerator',
@@ -756,7 +1029,28 @@
                         greatLocation: 'Tolle Lage',
                         comfortable: 'Komfortabel',
                         breakfast: 'Frühstück',
-                        value: 'Gutes Preis-Leistungs-Verhältnis'
+                        value: 'Gutes Preis-Leistungs-Verhältnis',
+                        perfectLength: 'Perfekte Länge!',
+                        addMoreDetail: 'Mehr Details hinzufügen',
+                        greatDetail: 'Großartige Details!',
+                        tooLong: 'Kürzer fassen',
+                        validReview: 'Bewertung bereit zum Einreichen!',
+                        invalidReview: 'Bitte beheben Sie die Probleme',
+                        profanityDetected: 'Bitte entfernen Sie unangemessene Sprache',
+                        tooShort: 'Bewertung ist zu kurz (mindestens 50 Zeichen)',
+                        missingHotelName: 'Erwägen Sie, den Hotelnamen zu erwähnen',
+                        shareReview: 'Bewertung Teilen',
+                        qrCode: 'QR-Code',
+                        qrInstructions: 'Scannen zum Teilen',
+                        shareWhatsApp: 'WhatsApp',
+                        shareFacebook: 'Facebook',
+                        shareTwitter: 'Twitter',
+                        shareEmail: 'E-Mail',
+                        copyLink: 'Link Kopieren',
+                        shareCount: 'Geteilt:',
+                        viewCount: 'Aufrufe:',
+                        linkCopied: '✓ Link kopiert!',
+                        shareSuccess: 'Erfolgreich geteilt!'
                     },
                     it: {
                         title: '🏨 Generatore di Recensioni',
@@ -777,7 +1071,28 @@
                         greatLocation: 'Ottima Posizione',
                         comfortable: 'Confortevole',
                         breakfast: 'Colazione',
-                        value: 'Ottimo Rapporto Qualità-Prezzo'
+                        value: 'Ottimo Rapporto Qualità-Prezzo',
+                        perfectLength: 'Lunghezza perfetta!',
+                        addMoreDetail: 'Aggiungi più dettagli',
+                        greatDetail: 'Ottimi dettagli!',
+                        tooLong: 'Considera di accorciare',
+                        validReview: 'Recensione pronta per l\'invio!',
+                        invalidReview: 'Per favore risolvi i problemi',
+                        profanityDetected: 'Per favore rimuovi il linguaggio inappropriato',
+                        tooShort: 'La recensione è troppo corta (minimo 50 caratteri)',
+                        missingHotelName: 'Considera di menzionare il nome dell\'hotel',
+                        shareReview: 'Condividi la Tua Recensione',
+                        qrCode: 'Codice QR',
+                        qrInstructions: 'Scansiona per condividere',
+                        shareWhatsApp: 'WhatsApp',
+                        shareFacebook: 'Facebook',
+                        shareTwitter: 'Twitter',
+                        shareEmail: 'Email',
+                        copyLink: 'Copia Link',
+                        shareCount: 'Condivisioni:',
+                        viewCount: 'Visualizzazioni:',
+                        linkCopied: '✓ Link copiato!',
+                        shareSuccess: 'Condivisione riuscita!'
                     },
                     zh: {
                         title: '🏨 酒店评价生成器',
@@ -798,7 +1113,28 @@
                         greatLocation: '绝佳位置',
                         comfortable: '舒适',
                         breakfast: '早餐',
-                        value: '物超所值'
+                        value: '物超所值',
+                        perfectLength: '长度完美！',
+                        addMoreDetail: '添加更多细节',
+                        greatDetail: '很好的细节！',
+                        tooLong: '考虑缩短一下',
+                        validReview: '评价已准备好提交！',
+                        invalidReview: '请修复问题',
+                        profanityDetected: '请删除不当用语',
+                        tooShort: '评价太短（至少50个字符）',
+                        missingHotelName: '考虑提及酒店名称',
+                        shareReview: '分享您的评价',
+                        qrCode: '二维码',
+                        qrInstructions: '扫码分享',
+                        shareWhatsApp: 'WhatsApp',
+                        shareFacebook: 'Facebook',
+                        shareTwitter: 'Twitter',
+                        shareEmail: '邮件',
+                        copyLink: '复制链接',
+                        shareCount: '分享次数：',
+                        viewCount: '浏览次数：',
+                        linkCopied: '✓ 链接已复制！',
+                        shareSuccess: '分享成功！'
                     },
                     el: {
                         title: '🏨 Δημιουργός Κριτικών Ξενοδοχείων',
@@ -828,7 +1164,19 @@
                         invalidReview: 'Παρακαλώ διορθώστε τα προβλήματα',
                         profanityDetected: 'Παρακαλώ αφαιρέστε ακατάλληλη γλώσσα',
                         tooShort: 'Η κριτική είναι πολύ σύντομη (ελάχιστο 50 χαρακτήρες)',
-                        missingHotelName: 'Σκεφτείτε να αναφέρετε το όνομα του ξενοδοχείου'
+                        missingHotelName: 'Σκεφτείτε να αναφέρετε το όνομα του ξενοδοχείου',
+                        shareReview: 'Μοιραστείτε την Κριτική σας',
+                        qrCode: 'Κωδικός QR',
+                        qrInstructions: 'Σαρώστε για να μοιραστείτε',
+                        shareWhatsApp: 'WhatsApp',
+                        shareFacebook: 'Facebook',
+                        shareTwitter: 'Twitter',
+                        shareEmail: 'Email',
+                        copyLink: 'Αντιγραφή Συνδέσμου',
+                        shareCount: 'Κοινοποιήσεις:',
+                        viewCount: 'Προβολές:',
+                        linkCopied: '✓ Σύνδεσμος αντιγράφηκε!',
+                        shareSuccess: 'Επιτυχημένη κοινοποίηση!'
                     }
                 };
                 
@@ -846,6 +1194,7 @@
                 this.setupExitIntent();
                 this.restoreDraft();
                 this.addMicroAnimations();
+                this.handleSharedLink();
             }
 
             /**
@@ -958,6 +1307,9 @@
                         this.submitToPlatform(e.target.dataset.platform);
                     });
                 });
+
+                // Sharing buttons
+                this.setupSharingEventListeners();
             }
 
             /**
@@ -1160,6 +1512,9 @@
                     // Show output
                     document.getElementById('review-output').textContent = review;
                     output.classList.remove('hidden');
+                    
+                    // Show sharing section and generate QR code
+                    this.showSharingSection(review, hotelName);
                     
                     // Reset button
                     btn.innerHTML = `<span>${this.translations[this.currentLanguage].generate}</span><span>✨</span>`;
@@ -1480,6 +1835,284 @@
             }
 
             /**
+             * Generate unique tracking ID for shares
+             */
+            generateTrackingId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            /**
+             * Setup sharing event listeners
+             */
+            setupSharingEventListeners() {
+                document.getElementById('share-whatsapp')?.addEventListener('click', () => {
+                    this.shareViaWhatsApp();
+                });
+
+                document.getElementById('share-facebook')?.addEventListener('click', () => {
+                    this.shareViaFacebook();
+                });
+
+                document.getElementById('share-twitter')?.addEventListener('click', () => {
+                    this.shareViaTwitter();
+                });
+
+                document.getElementById('share-email')?.addEventListener('click', () => {
+                    this.shareViaEmail();
+                });
+
+                document.getElementById('share-copy')?.addEventListener('click', () => {
+                    this.copyShareableLink();
+                });
+            }
+
+            /**
+             * Show sharing section with QR code generation
+             */
+            showSharingSection(review, hotelName) {
+                const sharingSection = document.getElementById('sharing-section');
+                if (sharingSection) {
+                    sharingSection.classList.remove('hidden');
+                    
+                    // Generate QR code
+                    this.generateQRCode(review, hotelName);
+                    
+                    // Load share statistics
+                    this.loadShareStatistics();
+                }
+            }
+
+            /**
+             * Generate QR code for sharing
+             */
+            generateQRCode(review, hotelName) {
+                const canvas = document.getElementById('qr-canvas');
+                if (canvas && window.QRCode) {
+                    const shareableLink = this.generateShareableLink(review, hotelName);
+                    
+                    QRCode.toCanvas(canvas, shareableLink, {
+                        width: 120,
+                        margin: 2,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        }
+                    }, (error) => {
+                        if (error) {
+                            console.warn('QR Code generation failed:', error);
+                            canvas.style.display = 'none';
+                        }
+                    });
+                }
+            }
+
+            /**
+             * Generate shareable link with tracking parameters
+             */
+            generateShareableLink(review, hotelName) {
+                const baseUrl = window.location.origin + window.location.pathname;
+                const params = new URLSearchParams({
+                    hotel: hotelName,
+                    review: review.substring(0, 100) + '...',
+                    tid: this.shareData.trackingId,
+                    source: 'qr'
+                });
+                
+                return `${baseUrl}?${params.toString()}`;
+            }
+
+            /**
+             * Share via WhatsApp
+             */
+            shareViaWhatsApp() {
+                const review = document.getElementById('review-output').textContent;
+                const hotelName = document.getElementById('hotel-name').value;
+                const shareableLink = this.generateShareableLink(review, hotelName);
+                
+                const message = `Check out my review of ${hotelName}!\n\n"${review.substring(0, 200)}..."\n\n${shareableLink}`;
+                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                
+                this.openShare(whatsappUrl, 'whatsapp');
+            }
+
+            /**
+             * Share via Facebook
+             */
+            shareViaFacebook() {
+                const review = document.getElementById('review-output').textContent;
+                const hotelName = document.getElementById('hotel-name').value;
+                const shareableLink = this.generateShareableLink(review, hotelName);
+                
+                const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareableLink)}&quote=${encodeURIComponent(`My review of ${hotelName}: ${review.substring(0, 200)}...`)}`;
+                
+                this.openShare(facebookUrl, 'facebook');
+            }
+
+            /**
+             * Share via Twitter
+             */
+            shareViaTwitter() {
+                const review = document.getElementById('review-output').textContent;
+                const hotelName = document.getElementById('hotel-name').value;
+                const shareableLink = this.generateShareableLink(review, hotelName);
+                
+                const tweet = `My review of ${hotelName}: "${review.substring(0, 150)}..." ${shareableLink} #HotelReview`;
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
+                
+                this.openShare(twitterUrl, 'twitter');
+            }
+
+            /**
+             * Share via Email
+             */
+            shareViaEmail() {
+                const review = document.getElementById('review-output').textContent;
+                const hotelName = document.getElementById('hotel-name').value;
+                const shareableLink = this.generateShareableLink(review, hotelName);
+                
+                const subject = `My Review of ${hotelName}`;
+                const body = `Hi,\n\nI wanted to share my recent review of ${hotelName}:\n\n"${review}"\n\nYou can read more reviews like this at: ${shareableLink}\n\nBest regards!`;
+                
+                const emailUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                this.openShare(emailUrl, 'email');
+            }
+
+            /**
+             * Copy shareable link to clipboard
+             */
+            copyShareableLink() {
+                const review = document.getElementById('review-output').textContent;
+                const hotelName = document.getElementById('hotel-name').value;
+                const shareableLink = this.generateShareableLink(review, hotelName);
+                
+                this.copyToClipboard(shareableLink);
+                
+                // Show success animation
+                const successElement = document.getElementById('copy-success');
+                if (successElement) {
+                    successElement.classList.add('show');
+                    setTimeout(() => {
+                        successElement.classList.remove('show');
+                    }, 2000);
+                }
+                
+                this.trackShare('copy');
+                this.showToast(this.translations[this.currentLanguage].linkCopied || '✓ Link copied!', 'success');
+            }
+
+            /**
+             * Open share window and track
+             */
+            openShare(url, platform) {
+                const newWindow = window.open(url, '_blank', 'width=600,height=400');
+                
+                if (newWindow) {
+                    this.trackShare(platform);
+                    this.showToast(this.translations[this.currentLanguage].shareSuccess || 'Share successful!', 'success');
+                } else {
+                    // Fallback for blocked popups
+                    window.location.href = url;
+                }
+            }
+
+            /**
+             * Track share event
+             */
+            trackShare(platform) {
+                this.shareData.shareCount++;
+                
+                // Update UI
+                document.getElementById('share-count').textContent = this.shareData.shareCount;
+                
+                // Save to localStorage
+                this.saveShareStatistics();
+                
+                // Track with analytics
+                if (this.analytics) {
+                    this.analytics.track('share_review', {
+                        platform,
+                        trackingId: this.shareData.trackingId,
+                        shareCount: this.shareData.shareCount
+                    });
+                }
+            }
+
+            /**
+             * Load share statistics from localStorage
+             */
+            loadShareStatistics() {
+                try {
+                    const saved = localStorage.getItem('shareStatistics');
+                    if (saved) {
+                        const stats = JSON.parse(saved);
+                        this.shareData.shareCount = stats.shareCount || 0;
+                        this.shareData.viewCount = stats.viewCount || 0;
+                        
+                        // Update UI
+                        document.getElementById('share-count').textContent = this.shareData.shareCount;
+                        document.getElementById('view-count').textContent = this.shareData.viewCount;
+                    }
+                    
+                    // Increment view count
+                    this.shareData.viewCount++;
+                    document.getElementById('view-count').textContent = this.shareData.viewCount;
+                    this.saveShareStatistics();
+                    
+                } catch (e) {
+                    console.warn('Could not load share statistics:', e);
+                }
+            }
+
+            /**
+             * Save share statistics to localStorage
+             */
+            saveShareStatistics() {
+                try {
+                    const stats = {
+                        shareCount: this.shareData.shareCount,
+                        viewCount: this.shareData.viewCount,
+                        trackingId: this.shareData.trackingId,
+                        lastUpdate: Date.now()
+                    };
+                    localStorage.setItem('shareStatistics', JSON.stringify(stats));
+                } catch (e) {
+                    console.warn('Could not save share statistics:', e);
+                }
+            }
+
+            /**
+             * Handle shared link parameters
+             */
+            handleSharedLink() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const hotelParam = urlParams.get('hotel');
+                const reviewParam = urlParams.get('review');
+                const trackingId = urlParams.get('tid');
+                const source = urlParams.get('source');
+
+                if (hotelParam && reviewParam) {
+                    // Pre-fill form with shared data
+                    document.getElementById('hotel-name').value = hotelParam;
+                    
+                    // Show preview of shared review
+                    this.showToast(`Viewing shared review of ${hotelParam}`, 'info');
+                    
+                    // Track link view
+                    if (this.analytics && trackingId) {
+                        this.analytics.track('shared_link_view', {
+                            trackingId,
+                            source,
+                            hotel: hotelParam
+                        });
+                    }
+                    
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+
+            /**
              * Load translations (for lazy loading)
              */
             async loadTranslations(lang) {
@@ -1524,5 +2157,18 @@
             navigator.serviceWorker.register('/sw.js').catch(console.log);
         }
     </script>
+    <!-- Analytics Dashboard Link -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+        <a href="analytics-dashboard.html" 
+           style="display: inline-flex; align-items: center; gap: 0.5rem; 
+                  background: #1e40af; color: white; padding: 0.75rem 1rem; 
+                  border-radius: 999px; text-decoration: none; 
+                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                  font-weight: 600; font-size: 0.875rem;
+                  transition: all 150ms ease;">
+            📊 View Analytics
+        </a>
+    </div>
+
 </body>
 </html>

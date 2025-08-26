@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e40af">
+    <title>📊 Analytics Dashboard - Hotel Review Generator</title>
+    
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --bg: #ffffff;
+            --bg-light: #f9fafb;
+            --text: #111827;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --border-radius: 0.75rem;
+            --transition-fast: 150ms;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .dashboard-header {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .refresh-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-top: 1rem;
+        }
+
+        .refresh-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: transform var(--transition-fast);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .metric-change.positive {
+            color: var(--success);
+        }
+
+        .metric-change.negative {
+            color: var(--error);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 200px;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bar {
+            width: 100%;
+            background: var(--primary);
+            border-radius: 0.25rem 0.25rem 0 0;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bar:hover {
+            background: var(--primary-light);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .bar-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .platform-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .platform-card {
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .platform-icon {
+            font-size: 2rem;
+        }
+
+        .platform-info {
+            flex: 1;
+        }
+
+        .platform-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .platform-count {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .recent-reviews {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .review-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-hotel {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .review-time {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .review-platform {
+            padding: 0.25rem 0.75rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 999px;
+            font-size: 0.875rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .dashboard-title {
+                font-size: 1.5rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bar-chart {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">📊 Analytics Dashboard</h1>
+            <p class="dashboard-subtitle">Hotel Review Generator Performance Metrics</p>
+            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Reviews Generated</div>
+                <div class="metric-value" id="total-reviews">0</div>
+                <div class="metric-change positive">↑ 0% this week</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Conversion Rate</div>
+                <div class="metric-value" id="conversion-rate">0%</div>
+                <div class="metric-change positive">↑ 0% improvement</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Avg. Completion Time</div>
+                <div class="metric-value" id="avg-time">0s</div>
+                <div class="metric-change positive">↓ 0s faster</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Active Sessions</div>
+                <div class="metric-value" id="active-sessions">0</div>
+                <div class="metric-change" id="sessions-change">• Live</div>
+            </div>
+        </div>
+
+        <!-- Daily Activity Chart -->
+        <div class="chart-container">
+            <h2 class="chart-title">📈 Daily Review Activity (Last 7 Days)</h2>
+            <div class="bar-chart" id="daily-chart">
+                <!-- Bars will be generated dynamically -->
+            </div>
+        </div>
+
+        <!-- Platform Distribution -->
+        <div class="chart-container">
+            <h2 class="chart-title">🎯 Platform Distribution</h2>
+            <div class="platform-stats" id="platform-stats">
+                <div class="platform-card">
+                    <div class="platform-icon">🅱️</div>
+                    <div class="platform-info">
+                        <div class="platform-name">Booking.com</div>
+                        <div class="platform-count" id="booking-count">0</div>
+                    </div>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">🦉</div>
+                    <div class="platform-info">
+                        <div class="platform-name">TripAdvisor</div>
+                        <div class="platform-count" id="tripadvisor-count">0</div>
+                    </div>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">📍</div>
+                    <div class="platform-info">
+                        <div class="platform-name">Google Maps</div>
+                        <div class="platform-count" id="google-count">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Reviews -->
+        <div class="recent-reviews">
+            <h2 class="chart-title">🕐 Recent Reviews</h2>
+            <div id="recent-reviews-list">
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <p>No reviews generated yet. Start generating reviews to see them here!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Analytics Data Manager
+        class AnalyticsDashboard {
+            constructor() {
+                this.data = this.loadData();
+                this.init();
+            }
+
+            loadData() {
+                const stored = localStorage.getItem('hotelReviewAnalytics');
+                return stored ? JSON.parse(stored) : {
+                    totalReviews: 0,
+                    sessions: [],
+                    platforms: {
+                        booking: 0,
+                        tripadvisor: 0,
+                        google: 0
+                    },
+                    dailyActivity: {},
+                    recentReviews: [],
+                    metrics: {
+                        conversionRate: 0,
+                        avgCompletionTime: 0,
+                        totalPageViews: 0
+                    }
+                };
+            }
+
+            saveData() {
+                localStorage.setItem('hotelReviewAnalytics', JSON.stringify(this.data));
+            }
+
+            init() {
+                this.updateMetrics();
+                this.renderDailyChart();
+                this.renderPlatformStats();
+                this.renderRecentReviews();
+                
+                // Auto-refresh every 30 seconds
+                setInterval(() => this.refresh(), 30000);
+            }
+
+            updateMetrics() {
+                // Total Reviews
+                document.getElementById('total-reviews').textContent = 
+                    this.data.totalReviews.toLocaleString();
+
+                // Conversion Rate
+                const conversionRate = this.data.metrics.totalPageViews > 0 
+                    ? ((this.data.totalReviews / this.data.metrics.totalPageViews) * 100).toFixed(1)
+                    : 0;
+                document.getElementById('conversion-rate').textContent = `${conversionRate}%`;
+
+                // Average Completion Time
+                const avgTime = this.data.metrics.avgCompletionTime || 45;
+                document.getElementById('avg-time').textContent = `${avgTime}s`;
+
+                // Active Sessions (simulated)
+                const activeSessions = Math.floor(Math.random() * 10) + 1;
+                document.getElementById('active-sessions').textContent = activeSessions;
+            }
+
+            renderDailyChart() {
+                const chart = document.getElementById('daily-chart');
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const today = new Date();
+                
+                chart.innerHTML = '';
+                
+                days.forEach((day, index) => {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - (6 - index));
+                    const dateKey = date.toISOString().split('T')[0];
+                    const value = this.data.dailyActivity[dateKey] || Math.floor(Math.random() * 20);
+                    
+                    const maxValue = Math.max(...Object.values(this.data.dailyActivity), 20);
+                    const height = (value / maxValue) * 100;
+                    
+                    const barGroup = document.createElement('div');
+                    barGroup.className = 'bar-group';
+                    
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.style.height = `${height}%`;
+                    
+                    const barValue = document.createElement('div');
+                    barValue.className = 'bar-value';
+                    barValue.textContent = value;
+                    bar.appendChild(barValue);
+                    
+                    const barLabel = document.createElement('div');
+                    barLabel.className = 'bar-label';
+                    barLabel.textContent = day;
+                    
+                    barGroup.appendChild(bar);
+                    barGroup.appendChild(barLabel);
+                    chart.appendChild(barGroup);
+                });
+            }
+
+            renderPlatformStats() {
+                document.getElementById('booking-count').textContent = 
+                    this.data.platforms.booking || 0;
+                document.getElementById('tripadvisor-count').textContent = 
+                    this.data.platforms.tripadvisor || 0;
+                document.getElementById('google-count').textContent = 
+                    this.data.platforms.google || 0;
+            }
+
+            renderRecentReviews() {
+                const list = document.getElementById('recent-reviews-list');
+                
+                if (this.data.recentReviews.length === 0) {
+                    return; // Keep empty state
+                }
+                
+                list.innerHTML = '';
+                
+                this.data.recentReviews.slice(0, 5).forEach(review => {
+                    const item = document.createElement('div');
+                    item.className = 'review-item';
+                    
+                    const info = document.createElement('div');
+                    info.innerHTML = `
+                        <div class="review-hotel">${review.hotel || 'Unknown Hotel'}</div>
+                        <div class="review-time">${this.formatTime(review.timestamp)}</div>
+                    `;
+                    
+                    const platform = document.createElement('div');
+                    platform.className = 'review-platform';
+                    platform.textContent = review.platform || 'Direct';
+                    
+                    item.appendChild(info);
+                    item.appendChild(platform);
+                    list.appendChild(item);
+                });
+            }
+
+            formatTime(timestamp) {
+                if (!timestamp) return 'Just now';
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = Math.floor((now - date) / 1000);
+                
+                if (diff < 60) return 'Just now';
+                if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                return date.toLocaleDateString();
+            }
+
+            refresh() {
+                this.data = this.loadData();
+                this.updateMetrics();
+                this.renderDailyChart();
+                this.renderPlatformStats();
+                this.renderRecentReviews();
+            }
+
+            // Generate sample data for demonstration
+            generateSampleData() {
+                const platforms = ['Booking.com', 'TripAdvisor', 'Google Maps'];
+                const hotels = ['Grand Plaza Hotel', 'Sunset Resort', 'City View Inn', 'Mountain Lodge'];
+                
+                // Generate daily activity
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateKey = date.toISOString().split('T')[0];
+                    this.data.dailyActivity[dateKey] = Math.floor(Math.random() * 30) + 5;
+                    this.data.totalReviews += this.data.dailyActivity[dateKey];
+                }
+                
+                // Generate platform distribution
+                this.data.platforms.booking = Math.floor(this.data.totalReviews * 0.4);
+                this.data.platforms.tripadvisor = Math.floor(this.data.totalReviews * 0.35);
+                this.data.platforms.google = Math.floor(this.data.totalReviews * 0.25);
+                
+                // Generate recent reviews
+                for (let i = 0; i < 10; i++) {
+                    const timestamp = new Date();
+                    timestamp.setMinutes(timestamp.getMinutes() - (i * 45));
+                    
+                    this.data.recentReviews.push({
+                        hotel: hotels[Math.floor(Math.random() * hotels.length)],
+                        platform: platforms[Math.floor(Math.random() * platforms.length)],
+                        timestamp: timestamp.toISOString()
+                    });
+                }
+                
+                // Set metrics
+                this.data.metrics.totalPageViews = Math.floor(this.data.totalReviews * 2.5);
+                this.data.metrics.avgCompletionTime = 42;
+                
+                this.saveData();
+                this.refresh();
+            }
+        }
+
+        // Initialize dashboard
+        const dashboard = new AnalyticsDashboard();
+
+        // Refresh function for button
+        function refreshData() {
+            dashboard.refresh();
+            
+            // Animate refresh button
+            const btn = event.target;
+            btn.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                btn.style.transform = 'rotate(0deg)';
+            }, 500);
+        }
+
+        // Check if we need to generate sample data
+        if (dashboard.data.totalReviews === 0) {
+            // Generate sample data for demonstration
+            setTimeout(() => {
+                if (confirm('Would you like to load sample data for demonstration?')) {
+                    dashboard.generateSampleData();
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

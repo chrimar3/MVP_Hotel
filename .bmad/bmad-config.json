@@ -1,0 +1,98 @@
+{
+  "version": "4.40.0",
+  "project": "MVP_Hotel",
+  "methodology": "BMAD-METHOD",
+  "framework": "React TypeScript",
+  "agents": {
+    "analyst": {
+      "role": "Business Analyst",
+      "responsibilities": [
+        "Gather and document requirements",
+        "Create PRDs and specifications",
+        "Define acceptance criteria",
+        "Analyze business objectives"
+      ]
+    },
+    "pm": {
+      "role": "Product Manager",
+      "responsibilities": [
+        "Prioritize features",
+        "Create product roadmap",
+        "Define MVP",
+        "Manage stakeholder expectations"
+      ]
+    },
+    "architect": {
+      "role": "Solution Architect",
+      "responsibilities": [
+        "Design system architecture",
+        "Define technical stack",
+        "Create component diagrams",
+        "Establish patterns and standards"
+      ]
+    },
+    "scrum_master": {
+      "role": "Scrum Master",
+      "responsibilities": [
+        "Create detailed user stories",
+        "Manage sprint planning",
+        "Track progress",
+        "Facilitate agent handoffs"
+      ]
+    },
+    "developer": {
+      "role": "Full-Stack Developer",
+      "responsibilities": [
+        "Implement features",
+        "Write tests",
+        "Code review",
+        "Documentation"
+      ]
+    },
+    "qa": {
+      "role": "Quality Assurance",
+      "responsibilities": [
+        "Test implementation",
+        "Verify acceptance criteria",
+        "Report bugs",
+        "Validate user experience"
+      ]
+    },
+    "devops": {
+      "role": "DevOps Engineer",
+      "responsibilities": [
+        "Setup CI/CD",
+        "Configure deployment",
+        "Monitor performance",
+        "Manage infrastructure"
+      ]
+    },
+    "ux": {
+      "role": "UX Designer",
+      "responsibilities": [
+        "Design user interfaces",
+        "Create wireframes",
+        "Ensure accessibility",
+        "Optimize user flows"
+      ]
+    }
+  },
+  "workflow": {
+    "phases": [
+      "planning",
+      "design",
+      "development",
+      "testing",
+      "deployment"
+    ],
+    "current_phase": "planning",
+    "sprint": 1
+  },
+  "directories": {
+    "artifacts": ".bmad/artifacts",
+    "stories": ".bmad/stories",
+    "context": ".bmad/context",
+    "sessions": ".bmad/sessions",
+    "agents": ".bmad/agents"
+  }
+}
