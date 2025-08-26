@@ -3,54 +3,63 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-*.log
 
-# Test artifacts  
-*.png
-*.jpg
-*.jpeg
-test-*.js
-test-*.html
-*-test.*
-*-demo.*
+# Testing
 coverage/
-screenshots/
+*.lcov
+.nyc_output
+
+# Production builds
+dist/
+build/
+*.min.js
+*.min.css
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 *.sublime-project
 *.sublime-workspace
+.DS_Store
 
-# OS
+# Temporary files
+*.tmp
+*.temp
+*.log
+tmp/
+temp/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# OS generated files
+Thumbs.db
 .DS_Store
 .DS_Store?
 ._*
-Thumbs.db
-Desktop.ini
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 
-# Temp files
-*.tmp
-*.bak
-*~
-tmp/
-temp/
-.cache/
+# Sensitive or personal files
+*_PRIVATE.*
+*_SECRET.*
+*.pem
+*.key
+credentials.json
+secrets.json
 
-# Environment
-.env
-.env.local
-.env.production
-
-# Archive folders
-archive/
-documentation-archive/
-old/
-backup/
-
-# Build files
-dist/
-build/
-out/
+# Local development
+.bmad/sessions/
+.bmad/context/*.log
+local-notes.md
+TODO.md
+scratch/

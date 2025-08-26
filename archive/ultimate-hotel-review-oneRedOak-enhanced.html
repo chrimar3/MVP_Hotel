@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com;">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    
+    <title>Hotel Review Generator - OneRedOak Enhanced</title>
+    
+    <!-- Deferred Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #ffffff;
+            --bg-light: #f9fafb;
+            --border: #e5e7eb;
+            --touch-target: 48px; /* Enhanced from 44px for better mobile UX */
+            --max-width: 480px;
+            --border-radius: 0.5rem;
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg-light);
+            padding: 1rem;
+            padding-top: calc(1rem + var(--safe-area-inset-top));
+            padding-bottom: calc(1rem + var(--safe-area-inset-bottom));
+            min-height: 100vh;
+            touch-action: pan-y;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Enhanced Touch Targets - OneRedOak Standard */
+        button, 
+        input[type="submit"], 
+        input[type="button"],
+        .touchable {
+            min-height: var(--touch-target);
+            min-width: var(--touch-target);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Haptic Feedback Visual Indicator */
+        @keyframes haptic {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.98); }
+            100% { transform: scale(1); }
+        }
+
+        .haptic-feedback {
+            animation: haptic 0.1s ease-out;
+        }
+
+        /* Language Selector - Accessibility Enhanced */
+        .language-selector {
+            position: absolute;
+            top: calc(10px + var(--safe-area-inset-top));
+            right: 10px;
+            z-index: 100;
+        }
+
+        .language-selector select {
+            min-height: var(--touch-target);
+            padding: 12px 16px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            background: white;
+            font-size: 16px; /* Prevents zoom on iOS */
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        /* Container */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            background: var(--bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header - Mobile Optimized */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: clamp(0.875rem, 3vw, 1rem);
+            opacity: 0.9;
+        }
+
+        /* Form - Accessibility Enhanced */
+        .form-container {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--error);
+            aria-label: "required";
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px; /* Prevents zoom on iOS */
+            transition: all 0.2s;
+            background: var(--bg);
+            min-height: var(--touch-target);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        /* Star Rating - Touch Optimized */
+        .rating-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .star {
+            font-size: 32px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: var(--touch-target);
+            min-height: var(--touch-target);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .star:hover, .star.active {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+
+        .star:active {
+            transform: scale(0.95);
+        }
+
+        /* Buttons - OneRedOak Touch Standards */
+        .btn {
+            min-height: var(--touch-target);
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            touch-action: manipulation;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ripple Effect for Touch Feedback */
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        /* Character Counter */
+        .char-counter {
+            text-align: right;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .char-counter.warning {
+            color: var(--warning);
+        }
+
+        .char-counter.error {
+            color: var(--error);
+        }
+
+        /* Result Container */
+        .result-container {
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .result-container.active {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pull to Refresh */
+        .pull-to-refresh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            transform: translateY(-100%);
+            transition: transform 0.3s;
+            z-index: 999;
+        }
+
+        .pull-to-refresh.active {
+            transform: translateY(0);
+        }
+
+        /* PWA Install Button - Enhanced */
+        .install-button {
+            display: none;
+            position: fixed;
+            bottom: calc(20px + var(--safe-area-inset-bottom));
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            min-height: 56px;
+            min-width: 56px;
+            padding: 16px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            z-index: 1000;
+            border: none;
+            font-weight: 500;
+            animation: slideUp 0.3s ease;
+        }
+
+        .install-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Offline Banner */
+        .offline-banner {
+            display: none;
+            background: var(--warning);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .offline-banner.active {
+            display: block;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Accessibility Focus Indicators */
+        *:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Skip to Content Link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* Mobile Landscape Optimization */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .form-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* Tablet and Desktop */
+        @media (min-width: 768px) {
+            body {
+                padding: 2rem;
+            }
+            
+            .container {
+                margin-top: 2rem;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* High Contrast Mode Support */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary: #0000ff;
+                --primary-dark: #000080;
+                --border: #000000;
+            }
+        }
+
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .language-selector,
+            .install-button,
+            .btn,
+            .rating-container {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to Content for Screen Readers -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Pull to Refresh Indicator -->
+    <div class="pull-to-refresh" id="pullToRefresh" role="status" aria-live="polite">
+        <span>Release to refresh</span>
+    </div>
+    
+    <!-- Offline Banner -->
+    <div class="offline-banner" id="offlineBanner" role="alert" aria-live="assertive">
+        You're offline - but the app still works!
+    </div>
+    
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <label for="languageSelect" class="sr-only">Select Language</label>
+        <select id="languageSelect" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="it">Italiano</option>
+            <option value="pt">Português</option>
+            <option value="nl">Nederlands</option>
+            <option value="ja">日本語</option>
+            <option value="zh">中文</option>
+            <option value="ar">العربية</option>
+            <option value="el">Ελληνικά</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 id="mainTitle">🏨 Hotel Review Generator</h1>
+            <p id="subtitle">Share your experience with fellow travelers</p>
+        </header>
+
+        <main id="main-content" class="form-container">
+            <form id="reviewForm" novalidate>
+                <div class="form-group">
+                    <label for="hotelName" class="required" id="hotelNameLabel">Hotel Name</label>
+                    <input 
+                        type="text" 
+                        id="hotelName" 
+                        name="hotelName" 
+                        required 
+                        aria-required="true"
+                        aria-describedby="hotelNameError"
+                        placeholder="Enter hotel name"
+                        maxlength="100"
+                        autocomplete="organization"
+                    >
+                    <span id="hotelNameError" class="error-message" role="alert" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="stayDates" id="stayDatesLabel">Stay Dates</label>
+                    <input 
+                        type="date" 
+                        id="stayDates" 
+                        name="stayDates"
+                        aria-describedby="stayDatesHelp"
+                        max="2024-12-31"
+                    >
+                    <span id="stayDatesHelp" class="help-text">When did you stay?</span>
+                </div>
+
+                <div class="form-group">
+                    <label id="ratingLabel">Overall Rating</label>
+                    <div class="rating-container" role="radiogroup" aria-labelledby="ratingLabel">
+                        <button type="button" class="star" data-rating="1" aria-label="1 star" role="radio" aria-checked="false">⭐</button>
+                        <button type="button" class="star" data-rating="2" aria-label="2 stars" role="radio" aria-checked="false">⭐</button>
+                        <button type="button" class="star" data-rating="3" aria-label="3 stars" role="radio" aria-checked="false">⭐</button>
+                        <button type="button" class="star" data-rating="4" aria-label="4 stars" role="radio" aria-checked="false">⭐</button>
+                        <button type="button" class="star" data-rating="5" aria-label="5 stars" role="radio" aria-checked="false">⭐</button>
+                    </div>
+                    <input type="hidden" id="rating" name="rating" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewTitle" class="required" id="reviewTitleLabel">Review Title</label>
+                    <input 
+                        type="text" 
+                        id="reviewTitle" 
+                        name="reviewTitle" 
+                        required 
+                        aria-required="true"
+                        aria-describedby="reviewTitleError reviewTitleCounter"
+                        placeholder="Summarize your experience"
+                        maxlength="100"
+                    >
+                    <span id="reviewTitleError" class="error-message" role="alert" aria-live="polite"></span>
+                    <div id="reviewTitleCounter" class="char-counter" aria-live="polite">0 / 100</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reviewText" class="required" id="reviewTextLabel">Your Review</label>
+                    <textarea 
+                        id="reviewText" 
+                        name="reviewText" 
+                        required 
+                        aria-required="true"
+                        aria-describedby="reviewTextError reviewTextCounter"
+                        placeholder="Share details about your stay..."
+                        maxlength="1000"
+                    ></textarea>
+                    <span id="reviewTextError" class="error-message" role="alert" aria-live="polite"></span>
+                    <div id="reviewTextCounter" class="char-counter" aria-live="polite">0 / 1000</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="generateBtn" aria-label="Generate Review">
+                    <span id="generateBtnText">Generate Review</span>
+                    <span class="loading" style="display: none;" aria-hidden="true"></span>
+                </button>
+            </form>
+        </main>
+
+        <div class="result-container" id="resultContainer" role="region" aria-label="Generated Review" aria-live="polite">
+            <h2 id="resultTitle">Your Review</h2>
+            <div id="reviewOutput"></div>
+            <button type="button" class="btn btn-secondary" id="copyBtn" aria-label="Copy Review to Clipboard">
+                <span id="copyBtnText">Copy to Clipboard</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- PWA Install Button -->
+    <button class="install-button" id="installBtn" aria-label="Install App">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+        </svg>
+    </button>
+
+    <script>
+        // OneRedOak Enhanced JavaScript with Performance Optimizations
+        'use strict';
+
+        // Performance monitoring
+        const perfObserver = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                // Log Core Web Vitals
+                if (entry.entryType === 'largest-contentful-paint') {
+                    console.log('LCP:', entry.renderTime || entry.loadTime);
+                }
+                if (entry.entryType === 'first-input') {
+                    console.log('FID:', entry.processingStart - entry.startTime);
+                }
+                if (entry.entryType === 'layout-shift') {
+                    console.log('CLS:', entry.value);
+                }
+            }
+        });
+        
+        perfObserver.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
+
+        // Haptic Feedback Manager (OneRedOak Mobile UX)
+        class HapticFeedback {
+            static vibrate(pattern = 10) {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(pattern);
+                }
+            }
+            
+            static light() { this.vibrate(10); }
+            static medium() { this.vibrate(20); }
+            static heavy() { this.vibrate(30); }
+            static success() { this.vibrate([10, 50, 10]); }
+            static error() { this.vibrate([50, 100, 50]); }
+        }
+
+        // Pull to Refresh Implementation
+        class PullToRefresh {
+            constructor() {
+                this.threshold = 80;
+                this.startY = 0;
+                this.currentY = 0;
+                this.pulling = false;
+                this.init();
+            }
+            
+            init() {
+                document.addEventListener('touchstart', (e) => {
+                    if (window.scrollY === 0) {
+                        this.startY = e.touches[0].clientY;
+                        this.pulling = true;
+                    }
+                });
+                
+                document.addEventListener('touchmove', (e) => {
+                    if (!this.pulling) return;
+                    
+                    this.currentY = e.touches[0].clientY;
+                    const diff = this.currentY - this.startY;
+                    
+                    if (diff > this.threshold) {
+                        document.getElementById('pullToRefresh').classList.add('active');
+                        HapticFeedback.light();
+                    }
+                });
+                
+                document.addEventListener('touchend', () => {
+                    const diff = this.currentY - this.startY;
+                    
+                    if (diff > this.threshold && this.pulling) {
+                        this.refresh();
+                    }
+                    
+                    document.getElementById('pullToRefresh').classList.remove('active');
+                    this.pulling = false;
+                });
+            }
+            
+            refresh() {
+                HapticFeedback.success();
+                location.reload();
+            }
+        }
+
+        // Enhanced i18n with Greek Support
+        const translations = {
+            en: {
+                mainTitle: "🏨 Hotel Review Generator",
+                subtitle: "Share your experience with fellow travelers",
+                hotelNameLabel: "Hotel Name",
+                stayDatesLabel: "Stay Dates",
+                ratingLabel: "Overall Rating",
+                reviewTitleLabel: "Review Title",
+                reviewTextLabel: "Your Review",
+                generateBtnText: "Generate Review",
+                copyBtnText: "Copy to Clipboard",
+                resultTitle: "Your Review",
+                copiedMessage: "Review copied to clipboard!",
+                offlineMessage: "You're offline - but the app still works!",
+                installMessage: "Install app for better experience"
+            },
+            el: {
+                mainTitle: "🏨 Δημιουργός Κριτικών Ξενοδοχείων",
+                subtitle: "Μοιραστείτε την εμπειρία σας με άλλους ταξιδιώτες",
+                hotelNameLabel: "Όνομα Ξενοδοχείου",
+                stayDatesLabel: "Ημερομηνίες Διαμονής",
+                ratingLabel: "Συνολική Βαθμολογία",
+                reviewTitleLabel: "Τίτλος Κριτικής",
+                reviewTextLabel: "Η Κριτική σας",
+                generateBtnText: "Δημιουργία Κριτικής",
+                copyBtnText: "Αντιγραφή στο Πρόχειρο",
+                resultTitle: "Η Κριτική σας",
+                copiedMessage: "Η κριτική αντιγράφηκε!",
+                offlineMessage: "Είστε εκτός σύνδεσης - αλλά η εφαρμογή λειτουργεί!",
+                installMessage: "Εγκαταστήστε την εφαρμογή για καλύτερη εμπειρία"
+            },
+            es: {
+                mainTitle: "🏨 Generador de Reseñas de Hoteles",
+                subtitle: "Comparte tu experiencia con otros viajeros",
+                hotelNameLabel: "Nombre del Hotel",
+                stayDatesLabel: "Fechas de Estancia",
+                ratingLabel: "Calificación General",
+                reviewTitleLabel: "Título de la Reseña",
+                reviewTextLabel: "Tu Reseña",
+                generateBtnText: "Generar Reseña",
+                copyBtnText: "Copiar al Portapapeles",
+                resultTitle: "Tu Reseña",
+                copiedMessage: "¡Reseña copiada!",
+                offlineMessage: "Estás sin conexión - ¡pero la app funciona!",
+                installMessage: "Instala la app para mejor experiencia"
+            },
+            fr: {
+                mainTitle: "🏨 Générateur d'Avis d'Hôtel",
+                subtitle: "Partagez votre expérience avec d'autres voyageurs",
+                hotelNameLabel: "Nom de l'Hôtel",
+                stayDatesLabel: "Dates de Séjour",
+                ratingLabel: "Note Globale",
+                reviewTitleLabel: "Titre de l'Avis",
+                reviewTextLabel: "Votre Avis",
+                generateBtnText: "Générer l'Avis",
+                copyBtnText: "Copier dans le Presse-papiers",
+                resultTitle: "Votre Avis",
+                copiedMessage: "Avis copié !",
+                offlineMessage: "Vous êtes hors ligne - mais l'app fonctionne !",
+                installMessage: "Installez l'app pour une meilleure expérience"
+            },
+            de: {
+                mainTitle: "🏨 Hotel-Bewertungsgenerator",
+                subtitle: "Teilen Sie Ihre Erfahrung mit anderen Reisenden",
+                hotelNameLabel: "Hotelname",
+                stayDatesLabel: "Aufenthaltsdaten",
+                ratingLabel: "Gesamtbewertung",
+                reviewTitleLabel: "Bewertungstitel",
+                reviewTextLabel: "Ihre Bewertung",
+                generateBtnText: "Bewertung Generieren",
+                copyBtnText: "In Zwischenablage Kopieren",
+                resultTitle: "Ihre Bewertung",
+                copiedMessage: "Bewertung kopiert!",
+                offlineMessage: "Sie sind offline - aber die App funktioniert!",
+                installMessage: "App für bessere Erfahrung installieren"
+            }
+        };
+
+        // Language Manager
+        class LanguageManager {
+            constructor() {
+                this.currentLang = localStorage.getItem('preferredLanguage') || 'en';
+                this.init();
+            }
+            
+            init() {
+                const selector = document.getElementById('languageSelect');
+                selector.value = this.currentLang;
+                
+                selector.addEventListener('change', (e) => {
+                    this.changeLanguage(e.target.value);
+                    HapticFeedback.light();
+                });
+                
+                this.applyTranslations();
+            }
+            
+            changeLanguage(lang) {
+                this.currentLang = lang;
+                localStorage.setItem('preferredLanguage', lang);
+                this.applyTranslations();
+                
+                // RTL support for Arabic
+                document.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            }
+            
+            applyTranslations() {
+                const t = translations[this.currentLang] || translations.en;
+                
+                Object.keys(t).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.textContent = t[key];
+                    }
+                });
+            }
+        }
+
+        // Form Validation with Accessibility
+        class FormValidator {
+            constructor(form) {
+                this.form = form;
+                this.init();
+            }
+            
+            init() {
+                this.form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (this.validate()) {
+                        this.generateReview();
+                    } else {
+                        HapticFeedback.error();
+                    }
+                });
+                
+                // Real-time validation
+                this.form.querySelectorAll('input, textarea').forEach(field => {
+                    field.addEventListener('blur', () => this.validateField(field));
+                    field.addEventListener('input', () => this.updateCharCounter(field));
+                });
+            }
+            
+            validateField(field) {
+                const isValid = field.checkValidity();
+                const errorElement = document.getElementById(field.id + 'Error');
+                
+                if (!isValid && field.value) {
+                    errorElement.textContent = field.validationMessage;
+                    field.setAttribute('aria-invalid', 'true');
+                } else {
+                    errorElement.textContent = '';
+                    field.setAttribute('aria-invalid', 'false');
+                }
+                
+                return isValid;
+            }
+            
+            updateCharCounter(field) {
+                const counter = document.getElementById(field.id + 'Counter');
+                if (counter) {
+                    const length = field.value.length;
+                    const max = field.maxLength;
+                    counter.textContent = `${length} / ${max}`;
+                    
+                    if (length > max * 0.9) {
+                        counter.classList.add('error');
+                    } else if (length > max * 0.7) {
+                        counter.classList.add('warning');
+                    } else {
+                        counter.classList.remove('warning', 'error');
+                    }
+                }
+            }
+            
+            validate() {
+                let isValid = true;
+                
+                this.form.querySelectorAll('[required]').forEach(field => {
+                    if (!this.validateField(field)) {
+                        isValid = false;
+                    }
+                });
+                
+                return isValid;
+            }
+            
+            generateReview() {
+                HapticFeedback.success();
+                const formData = new FormData(this.form);
+                const data = Object.fromEntries(formData);
+                
+                // Show loading state
+                const btn = document.getElementById('generateBtn');
+                btn.disabled = true;
+                btn.querySelector('.loading').style.display = 'inline-block';
+                
+                // Simulate review generation
+                setTimeout(() => {
+                    this.displayReview(data);
+                    btn.disabled = false;
+                    btn.querySelector('.loading').style.display = 'none';
+                }, 1000);
+            }
+            
+            displayReview(data) {
+                const output = document.getElementById('reviewOutput');
+                const container = document.getElementById('resultContainer');
+                
+                const review = `
+                    <h3>${data.reviewTitle}</h3>
+                    <p><strong>Hotel:</strong> ${data.hotelName}</p>
+                    <p><strong>Rating:</strong> ${'⭐'.repeat(data.rating)}</p>
+                    <p><strong>Date:</strong> ${data.stayDates || 'Not specified'}</p>
+                    <p>${data.reviewText}</p>
+                `;
+                
+                output.innerHTML = review;
+                container.classList.add('active');
+                
+                // Scroll to result
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Star Rating Handler
+        class StarRating {
+            constructor() {
+                this.stars = document.querySelectorAll('.star');
+                this.ratingInput = document.getElementById('rating');
+                this.init();
+            }
+            
+            init() {
+                this.stars.forEach((star, index) => {
+                    star.addEventListener('click', () => {
+                        this.setRating(index + 1);
+                        HapticFeedback.light();
+                    });
+                    
+                    star.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.setRating(index + 1);
+                        }
+                    });
+                });
+            }
+            
+            setRating(rating) {
+                this.ratingInput.value = rating;
+                
+                this.stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.add('active');
+                        star.setAttribute('aria-checked', 'true');
+                    } else {
+                        star.classList.remove('active');
+                        star.setAttribute('aria-checked', 'false');
+                    }
+                });
+            }
+        }
+
+        // Clipboard Manager
+        class ClipboardManager {
+            constructor() {
+                this.copyBtn = document.getElementById('copyBtn');
+                this.init();
+            }
+            
+            init() {
+                this.copyBtn.addEventListener('click', () => this.copyToClipboard());
+            }
+            
+            async copyToClipboard() {
+                const reviewText = document.getElementById('reviewOutput').innerText;
+                
+                try {
+                    await navigator.clipboard.writeText(reviewText);
+                    HapticFeedback.success();
+                    this.showCopyFeedback();
+                } catch (err) {
+                    // Fallback for older browsers
+                    this.fallbackCopy(reviewText);
+                }
+            }
+            
+            fallbackCopy(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                this.showCopyFeedback();
+            }
+            
+            showCopyFeedback() {
+                const originalText = this.copyBtn.textContent;
+                this.copyBtn.textContent = translations[langManager.currentLang].copiedMessage;
+                
+                setTimeout(() => {
+                    this.copyBtn.textContent = originalText;
+                }, 2000);
+            }
+        }
+
+        // Service Worker Registration
+        class ServiceWorkerManager {
+            constructor() {
+                this.init();
+            }
+            
+            async init() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        const registration = await navigator.serviceWorker.register('/sw.js');
+                        console.log('Service Worker registered:', registration);
+                        
+                        // Update notification
+                        registration.addEventListener('updatefound', () => {
+                            console.log('New Service Worker available');
+                        });
+                    } catch (error) {
+                        console.error('Service Worker registration failed:', error);
+                    }
+                }
+                
+                // Offline detection
+                window.addEventListener('online', () => this.updateOnlineStatus(true));
+                window.addEventListener('offline', () => this.updateOnlineStatus(false));
+            }
+            
+            updateOnlineStatus(isOnline) {
+                const banner = document.getElementById('offlineBanner');
+                
+                if (!isOnline) {
+                    banner.classList.add('active');
+                    HapticFeedback.medium();
+                } else {
+                    banner.classList.remove('active');
+                }
+            }
+        }
+
+        // PWA Install Manager
+        class PWAInstallManager {
+            constructor() {
+                this.deferredPrompt = null;
+                this.installBtn = document.getElementById('installBtn');
+                this.init();
+            }
+            
+            init() {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    this.deferredPrompt = e;
+                    this.showInstallButton();
+                });
+                
+                this.installBtn.addEventListener('click', () => this.installPWA());
+                
+                // Check if already installed
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    console.log('App is already installed');
+                }
+            }
+            
+            showInstallButton() {
+                this.installBtn.style.display = 'flex';
+            }
+            
+            async installPWA() {
+                if (!this.deferredPrompt) return;
+                
+                HapticFeedback.medium();
+                this.deferredPrompt.prompt();
+                
+                const { outcome } = await this.deferredPrompt.userChoice;
+                console.log(`User ${outcome} the install prompt`);
+                
+                if (outcome === 'accepted') {
+                    HapticFeedback.success();
+                    this.installBtn.style.display = 'none';
+                }
+                
+                this.deferredPrompt = null;
+            }
+        }
+
+        // Initialize everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Core initializations
+            const langManager = new LanguageManager();
+            const formValidator = new FormValidator(document.getElementById('reviewForm'));
+            const starRating = new StarRating();
+            const clipboardManager = new ClipboardManager();
+            
+            // Enhanced mobile features
+            const pullToRefresh = new PullToRefresh();
+            const swManager = new ServiceWorkerManager();
+            const pwaManager = new PWAInstallManager();
+            
+            // Add haptic feedback to all buttons
+            document.querySelectorAll('button, .touchable').forEach(element => {
+                element.addEventListener('touchstart', () => {
+                    element.classList.add('haptic-feedback');
+                    HapticFeedback.light();
+                });
+                
+                element.addEventListener('touchend', () => {
+                    setTimeout(() => element.classList.remove('haptic-feedback'), 100);
+                });
+            });
+            
+            // Analytics
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'page_view', {
+                    page_title: 'Hotel Review Generator - OneRedOak Enhanced',
+                    page_location: window.location.href
+                });
+            }
+            
+            // Log performance metrics
+            window.addEventListener('load', () => {
+                const perfData = performance.getEntriesByType('navigation')[0];
+                console.log('Page Load Time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+            });
+        });
+
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            console.error('Application Error:', e.error);
+            HapticFeedback.error();
+        });
+
+        // Make language manager globally available
+        let langManager;
+    </script>
+</body>
+</html>
