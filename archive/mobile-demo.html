@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Demo - Hotel Review Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .demo-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .demo-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .demo-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        /* iPhone Frame */
+        .phone-container {
+            position: relative;
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 10px;
+            box-shadow: 
+                0 0 0 12px #1a1a1a,
+                0 30px 60px rgba(0,0,0,0.3),
+                inset 0 0 0 2px rgba(255,255,255,0.1);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* Screen */
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Notch */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 11;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-left {
+            display: flex;
+            gap: 5px;
+        }
+
+        .status-right {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        /* Home Indicator */
+        .home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 135px;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        /* iframe container */
+        .iframe-container {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .control-btn {
+            background: white;
+            color: #764ba2;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .control-btn.active {
+            background: #764ba2;
+            color: white;
+        }
+
+        /* Device selector */
+        .device-selector {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .device-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .device-btn:hover {
+            background: white;
+            color: #764ba2;
+        }
+
+        .device-btn.active {
+            background: white;
+            color: #764ba2;
+        }
+
+        /* Android Phone */
+        .phone-container.android {
+            border-radius: 20px;
+            background: #2a2a2a;
+        }
+
+        .phone-container.android .phone-screen {
+            border-radius: 15px;
+        }
+
+        .phone-container.android .notch {
+            display: none;
+        }
+
+        /* Tablet */
+        .phone-container.tablet {
+            width: 768px;
+            height: 1024px;
+            border-radius: 30px;
+        }
+
+        .phone-container.tablet .notch {
+            display: none;
+        }
+
+        /* Info Box */
+        .info-box {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            background: rgba(255,255,255,0.95);
+            padding: 1.5rem;
+            border-radius: 12px;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .info-box h3 {
+            color: #764ba2;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .info-box li {
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box li::before {
+            content: "✅";
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .phone-container {
+                transform: scale(0.8);
+            }
+            
+            .device-selector {
+                position: static;
+                margin-bottom: 1rem;
+            }
+            
+            .info-box {
+                position: static;
+                margin-top: 2rem;
+                max-width: 100%;
+            }
+        }
+
+        /* Floating Features */
+        .floating-badge {
+            position: absolute;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            animation: float 3s ease-in-out infinite;
+            z-index: 100;
+        }
+
+        .badge-1 {
+            top: 100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .badge-2 {
+            top: 200px;
+            right: -120px;
+            animation-delay: 1s;
+        }
+
+        .badge-3 {
+            top: 300px;
+            right: -110px;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Device Selector -->
+    <div class="device-selector">
+        <button class="device-btn active" onclick="setDevice('iphone')">📱 iPhone</button>
+        <button class="device-btn" onclick="setDevice('android')">🤖 Android</button>
+        <button class="device-btn" onclick="setDevice('tablet')">📱 Tablet</button>
+    </div>
+
+    <!-- Header -->
+    <div class="demo-header">
+        <h1>📱 Mobile Experience Demo</h1>
+        <p>Enhanced UX Hotel Review Generator</p>
+    </div>
+
+    <!-- Phone Container -->
+    <div class="phone-container" id="device">
+        <!-- Floating Badges -->
+        <div class="floating-badge badge-1">Touch Optimized</div>
+        <div class="floating-badge badge-2">Haptic Feedback</div>
+        <div class="floating-badge badge-3">5-Star Reviews</div>
+
+        <!-- Phone Screen -->
+        <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-left">
+                    <span>9:41</span>
+                </div>
+                <div class="status-right">
+                    <span>📶</span>
+                    <span>📶</span>
+                    <span>🔋</span>
+                </div>
+            </div>
+
+            <!-- Notch -->
+            <div class="notch"></div>
+
+            <!-- App Content -->
+            <iframe src="src/ultimate-ux-enhanced.html" title="Hotel Review App"></iframe>
+
+            <!-- Home Indicator -->
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="control-btn" onclick="simulateScroll()">📜 Simulate Scroll</button>
+        <button class="control-btn" onclick="simulateTap()">👆 Simulate Tap</button>
+        <button class="control-btn" onclick="refreshApp()">🔄 Refresh</button>
+        <button class="control-btn" onclick="toggleOrientation()">🔄 Rotate</button>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+        <h3>✨ Mobile Features</h3>
+        <ul>
+            <li>48px touch targets</li>
+            <li>Haptic feedback on all interactions</li>
+            <li>Pull-to-refresh gesture</li>
+            <li>Auto 5-star rating</li>
+            <li>Smooth animations</li>
+            <li>Progressive Web App</li>
+            <li>Offline support</li>
+            <li>Dark mode support</li>
+            <li>Greek language included</li>
+        </ul>
+    </div>
+
+    <script>
+        // Device switching
+        function setDevice(type) {
+            const container = document.getElementById('device');
+            const buttons = document.querySelectorAll('.device-btn');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update device class
+            container.className = 'phone-container';
+            if (type === 'android') {
+                container.classList.add('android');
+            } else if (type === 'tablet') {
+                container.classList.add('tablet');
+            }
+        }
+
+        // Simulate scroll
+        function simulateScroll() {
+            const iframe = document.querySelector('iframe');
+            const iframeWindow = iframe.contentWindow;
+            
+            // Smooth scroll animation
+            let scrollPos = 0;
+            const scrollInterval = setInterval(() => {
+                scrollPos += 5;
+                iframeWindow.scrollTo(0, scrollPos);
+                
+                if (scrollPos >= 500) {
+                    clearInterval(scrollInterval);
+                    setTimeout(() => {
+                        iframeWindow.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 1000);
+                }
+            }, 20);
+            
+            // Visual feedback
+            event.target.classList.add('active');
+            setTimeout(() => event.target.classList.remove('active'), 2000);
+        }
+
+        // Simulate tap
+        function simulateTap() {
+            const iframe = document.querySelector('iframe');
+            const iframeDoc = iframe.contentDocument;
+            
+            // Find a button or aspect to click
+            const button = iframeDoc.querySelector('.aspect-card');
+            if (button) {
+                button.click();
+                
+                // Visual feedback
+                button.style.animation = 'pulse 0.3s';
+                setTimeout(() => button.style.animation = '', 300);
+            }
+            
+            // Button feedback
+            event.target.classList.add('active');
+            setTimeout(() => event.target.classList.remove('active'), 300);
+        }
+
+        // Refresh app
+        function refreshApp() {
+            const iframe = document.querySelector('iframe');
+            iframe.src = iframe.src;
+            
+            // Button feedback
+            event.target.classList.add('active');
+            setTimeout(() => event.target.classList.remove('active'), 1000);
+        }
+
+        // Toggle orientation
+        function toggleOrientation() {
+            const container = document.getElementById('device');
+            const currentWidth = container.style.width;
+            
+            if (currentWidth === '812px') {
+                container.style.width = '375px';
+                container.style.height = '812px';
+            } else {
+                container.style.width = '812px';
+                container.style.height = '375px';
+            }
+            
+            // Button feedback
+            event.target.classList.add('active');
+            setTimeout(() => event.target.classList.remove('active'), 500);
+        }
+
+        // Add some initial animation
+        setTimeout(() => {
+            const badges = document.querySelectorAll('.floating-badge');
+            badges.forEach((badge, index) => {
+                setTimeout(() => {
+                    badge.style.opacity = '1';
+                }, index * 200);
+            });
+        }, 500);
+
+        // Auto-demo mode
+        let demoMode = false;
+        function toggleDemo() {
+            demoMode = !demoMode;
+            if (demoMode) {
+                // Run through features automatically
+                setTimeout(simulateScroll, 1000);
+                setTimeout(simulateTap, 3000);
+                setTimeout(() => setDevice('android'), 5000);
+                setTimeout(() => setDevice('tablet'), 7000);
+                setTimeout(() => setDevice('iphone'), 9000);
+            }
+        }
+
+        // Keyboard shortcut for demo
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'd') {
+                toggleDemo();
+            }
+        });
+    </script>
+</body>
+</html>
