@@ -742,6 +742,31 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Staff Recognition Section (Optional) -->
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="staff-recognition" style="display: flex; align-items: center; gap: 8px;">
+                    <span>👏</span>
+                    <span data-i18n="staffRecognition">Staff Recognition (Optional)</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="staff-recognition" 
+                    placeholder="Name any staff member who provided excellent service"
+                    data-i18n-placeholder="staffPlaceholder"
+                    autocomplete="off"
+                    inputmode="text"
+                    enterkeyhint="next"
+                    spellcheck="true"
+                    autocorrect="on"
+                    autocapitalize="words"
+                    aria-label="Staff recognition"
+                    style="margin-top: 8px;"
+                />
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 4px;">
+                    <span data-i18n="staffHint">Mentioning staff by name helps them get recognized!</span>
+                </div>
+            </div>
         </div>
 
         <!-- Progressive Form Section 3: Comments (Initially Hidden) -->
@@ -933,7 +958,10 @@
                         shareCount: 'Shares:',
                         viewCount: 'Views:',
                         linkCopied: '✓ Link copied!',
-                        shareSuccess: 'Share successful!'
+                        shareSuccess: 'Share successful!',
+                        staffRecognition: 'Staff Recognition (Optional)',
+                        staffPlaceholder: 'Name any staff member who provided excellent service',
+                        staffHint: 'Mentioning staff by name helps them get recognized!'
                     },
                     es: {
                         title: '🏨 Generador de Reseñas',
@@ -966,7 +994,10 @@
                         shareCount: 'Compartidos:',
                         viewCount: 'Vistas:',
                         linkCopied: '✓ Enlace copiado!',
-                        shareSuccess: '¡Compartido con éxito!'
+                        shareSuccess: '¡Compartido con éxito!',
+                        staffRecognition: 'Reconocimiento del Personal (Opcional)',
+                        staffPlaceholder: 'Nombra a cualquier empleado que brindó un servicio excelente',
+                        staffHint: '¡Mencionar al personal por su nombre les ayuda a ser reconocidos!'
                     },
                     fr: {
                         title: '🏨 Générateur d\'Avis',
@@ -1296,6 +1327,14 @@
                     debouncedSave();
                 });
                 
+                // Staff recognition input with debounced save
+                const staffInput = document.getElementById('staff-recognition');
+                if (staffInput) {
+                    staffInput.addEventListener('input', () => {
+                        debouncedSave();
+                    });
+                }
+                
                 // Generate button
                 document.getElementById('generate-btn').addEventListener('click', () => {
                     this.generateReview();
@@ -1540,6 +1579,7 @@
             createReview(hotelName) {
                 const aspects = Array.from(this.selectedAspects);
                 const comments = document.getElementById('comments').value.trim();
+                const staffName = document.getElementById('staff-recognition').value.trim();
                 
                 const aspectSentences = {
                     'Clean Rooms': 'The rooms were spotlessly clean and well-maintained.',
@@ -1550,10 +1590,22 @@
                     'Excellent Value': 'Excellent value for money.'
                 };
                 
+                // Add staff recognition sentence if provided
+                let staffRecognition = '';
+                if (staffName) {
+                    const staffTemplates = [
+                        `Special thanks to ${staffName} for their exceptional service! `,
+                        `I must mention ${staffName} who went above and beyond to make our stay memorable. `,
+                        `${staffName} provided outstanding service throughout our stay. `,
+                        `A special shoutout to ${staffName} for their incredible hospitality. `
+                    ];
+                    staffRecognition = staffTemplates[Math.floor(Math.random() * staffTemplates.length)];
+                }
+                
                 const templates = [
-                    `I had a wonderful stay at ${hotelName}! ${aspects.map(a => aspectSentences[a]).join(' ')} ${comments ? comments + ' ' : ''}Highly recommended!`,
-                    `${hotelName} exceeded my expectations. ${aspects.map(a => aspectSentences[a]).join(' ')} ${comments ? comments + ' ' : ''}Would definitely stay again!`,
-                    `Great experience at ${hotelName}. ${aspects.map(a => aspectSentences[a]).join(' ')} ${comments ? comments + ' ' : ''}Perfect for anyone visiting the area.`
+                    `I had a wonderful stay at ${hotelName}! ${aspects.map(a => aspectSentences[a]).join(' ')} ${staffRecognition}${comments ? comments + ' ' : ''}Highly recommended!`,
+                    `${hotelName} exceeded my expectations. ${aspects.map(a => aspectSentences[a]).join(' ')} ${staffRecognition}${comments ? comments + ' ' : ''}Would definitely stay again!`,
+                    `Great experience at ${hotelName}. ${aspects.map(a => aspectSentences[a]).join(' ')} ${staffRecognition}${comments ? comments + ' ' : ''}Perfect for anyone visiting the area.`
                 ];
                 
                 return templates[Math.floor(Math.random() * templates.length)];
@@ -1655,6 +1707,7 @@
                         hotelName: document.getElementById('hotel-name').value,
                         aspects: Array.from(this.selectedAspects),
                         comments: document.getElementById('comments').value,
+                        staffRecognition: document.getElementById('staff-recognition').value,
                         timestamp: Date.now()
                     };
                     
@@ -1678,6 +1731,7 @@
                         if (Date.now() - draft.timestamp < 86400000) {
                             document.getElementById('hotel-name').value = draft.hotelName || '';
                             document.getElementById('comments').value = draft.comments || '';
+                            document.getElementById('staff-recognition').value = draft.staffRecognition || '';
                             
                             draft.aspects.forEach(aspect => {
                                 const card = document.querySelector(`[data-aspect="${aspect}"]`);
