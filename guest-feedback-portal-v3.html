@@ -699,6 +699,177 @@
             color: var(--text-secondary);
         }
         
+        /* Review Preview Modal */
+        .review-preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        
+        .review-preview-modal.show {
+            display: flex;
+        }
+        
+        .preview-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .preview-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .preview-close {
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            background: none;
+            border: none;
+        }
+        
+        .preview-close:hover {
+            color: var(--text-primary);
+        }
+        
+        .preview-section {
+            margin-bottom: 20px;
+        }
+        
+        .preview-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .preview-rating {
+            display: flex;
+            gap: 5px;
+            font-size: 24px;
+            color: #fbbf24;
+            margin-bottom: 15px;
+        }
+        
+        .preview-highlights {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .preview-highlight {
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .preview-text {
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+        
+        .preview-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .preview-button {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .preview-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .preview-button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .preview-button.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+        
+        .preview-button.secondary:hover {
+            background: white;
+            border-color: var(--primary-color);
+        }
+        
+        .preview-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #f0f9ff;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        
+        .preview-info-icon {
+            font-size: 18px;
+        }
+        
         /* Mobile Optimizations */
         @media (max-width: 640px) {
             .container {
@@ -887,6 +1058,47 @@
         <div class="achievement-content">
             <div class="achievement-title">Achievement Unlocked!</div>
             <div class="achievement-desc">You've earned bonus points</div>
+        </div>
+    </div>
+    
+    <!-- Review Preview Modal -->
+    <div class="review-preview-modal" id="reviewPreviewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2 class="preview-title">📝 Your Review Preview</h2>
+                <button class="preview-close" id="previewClose">✕</button>
+            </div>
+            
+            <div class="preview-section">
+                <div class="preview-label">Rating</div>
+                <div class="preview-rating" id="previewRating">
+                    <!-- Stars will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <div class="preview-label">Highlighted Features</div>
+                <div class="preview-highlights" id="previewHighlights">
+                    <!-- Highlights will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <div class="preview-label">Your Review Text</div>
+                <div class="preview-text" id="previewText">
+                    <!-- Review text will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="preview-info">
+                <span class="preview-info-icon">ℹ️</span>
+                <span>This is what will be posted to the review platform. You can go back to edit or submit now.</span>
+            </div>
+            
+            <div class="preview-actions">
+                <button class="preview-button secondary" id="previewEdit">← Back to Edit</button>
+                <button class="preview-button primary" id="previewSubmit">Submit Review →</button>
+            </div>
         </div>
     </div>
     
@@ -1306,6 +1518,10 @@
             
             setupSubmit() {
                 const button = document.getElementById('submitButton');
+                const modal = document.getElementById('reviewPreviewModal');
+                const closeBtn = document.getElementById('previewClose');
+                const editBtn = document.getElementById('previewEdit');
+                const submitBtn = document.getElementById('previewSubmit');
                 
                 button.addEventListener('mouseenter', () => {
                     if (this.state.progress >= 80) {
@@ -1318,8 +1534,72 @@
                 });
                 
                 button.addEventListener('click', () => {
+                    this.showPreview();
+                });
+                
+                // Modal controls
+                closeBtn.addEventListener('click', () => {
+                    modal.classList.remove('show');
+                });
+                
+                editBtn.addEventListener('click', () => {
+                    modal.classList.remove('show');
+                });
+                
+                submitBtn.addEventListener('click', () => {
+                    modal.classList.remove('show');
                     this.submitReview();
                 });
+                
+                // Close modal on background click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            }
+            
+            showPreview() {
+                const modal = document.getElementById('reviewPreviewModal');
+                const ratingDiv = document.getElementById('previewRating');
+                const highlightsDiv = document.getElementById('previewHighlights');
+                const textDiv = document.getElementById('previewText');
+                
+                // Generate the review
+                const review = this.generateNaturalReview();
+                
+                // Show rating stars
+                ratingDiv.innerHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    const star = document.createElement('span');
+                    star.textContent = i < this.state.rating ? '★' : '☆';
+                    ratingDiv.appendChild(star);
+                }
+                
+                // Show highlights
+                highlightsDiv.innerHTML = '';
+                if (this.state.highlights.length > 0) {
+                    this.state.highlights.forEach(id => {
+                        const highlight = this.smartDefaults.find(s => s.id === id);
+                        if (highlight) {
+                            const chip = document.createElement('div');
+                            chip.className = 'preview-highlight';
+                            chip.textContent = highlight.text.substring(2);
+                            highlightsDiv.appendChild(chip);
+                        }
+                    });
+                } else {
+                    highlightsDiv.innerHTML = '<span style="color: #718096; font-style: italic;">No highlights selected</span>';
+                }
+                
+                // Show review text
+                textDiv.textContent = review || 'No review text provided yet...';
+                
+                // Store for submission
+                this.state.finalReview = review;
+                
+                // Show modal
+                modal.classList.add('show');
             }
             
             updateProgress(value) {
