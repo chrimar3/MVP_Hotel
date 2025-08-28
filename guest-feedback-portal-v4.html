@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Experience Portal - Share Your Story</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Advanced Progress System */
+        .progress-container {
+            background: linear-gradient(to right, #f9fafb, #f3f4f6);
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .progress-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        
+        .progress-stats {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        
+        .progress-percentage {
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .ai-indicator.active {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Header Section */
+        .header {
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(to bottom, #f9fafb, white);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .hotel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        
+        .hotel-badge .verified {
+            color: var(--success);
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            font-size: 32px;
+            margin-bottom: 12px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 17px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Content Section */
+        .content {
+            padding: 40px;
+        }
+        
+        /* Rating Component with Emotion Detection */
+        .form-group {
+            margin-bottom: 32px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .rating-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .rating-star {
+            font-size: 40px;
+            color: #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .rating-star:hover {
+            transform: scale(1.1);
+        }
+        
+        .rating-star.filled {
+            color: #fbbf24;
+        }
+        
+        .rating-star.filled::after {
+            content: attr(data-emotion);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        
+        /* Smart Highlights with Categories */
+        .highlights-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .highlight-category {
+            margin-bottom: 20px;
+        }
+        
+        .category-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        
+        .highlight-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .highlight-chip {
+            padding: 10px 18px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 100px;
+            font-size: 14px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .highlight-chip:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .highlight-chip.selected {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .highlight-chip .emoji {
+            margin-right: 6px;
+        }
+        
+        /* Advanced Review Composer */
+        .review-composer {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            position: relative;
+        }
+        
+        .composer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .composer-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: 100px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .ai-status.generating {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        .review-display {
+            min-height: 200px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            font-size: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .review-display.typing {
+            animation: typewriter 0.5s ease;
+        }
+        
+        @keyframes typewriter {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+        
+        .review-placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .review-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .review-quality {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .quality-score {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .quality-bar {
+            width: 150px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 100px;
+            overflow: hidden;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .quality-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        .regenerate-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .regenerate-btn:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+        }
+        
+        /* Voice Tone Selector */
+        .voice-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        
+        .voice-option {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .voice-option:hover {
+            border-color: var(--primary);
+        }
+        
+        .voice-option.selected {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .voice-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .voice-label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* Submit Section */
+        .submit-section {
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 2px solid var(--border);
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgb(99 102 241 / 0.25);
+        }
+        
+        .submit-button:active {
+            transform: translateY(0);
+        }
+        
+        /* Preview Modal */
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .preview-modal.show {
+            display: flex;
+        }
+        
+        .preview-content {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .preview-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .preview-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .preview-close:hover {
+            background: var(--border);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 640px) {
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .rating-star {
+                font-size: 36px;
+            }
+            
+            .voice-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Container -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <div class="progress-title">Creating Your Review</div>
+                <div class="progress-stats">
+                    <div class="progress-percentage">0%</div>
+                    <div class="ai-indicator">
+                        <span>🤖</span>
+                        <span>AI Enhanced</span>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-bar" style="height: 8px; background: #e5e7eb; border-radius: 100px; overflow: hidden;">
+                <div class="progress-fill" style="height: 100%; background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%); width: 0%; transition: width 0.5s ease;"></div>
+            </div>
+        </div>
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="hotel-badge">
+                <span class="verified">✓</span>
+                <span>Verified Guest</span>
+            </div>
+            <h1>Share Your Experience</h1>
+            <p class="subtitle">Your story helps future guests and improves our service</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Rating Section -->
+            <div class="form-group">
+                <label class="form-label">How was your overall experience?</label>
+                <div class="rating-container" id="ratingContainer">
+                    <span class="rating-star" data-rating="1" data-emotion="Disappointed">☆</span>
+                    <span class="rating-star" data-rating="2" data-emotion="Below Average">☆</span>
+                    <span class="rating-star" data-rating="3" data-emotion="Acceptable">☆</span>
+                    <span class="rating-star" data-rating="4" data-emotion="Great">☆</span>
+                    <span class="rating-star" data-rating="5" data-emotion="Outstanding">☆</span>
+                </div>
+            </div>
+            
+            <!-- Voice Tone Selector -->
+            <div class="voice-selector" id="voiceSelector" style="display: none;">
+                <div class="voice-option" data-voice="professional">
+                    <div class="voice-icon">💼</div>
+                    <div class="voice-label">Professional</div>
+                </div>
+                <div class="voice-option selected" data-voice="friendly">
+                    <div class="voice-icon">😊</div>
+                    <div class="voice-label">Friendly</div>
+                </div>
+                <div class="voice-option" data-voice="enthusiastic">
+                    <div class="voice-icon">🎉</div>
+                    <div class="voice-label">Enthusiastic</div>
+                </div>
+                <div class="voice-option" data-voice="detailed">
+                    <div class="voice-icon">📝</div>
+                    <div class="voice-label">Detailed</div>
+                </div>
+            </div>
+            
+            <!-- Smart Highlights -->
+            <div class="highlights-section" id="highlightsSection" style="display: none;">
+                <div class="form-label">What stood out during your stay?</div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Service & Staff</div>
+                    <div class="highlight-chips" id="serviceHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Room & Comfort</div>
+                    <div class="highlight-chips" id="roomHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Amenities & Facilities</div>
+                    <div class="highlight-chips" id="amenityHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Location & Value</div>
+                    <div class="highlight-chips" id="locationHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Advanced Review Composer -->
+            <div class="review-composer" id="reviewComposer" style="display: none;">
+                <div class="composer-header">
+                    <div class="composer-title">📝 Your Generated Review</div>
+                    <div class="ai-status" id="aiStatus">
+                        <span>✨</span>
+                        <span>AI Ready</span>
+                    </div>
+                </div>
+                
+                <div class="review-display" id="reviewDisplay">
+                    <div class="review-placeholder">Your personalized review will appear here...</div>
+                </div>
+                
+                <div class="review-quality">
+                    <div class="quality-score">
+                        <span class="quality-label">Quality Score:</span>
+                        <div class="quality-bar">
+                            <div class="quality-fill" id="qualityFill" style="width: 0%"></div>
+                        </div>
+                        <span id="qualityText" style="font-size: 13px; color: #10b981; font-weight: 600;">0%</span>
+                    </div>
+                    <button class="regenerate-btn" id="regenerateBtn">
+                        <span>🔄</span>
+                        <span>Regenerate</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Submit Section -->
+            <div class="submit-section" id="submitSection" style="display: none;">
+                <button class="submit-button" id="submitButton">
+                    Review & Submit Your Feedback
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2 class="preview-title">Review Your Feedback</h2>
+                <button class="preview-close" id="closePreview">✕</button>
+            </div>
+            <div id="previewBody">
+                <!-- Preview content inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Advanced Natural Language Generation Engine
+        class AdvancedNLGEngine {
+            constructor() {
+                this.state = {
+                    rating: 0,
+                    voice: 'friendly',
+                    highlights: [],
+                    reviewText: '',
+                    context: this.detectContext(),
+                    generationCount: 0,
+                    qualityScore: 0
+                };
+                
+                // Advanced template system with storytelling
+                this.storyTemplates = {
+                    opening: {
+                        5: {
+                            professional: [
+                                "I recently completed a ${duration}-night stay at ${hotelName} and found the experience to be exceptional in every regard.",
+                                "Having stayed at numerous hotels for ${tripType} purposes, I can confidently say that ${hotelName} exceeded my expectations.",
+                                "My ${duration}-night ${tripType} stay at ${hotelName} proved to be one of the most satisfying hotel experiences I've had."
+                            ],
+                            friendly: [
+                                "Just wrapped up an amazing ${duration}-night stay at ${hotelName}, and I'm already planning my return visit!",
+                                "Wow, what a fantastic experience at ${hotelName}! Everything from check-in to checkout was absolutely perfect.",
+                                "I've just returned from ${hotelName} after ${duration} wonderful nights, and I couldn't be happier with my choice."
+                            ],
+                            enthusiastic: [
+                                "AMAZING! That's the word that keeps coming to mind after my ${duration}-night adventure at ${hotelName}!",
+                                "I'm still on cloud nine after my incredible stay at ${hotelName}! Every moment was pure perfection!",
+                                "OH MY GOODNESS! ${hotelName} has completely blown me away! Best ${duration} nights I've spent anywhere!"
+                            ],
+                            detailed: [
+                                "During my ${duration}-night ${tripType} stay at ${hotelName} from ${checkIn} to ${checkOut}, I experienced a level of service and comfort that warrants this detailed review.",
+                                "I'd like to share my comprehensive experience from my recent ${duration}-night stay at ${hotelName}, covering all aspects that future guests might find valuable.",
+                                "This review covers my ${tripType} stay at ${hotelName}, spanning ${duration} nights, with particular attention to the details that made the experience noteworthy."
+                            ]
+                        },
+                        4: {
+                            professional: [
+                                "My recent ${duration}-night stay at ${hotelName} was very satisfactory, with several standout features worth noting.",
+                                "I found ${hotelName} to be a solid choice for ${tripType} travelers, offering good value and reliable service.",
+                                "Overall, my ${duration}-night experience at ${hotelName} met most of my expectations with some pleasant surprises."
+                            ],
+                            friendly: [
+                                "Just got back from ${hotelName} after ${duration} nights, and I have mostly great things to say!",
+                                "Had a really nice stay at ${hotelName}! A few small hiccups, but overall very pleased with my choice.",
+                                "Spent ${duration} nights at ${hotelName} and enjoyed it quite a bit! Here's what stood out..."
+                            ],
+                            enthusiastic: [
+                                "Really enjoyed my time at ${hotelName}! ${duration} nights of mostly awesome experiences!",
+                                "Great stay at ${hotelName}! So many things to love about this place!",
+                                "Just finished ${duration} fun nights at ${hotelName} - definitely recommend checking it out!"
+                            ],
+                            detailed: [
+                                "My ${duration}-night ${tripType} stay at ${hotelName} provided ample opportunity to evaluate various aspects of the property and service.",
+                                "Having spent ${duration} nights at ${hotelName}, I can provide a balanced assessment of the strengths and areas for improvement.",
+                                "This review examines my ${tripType} experience at ${hotelName} over ${duration} nights, highlighting both positives and minor concerns."
+                            ]
+                        },
+                        3: {
+                            professional: [
+                                "My ${duration}-night stay at ${hotelName} was adequate for ${tripType} purposes, though there's room for improvement.",
+                                "${hotelName} provided basic accommodations during my ${duration}-night visit, meeting essential needs.",
+                                "The ${duration} nights I spent at ${hotelName} were satisfactory, with both positive aspects and areas needing attention."
+                            ],
+                            friendly: [
+                                "Just finished ${duration} nights at ${hotelName}. It was okay - some good points and some not-so-good ones.",
+                                "My stay at ${hotelName} was a mixed bag. Here's the good, the bad, and everything in between.",
+                                "Spent ${duration} nights at ${hotelName}. It did the job, but I expected a bit more honestly."
+                            ],
+                            enthusiastic: [
+                                "${hotelName} was alright! Had some great moments during my ${duration}-night stay, though not everything was perfect.",
+                                "Mixed feelings about ${hotelName} after ${duration} nights - some really cool stuff but also some disappointments.",
+                                "Just okay is how I'd describe my ${duration}-night adventure at ${hotelName} - had its ups and downs!"
+                            ],
+                            detailed: [
+                                "My ${duration}-night evaluation of ${hotelName} reveals a property with both strengths and weaknesses that potential guests should consider.",
+                                "After ${duration} nights at ${hotelName}, I've compiled observations on various aspects that paint a mixed picture.",
+                                "This balanced review of ${hotelName} is based on my ${duration}-night ${tripType} stay, examining all facets objectively."
+                            ]
+                        }
+                    },
+                    
+                    body: {
+                        service: {
+                            positive: [
+                                "The staff truly made the difference - ${staffExample}. Every interaction was marked by genuine warmth and professionalism.",
+                                "What impressed me most was the level of personalized service. ${staffExample}, which really enhanced my stay.",
+                                "The team at ${hotelName} deserves special recognition. ${staffExample}, going above and beyond at every opportunity."
+                            ],
+                            negative: [
+                                "Unfortunately, the service didn't quite meet expectations. ${staffExample}, which was disappointing.",
+                                "The staff seemed overwhelmed during my stay. ${staffExample}, suggesting a need for better training or staffing.",
+                                "Service was inconsistent throughout my visit. ${staffExample}, creating some frustration."
+                            ]
+                        },
+                        room: {
+                            positive: [
+                                "My room was a perfect retreat - ${roomExample}. The attention to detail in both design and maintenance was evident.",
+                                "The accommodations exceeded expectations with ${roomExample}. I particularly appreciated the thoughtful touches.",
+                                "Room comfort was exceptional. ${roomExample}, creating an ideal environment for ${purpose}."
+                            ],
+                            negative: [
+                                "The room had several issues that need addressing. ${roomExample}, which affected my comfort.",
+                                "Unfortunately, the room didn't match the hotel's overall standard. ${roomExample}, requiring immediate attention.",
+                                "Room conditions were below par with ${roomExample}, detracting from the overall experience."
+                            ]
+                        },
+                        amenities: {
+                            positive: [
+                                "The facilities really enhanced my stay - ${amenityExample}. Everything was well-maintained and easily accessible.",
+                                "${hotelName}'s amenities are truly impressive. ${amenityExample}, adding significant value to the experience.",
+                                "I made full use of the excellent facilities. ${amenityExample}, which made my ${duration}-night stay even more enjoyable."
+                            ],
+                            negative: [
+                                "The amenities need updating. ${amenityExample}, falling short of expectations for this price point.",
+                                "Facilities were disappointing with ${amenityExample}, limiting the overall value proposition.",
+                                "Several amenities weren't functioning properly. ${amenityExample}, which was frustrating given the hotel's rating."
+                            ]
+                        },
+                        location: {
+                            positive: [
+                                "The location couldn't be better for ${tripType} travelers. ${locationExample}, making it incredibly convenient.",
+                                "Perfectly situated with ${locationExample}. The neighborhood felt safe and offered plenty of nearby options.",
+                                "Location is one of ${hotelName}'s strongest assets. ${locationExample}, saving time and transportation costs."
+                            ],
+                            negative: [
+                                "The location presented some challenges. ${locationExample}, which wasn't ideal for my needs.",
+                                "While the hotel itself was fine, the location was problematic. ${locationExample}, causing some inconvenience.",
+                                "Location-wise, there were issues. ${locationExample}, something future guests should consider."
+                            ]
+                        }
+                    },
+                    
+                    closing: {
+                        5: {
+                            professional: [
+                                "I would not hesitate to recommend ${hotelName} to colleagues and will certainly return for future ${tripType} trips. The combination of ${topHighlights} creates an exceptional experience.",
+                                "In conclusion, ${hotelName} delivers on all fronts. For ${tripType} travelers seeking ${keyNeeds}, this property is an excellent choice.",
+                                "Based on this experience, ${hotelName} has earned my highest recommendation. The ${topHighlights} justify the investment."
+                            ],
+                            friendly: [
+                                "Can't wait to come back! If you're looking for ${keyNeeds}, ${hotelName} is absolutely the place to be. You won't regret it!",
+                                "Huge thanks to everyone at ${hotelName} for making my stay so memorable! Already recommending it to all my friends!",
+                                "If you're on the fence about booking here - just do it! The ${topHighlights} alone make it worth every penny!"
+                            ],
+                            enthusiastic: [
+                                "RUN, don't walk, to book your stay at ${hotelName}! Seriously, the ${topHighlights} will blow your mind! 100% coming back!",
+                                "BEST. HOTEL. EVER! Thank you ${hotelName} for the most incredible ${duration} nights! See you again soon!",
+                                "I'm literally already planning my next visit! ${hotelName} has set the bar impossibly high! Absolutely PERFECT!"
+                            ],
+                            detailed: [
+                                "To summarize: ${hotelName} excels in ${topHighlights}, making it highly suitable for ${tripType} travelers. The minor areas for improvement don't detract from an overall outstanding experience. Rating: 5/5.",
+                                "For future guests considering ${hotelName}: The strengths in ${topHighlights} far outweigh any minor shortcomings. This represents excellent value for ${tripType} stays.",
+                                "Final assessment: ${hotelName} successfully delivers a premium experience. The combination of ${topHighlights} positions it as a top choice in this market segment."
+                            ]
+                        },
+                        4: {
+                            professional: [
+                                "I would recommend ${hotelName} to ${tripType} travelers, particularly those who value ${topHighlights}. With minor improvements, this could easily be a five-star experience.",
+                                "Overall, ${hotelName} offers good value and reliable service. The ${topHighlights} compensate for the few areas needing attention.",
+                                "In summary, a solid choice for ${tripType} stays. The strengths in ${topHighlights} make it worth considering despite minor issues."
+                            ],
+                            friendly: [
+                                "Would I stay here again? Yes! Despite a few small issues, the ${topHighlights} made it a great experience overall!",
+                                "Definitely recommend ${hotelName}, especially if ${keyNeeds} are important to you. Just a few tweaks needed for perfection!",
+                                "Really glad I chose ${hotelName}! The ${topHighlights} more than made up for the minor hiccups. Worth checking out!"
+                            ],
+                            enthusiastic: [
+                                "Great place overall! The ${topHighlights} were fantastic! Fix a few small things and this place would be absolutely perfect!",
+                                "Had a blast at ${hotelName}! Sure, not everything was perfect, but the ${topHighlights} made it totally worth it!",
+                                "Would definitely come back! Loved the ${topHighlights} - just needs some minor improvements to be truly amazing!"
+                            ],
+                            detailed: [
+                                "Conclusion: ${hotelName} demonstrates strength in ${topHighlights} while showing room for improvement in other areas. Recommended for ${tripType} travelers who prioritize these aspects.",
+                                "Final thoughts: A competent property with clear advantages in ${topHighlights}. Addressing the mentioned concerns would elevate the experience significantly.",
+                                "To conclude: ${hotelName} offers good value with particular excellence in ${topHighlights}. Future guests should weigh these strengths against the noted limitations."
+                            ]
+                        },
+                        3: {
+                            professional: [
+                                "${hotelName} may suit travelers with modest expectations or those prioritizing ${topHighlights}. However, improvements are needed for a truly satisfactory experience.",
+                                "While adequate for basic ${tripType} needs, ${hotelName} requires attention to several areas. The ${topHighlights} were the redeeming features.",
+                                "In conclusion, ${hotelName} is functional but unremarkable. Those who value ${topHighlights} might find it acceptable, others may want to explore alternatives."
+                            ],
+                            friendly: [
+                                "It's okay if you need a place to sleep and aren't too picky. The ${topHighlights} were decent, but don't expect too much else.",
+                                "Mixed feelings about recommending ${hotelName}. If ${keyNeeds} are your priority, maybe give it a shot. Otherwise, maybe look elsewhere.",
+                                "Not bad, not great. The ${topHighlights} were fine, but there's definitely better options out there for the price."
+                            ],
+                            enthusiastic: [
+                                "Had some good moments with the ${topHighlights}, but honestly expected more! Maybe with some improvements it could be great!",
+                                "It was okay! The ${topHighlights} were cool, but lots of room for improvement! Hoping they make some changes!",
+                                "Mixed experience! Loved the ${topHighlights} but frustrated by other issues. Could be awesome with some work!"
+                            ],
+                            detailed: [
+                                "Summary: ${hotelName} provides basic accommodations with strengths in ${topHighlights} offset by weaknesses in other areas. Suitable for guests with specific priorities and realistic expectations.",
+                                "Final evaluation: A middle-tier option with notable ${topHighlights} but significant areas requiring improvement. Consider alternatives if these issues are deal-breakers.",
+                                "In closing: ${hotelName} meets minimum standards with bright spots in ${topHighlights}. Major improvements needed to justify the current pricing structure."
+                            ]
+                        }
+                    }
+                };
+                
+                // Specific detail banks for authentic storytelling
+                this.detailBanks = {
+                    staffExamples: {
+                        positive: [
+                            "the concierge remembered my coffee preference every morning",
+                            "housekeeping noticed I was working late and brought extra towels without being asked",
+                            "the front desk upgraded my room when they learned it was a special occasion",
+                            "staff members greeted me by name after just one day",
+                            "the restaurant team accommodated my dietary restrictions perfectly",
+                            "reception called to ensure my airport transfer was confirmed",
+                            "the bellhop provided excellent local restaurant recommendations"
+                        ],
+                        negative: [
+                            "I waited 20 minutes to check in despite no queue",
+                            "housekeeping forgot to service my room two days in a row",
+                            "the concierge seemed unaware of local attractions",
+                            "multiple requests for extra pillows were ignored",
+                            "staff seemed more interested in their phones than guests",
+                            "conflicting information from different team members"
+                        ]
+                    },
+                    roomExamples: {
+                        positive: [
+                            "the bed was incredibly comfortable with premium linens",
+                            "loved the rainfall shower and luxurious bath products",
+                            "the room was spotlessly clean with beautiful city views",
+                            "excellent soundproofing ensured peaceful nights",
+                            "the workspace was perfect with multiple outlets and good lighting",
+                            "air conditioning worked flawlessly and quietly",
+                            "blackout curtains ensured great sleep quality",
+                            "the mini-bar was reasonably priced and well-stocked"
+                        ],
+                        negative: [
+                            "the air conditioning was noisy and ineffective",
+                            "visible mold in the bathroom corners",
+                            "the bed was uncomfortably firm with worn pillows",
+                            "constant noise from neighboring rooms",
+                            "several power outlets didn't work",
+                            "the shower had inconsistent water temperature",
+                            "outdated decor with visible wear and tear",
+                            "musty smell that wouldn't go away"
+                        ]
+                    },
+                    amenityExamples: {
+                        positive: [
+                            "the rooftop pool offered stunning sunset views",
+                            "the gym was well-equipped with modern machines",
+                            "loved the complimentary wine hour in the evening",
+                            "the business center had everything I needed",
+                            "the spa services were absolutely divine",
+                            "breakfast buffet had amazing variety and quality",
+                            "free bike rentals were a fantastic touch",
+                            "the lobby bar had creative cocktails and live music"
+                        ],
+                        negative: [
+                            "the pool was closed for maintenance without notice",
+                            "gym equipment was outdated and some machines broken",
+                            "breakfast was overpriced and mediocre quality",
+                            "WiFi was frustratingly slow throughout the property",
+                            "parking was expensive and inconvenient",
+                            "the restaurant had very limited hours",
+                            "no working ice machine on my floor",
+                            "the business center printer was out of order"
+                        ]
+                    },
+                    locationExamples: {
+                        positive: [
+                            "just a 5-minute walk to the main shopping district",
+                            "surrounded by excellent restaurants and cafes",
+                            "the metro station was literally next door",
+                            "quiet neighborhood despite being centrally located",
+                            "amazing views of the historic district",
+                            "beach access just across the street",
+                            "walking distance to all major attractions",
+                            "felt very safe even late at night"
+                        ],
+                        negative: [
+                            "30-minute taxi ride from anything interesting",
+                            "the area felt unsafe after dark",
+                            "constant construction noise from next door",
+                            "no restaurants within walking distance",
+                            "difficult to get taxis from this location",
+                            "far from public transportation options",
+                            "surrounded by abandoned buildings",
+                            "the nearby nightclub was noisy until 4am"
+                        ]
+                    }
+                };
+                
+                this.init();
+            }
+            
+            detectContext() {
+                const params = new URLSearchParams(window.location.search);
+                const date = new Date();
+                
+                return {
+                    hotelName: params.get('hotel') || 'Grand Hotel',
+                    tripType: params.get('tripType') || this.inferTripType(params),
+                    duration: parseInt(params.get('nights')) || 3,
+                    checkIn: this.formatDate(new Date(Date.now() - 86400000 * 3)),
+                    checkOut: this.formatDate(date),
+                    source: params.get('source') || 'direct',
+                    season: this.getSeason(date.getMonth()),
+                    dayOfWeek: date.getDay(),
+                    timeOfDay: date.getHours()
+                };
+            }
+            
+            inferTripType(params) {
+                const nights = parseInt(params.get('nights')) || 3;
+                const guests = parseInt(params.get('guests')) || 2;
+                
+                if (nights <= 2) return 'business';
+                if (guests >= 3) return 'family';
+                if (nights >= 7) return 'vacation';
+                return 'leisure';
+            }
+            
+            formatDate(date) {
+                const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${months[date.getMonth()]} ${date.getDate()}`;
+            }
+            
+            getSeason(month) {
+                if (month >= 2 && month <= 4) return 'spring';
+                if (month >= 5 && month <= 7) return 'summer';
+                if (month >= 8 && month <= 10) return 'autumn';
+                return 'winter';
+            }
+            
+            init() {
+                this.setupRating();
+                this.setupVoiceSelector();
+                this.setupHighlights();
+                this.setupRegenerate();
+                this.setupSubmit();
+                this.initProgressTracking();
+            }
+            
+            setupRating() {
+                const stars = document.querySelectorAll('.rating-star');
+                
+                stars.forEach(star => {
+                    star.addEventListener('click', () => {
+                        const rating = parseInt(star.dataset.rating);
+                        this.state.rating = rating;
+                        
+                        // Update visual
+                        stars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.textContent = '★';
+                                s.classList.add('filled');
+                            } else {
+                                s.textContent = '☆';
+                                s.classList.remove('filled');
+                            }
+                        });
+                        
+                        // Show next sections
+                        document.getElementById('voiceSelector').style.display = 'flex';
+                        document.getElementById('highlightsSection').style.display = 'block';
+                        document.getElementById('reviewComposer').style.display = 'block';
+                        document.getElementById('submitSection').style.display = 'block';
+                        
+                        this.populateHighlights();
+                        this.updateProgress(25);
+                        
+                        // Generate initial review
+                        setTimeout(() => this.generateReview(), 500);
+                    });
+                });
+            }
+            
+            setupVoiceSelector() {
+                const options = document.querySelectorAll('.voice-option');
+                
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        options.forEach(o => o.classList.remove('selected'));
+                        option.classList.add('selected');
+                        this.state.voice = option.dataset.voice;
+                        this.generateReview();
+                    });
+                });
+            }
+            
+            populateHighlights() {
+                const categories = {
+                    service: [
+                        { id: 'staff', text: '👥 Helpful Staff', weight: 0.9 },
+                        { id: 'checkin', text: '✓ Smooth Check-in', weight: 0.7 },
+                        { id: 'concierge', text: '🎯 Great Concierge', weight: 0.6 },
+                        { id: 'housekeeping', text: '🧹 Excellent Housekeeping', weight: 0.8 }
+                    ],
+                    room: [
+                        { id: 'comfort', text: '🛏️ Comfortable Bed', weight: 0.9 },
+                        { id: 'clean', text: '✨ Spotlessly Clean', weight: 0.8 },
+                        { id: 'view', text: '🌅 Great Views', weight: 0.7 },
+                        { id: 'quiet', text: '🔇 Quiet Room', weight: 0.7 }
+                    ],
+                    amenities: [
+                        { id: 'breakfast', text: '🍳 Excellent Breakfast', weight: 0.8 },
+                        { id: 'pool', text: '🏊 Nice Pool', weight: 0.7 },
+                        { id: 'gym', text: '💪 Well-equipped Gym', weight: 0.6 },
+                        { id: 'wifi', text: '📶 Fast WiFi', weight: 0.9 }
+                    ],
+                    location: [
+                        { id: 'central', text: '📍 Central Location', weight: 0.9 },
+                        { id: 'transport', text: '🚇 Near Transport', weight: 0.8 },
+                        { id: 'restaurants', text: '🍽️ Great Restaurants', weight: 0.7 },
+                        { id: 'safe', text: '🔒 Safe Area', weight: 0.8 }
+                    ]
+                };
+                
+                // Populate each category
+                Object.entries(categories).forEach(([category, items]) => {
+                    const container = document.getElementById(`${category}Highlights`);
+                    container.innerHTML = '';
+                    
+                    items.forEach(item => {
+                        const chip = document.createElement('div');
+                        chip.className = 'highlight-chip';
+                        chip.dataset.id = item.id;
+                        chip.dataset.category = category;
+                        chip.innerHTML = item.text;
+                        
+                        chip.addEventListener('click', () => {
+                            chip.classList.toggle('selected');
+                            this.updateHighlights();
+                            this.generateReview();
+                        });
+                        
+                        container.appendChild(chip);
+                    });
+                });
+            }
+            
+            updateHighlights() {
+                const selected = document.querySelectorAll('.highlight-chip.selected');
+                this.state.highlights = Array.from(selected).map(chip => ({
+                    id: chip.dataset.id,
+                    category: chip.dataset.category,
+                    text: chip.textContent
+                }));
+                
+                const progress = Math.min(25 + (this.state.highlights.length * 8), 80);
+                this.updateProgress(progress);
+            }
+            
+            generateReview() {
+                const aiStatus = document.getElementById('aiStatus');
+                const display = document.getElementById('reviewDisplay');
+                
+                // Show generating status
+                aiStatus.classList.add('generating');
+                aiStatus.innerHTML = '<span>🤖</span><span>Generating...</span>';
+                display.classList.add('typing');
+                
+                // Generate the review text
+                const review = this.composeNaturalReview();
+                
+                // Simulate typing effect
+                setTimeout(() => {
+                    display.innerHTML = `<div class="review-text">${review}</div>`;
+                    display.classList.remove('typing');
+                    aiStatus.classList.remove('generating');
+                    aiStatus.innerHTML = '<span>✨</span><span>AI Generated</span>';
+                    
+                    // Update quality score
+                    this.updateQualityScore(review);
+                    
+                    // Store for submission
+                    this.state.reviewText = review;
+                    this.state.generationCount++;
+                }, 800);
+            }
+            
+            composeNaturalReview() {
+                const { rating, voice, highlights, context } = this.state;
+                
+                if (!rating) return "Please select a rating to generate your review.";
+                
+                // Build the review using advanced templates
+                let review = '';
+                
+                // 1. Opening
+                const openings = this.storyTemplates.opening[rating][voice];
+                let opening = openings[Math.floor(Math.random() * openings.length)];
+                opening = this.replaceTokens(opening, context);
+                review += opening + '\n\n';
+                
+                // 2. Body paragraphs based on highlights
+                const categoryOrder = this.state.rating >= 4 ? 
+                    ['service', 'room', 'amenities', 'location'] : 
+                    ['room', 'service', 'location', 'amenities'];
+                
+                categoryOrder.forEach(category => {
+                    const categoryHighlights = highlights.filter(h => h.category === category);
+                    if (categoryHighlights.length > 0) {
+                        review += this.generateParagraph(category, categoryHighlights, rating >= 4) + '\n\n';
+                    }
+                });
+                
+                // Add specific details and examples
+                if (highlights.length === 0) {
+                    // Generate generic paragraph if no highlights selected
+                    review += this.generateGenericParagraph(rating, voice) + '\n\n';
+                }
+                
+                // 3. Closing
+                const closings = this.storyTemplates.closing[rating][voice];
+                let closing = closings[Math.floor(Math.random() * closings.length)];
+                
+                // Replace tokens in closing
+                const topHighlights = highlights.slice(0, 3).map(h => h.text.substring(2)).join(', ') || 'overall experience';
+                closing = closing.replace('${topHighlights}', topHighlights);
+                closing = closing.replace('${keyNeeds}', this.getKeyNeeds(context.tripType));
+                closing = this.replaceTokens(closing, context);
+                
+                review += closing;
+                
+                return review;
+            }
+            
+            generateParagraph(category, highlights, isPositive) {
+                const templates = this.storyTemplates.body[category];
+                const template = templates[isPositive ? 'positive' : 'negative'];
+                let paragraph = template[Math.floor(Math.random() * template.length)];
+                
+                // Get specific examples
+                const exampleBank = this.detailBanks[`${category}Examples`];
+                const examples = exampleBank[isPositive ? 'positive' : 'negative'];
+                const example = examples[Math.floor(Math.random() * examples.length)];
+                
+                // Build the paragraph
+                paragraph = paragraph.replace('${' + category + 'Example}', example);
+                paragraph = this.replaceTokens(paragraph, this.state.context);
+                
+                // Add mention of specific highlights
+                if (highlights.length > 1) {
+                    const items = highlights.map(h => h.text.substring(2).toLowerCase()).join(' and ');
+                    paragraph += ` The ${items} particularly stood out.`;
+                }
+                
+                return paragraph;
+            }
+            
+            generateGenericParagraph(rating, voice) {
+                const sentiments = {
+                    5: "Every aspect of my stay demonstrated the hotel's commitment to excellence. From the moment I arrived until checkout, the experience was flawless.",
+                    4: "Most aspects of my stay were very good, with only minor areas that could be improved. The overall experience was definitely positive.",
+                    3: "The stay was adequate for my needs, though there were both positive and negative aspects that future guests should be aware of.",
+                    2: "Unfortunately, several issues during my stay prevented this from being a positive experience. Management should address these concerns.",
+                    1: "I hate to leave negative reviews, but this stay fell far short of acceptable standards in multiple areas."
+                };
+                
+                return sentiments[rating] || sentiments[3];
+            }
+            
+            replaceTokens(text, context) {
+                Object.entries(context).forEach(([key, value]) => {
+                    text = text.replace(new RegExp('\\$\\{' + key + '\\}', 'g'), value);
+                });
+                text = text.replace(/\${purpose}/g, this.getPurpose(context.tripType));
+                return text;
+            }
+            
+            getPurpose(tripType) {
+                const purposes = {
+                    business: 'work and productivity',
+                    family: 'family bonding',
+                    vacation: 'relaxation and exploration',
+                    leisure: 'rest and enjoyment',
+                    romance: 'romantic escape'
+                };
+                return purposes[tripType] || 'my stay';
+            }
+            
+            getKeyNeeds(tripType) {
+                const needs = {
+                    business: 'efficiency and connectivity',
+                    family: 'space and family amenities',
+                    vacation: 'comfort and experiences',
+                    leisure: 'relaxation and value',
+                    romance: 'privacy and ambiance'
+                };
+                return needs[tripType] || 'quality and comfort';
+            }
+            
+            updateQualityScore(review) {
+                const words = review.split(' ').length;
+                const sentences = review.split(/[.!?]/).filter(s => s.trim()).length;
+                const paragraphs = review.split('\n\n').length;
+                
+                // Calculate quality based on length, structure, and content
+                let score = 0;
+                
+                // Length scoring
+                if (words >= 150) score += 30;
+                else if (words >= 100) score += 20;
+                else if (words >= 50) score += 10;
+                
+                // Structure scoring
+                if (sentences >= 8) score += 20;
+                if (paragraphs >= 3) score += 20;
+                
+                // Content scoring
+                if (this.state.highlights.length >= 3) score += 20;
+                if (this.state.rating) score += 10;
+                
+                // Cap at 100
+                score = Math.min(score, 100);
+                
+                // Update UI
+                document.getElementById('qualityFill').style.width = `${score}%`;
+                document.getElementById('qualityText').textContent = `${score}%`;
+                
+                this.state.qualityScore = score;
+            }
+            
+            setupRegenerate() {
+                document.getElementById('regenerateBtn').addEventListener('click', () => {
+                    this.generateReview();
+                });
+            }
+            
+            updateProgress(value) {
+                document.querySelector('.progress-percentage').textContent = `${value}%`;
+                document.querySelector('.progress-fill').style.width = `${value}%`;
+                
+                if (value >= 80) {
+                    document.querySelector('.ai-indicator').classList.add('active');
+                }
+            }
+            
+            initProgressTracking() {
+                // Track interactions
+                document.addEventListener('click', () => {
+                    if (this.state.rating && this.state.highlights.length > 0 && this.state.qualityScore > 50) {
+                        this.updateProgress(100);
+                    }
+                });
+            }
+            
+            setupSubmit() {
+                document.getElementById('submitButton').addEventListener('click', () => {
+                    this.showPreview();
+                });
+            }
+            
+            showPreview() {
+                const modal = document.getElementById('previewModal');
+                const body = document.getElementById('previewBody');
+                
+                // Build preview content
+                body.innerHTML = `
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px;">RATING</div>
+                        <div style="font-size: 32px;">
+                            ${'★'.repeat(this.state.rating)}${'☆'.repeat(5 - this.state.rating)}
+                        </div>
+                    </div>
+                    
+                    ${this.state.highlights.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">HIGHLIGHTED FEATURES</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${this.state.highlights.map(h => `
+                                <span style="padding: 6px 12px; background: #f3f4f6; border-radius: 100px; font-size: 14px;">
+                                    ${h.text}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">YOUR REVIEW</div>
+                        <div style="padding: 20px; background: #f9fafb; border-radius: 12px; line-height: 1.8; white-space: pre-wrap;">
+                            ${this.state.reviewText}
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button onclick="document.getElementById('previewModal').classList.remove('show')" 
+                                style="flex: 1; padding: 14px; background: #f3f4f6; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                            Back to Edit
+                        </button>
+                        <button onclick="window.NLGEngine.submitReview()" 
+                                style="flex: 1; padding: 14px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                            Submit Review
+                        </button>
+                    </div>
+                `;
+                
+                modal.classList.add('show');
+            }
+            
+            submitReview() {
+                // Close modal
+                document.getElementById('previewModal').classList.remove('show');
+                
+                // Route to platform
+                const platformUrls = {
+                    'booking.com': 'https://www.booking.com/reviews',
+                    'expedia': 'https://www.expedia.com/reviews',
+                    'hotels.com': 'https://www.hotels.com/reviews',
+                    'agoda': 'https://www.agoda.com/reviews',
+                    'tripadvisor': 'https://www.tripadvisor.com/UserReview'
+                };
+                
+                const url = platformUrls[this.state.context.source] || platformUrls['tripadvisor'];
+                
+                setTimeout(() => {
+                    console.log('Submitting review:', this.state.reviewText);
+                    console.log('Redirecting to:', url);
+                    window.location.href = url;
+                }, 1000);
+            }
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            window.NLGEngine = new AdvancedNLGEngine();
+            
+            // Close modal handlers
+            document.getElementById('closePreview').addEventListener('click', () => {
+                document.getElementById('previewModal').classList.remove('show');
+            });
+            
+            document.getElementById('previewModal').addEventListener('click', (e) => {
+                if (e.target.id === 'previewModal') {
+                    document.getElementById('previewModal').classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
