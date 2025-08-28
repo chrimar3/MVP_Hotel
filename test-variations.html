@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Variations Test - Sprint 1</title>
+    <style>
+        body {
+            font-family: -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #1a365d;
+            text-align: center;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            padding: 15px;
+            background: #f8f9fa;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #d4af37;
+        }
+        .review-output {
+            padding: 15px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        button {
+            padding: 10px 20px;
+            background: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2c5282;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a365d;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Sprint 1 Test: Review Variations & Natural Language</h1>
+    
+    <div class="test-section">
+        <h2>Test Statistics</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalTests">0</div>
+                <div class="stat-label">Total Tests Run</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="uniqueReviews">0</div>
+                <div class="stat-label">Unique Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgLength">0</div>
+                <div class="stat-label">Avg. Word Count</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="uniqueRate">0%</div>
+                <div class="stat-label">Uniqueness Rate</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Case 1: Same Input, Different Outputs</h2>
+        <p>Click the button multiple times with the same inputs to verify each review is unique</p>
+        
+        <div>
+            <strong>Fixed Inputs:</strong>
+            <ul>
+                <li>Rating: 5 stars</li>
+                <li>Highlights: Staff, Location, Cleanliness</li>
+                <li>Staff: Maria at reception</li>
+            </ul>
+        </div>
+        
+        <button onclick="runTest1()">Generate Review (Same Inputs)</button>
+        
+        <div id="test1Results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Case 2: Different Ratings</h2>
+        <p>Test how reviews adapt to different rating levels</p>
+        
+        <button onclick="runTest2(5)">5 Star Review</button>
+        <button onclick="runTest2(4)">4 Star Review</button>
+        <button onclick="runTest2(3)">3 Star Review</button>
+        
+        <div id="test2Results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Case 3: Highlight Combinations</h2>
+        <p>Test various highlight combinations for natural flow</p>
+        
+        <button onclick="runTest3(['staff'])">Staff Only</button>
+        <button onclick="runTest3(['room', 'breakfast'])">Room + Breakfast</button>
+        <button onclick="runTest3(['location', 'value', 'amenities'])">Location + Value + Amenities</button>
+        <button onclick="runTest3(['staff', 'room', 'location', 'cleanliness', 'breakfast'])">All Five</button>
+        
+        <div id="test3Results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Case 4: Batch Uniqueness Test</h2>
+        <p>Generate 10 reviews with identical inputs to verify uniqueness</p>
+        
+        <button onclick="runBatchTest()">Run Batch Test (10 Reviews)</button>
+        
+        <div id="batchResults"></div>
+    </div>
+    
+    <script>
+        // Copy the NaturalReviewBuilder class from the main file
+        class NaturalReviewBuilder {
+            constructor() {
+                this.templates = {
+                    openings: {
+                        5: [
+                            "I had an absolutely wonderful stay at Grand Hotel!",
+                            "What an amazing experience at Grand Hotel.",
+                            "Grand Hotel exceeded all my expectations!",
+                            "Just returned from Grand Hotel and I'm already planning my next visit.",
+                            "I couldn't have asked for a better stay than at Grand Hotel.",
+                            "My experience at Grand Hotel was nothing short of exceptional.",
+                            "Grand Hotel truly knows how to make guests feel special.",
+                            "From the moment I arrived at Grand Hotel, I knew I was in for a treat.",
+                            "I'm so glad I chose Grand Hotel for my stay!",
+                            "Grand Hotel delivered an outstanding experience from start to finish."
+                        ],
+                        4: [
+                            "Really enjoyed my time at Grand Hotel.",
+                            "Grand Hotel was a great choice for my trip.",
+                            "Very pleased with my stay at Grand Hotel.",
+                            "I had a lovely experience at Grand Hotel.",
+                            "Grand Hotel provided exactly what I was looking for.",
+                            "My stay at Grand Hotel was very comfortable and enjoyable.",
+                            "Would definitely consider Grand Hotel again.",
+                            "Grand Hotel made my trip memorable.",
+                            "Happy with my choice of Grand Hotel."
+                        ],
+                        3: [
+                            "Grand Hotel met my expectations.",
+                            "Had a pleasant stay at Grand Hotel.",
+                            "Grand Hotel was a solid choice.",
+                            "My experience at Grand Hotel was good overall.",
+                            "Grand Hotel provided what I needed."
+                        ]
+                    },
+                    
+                    highlights: {
+                        staff: [
+                            "The staff went above and beyond to ensure my comfort",
+                            "Every team member I encountered was friendly and professional",
+                            "The service was impeccable throughout my stay",
+                            "Staff members were always available and eager to help",
+                            "The level of hospitality was outstanding",
+                            "I was impressed by how attentive the staff were",
+                            "The team made me feel truly welcomed",
+                            "Service with a smile at every interaction"
+                        ],
+                        room: [
+                            "My room was spacious and beautifully appointed",
+                            "The bed was incredibly comfortable - I slept like a baby",
+                            "Loved the attention to detail in the room design",
+                            "The room exceeded my expectations in every way",
+                            "Everything in my room was modern and well-maintained",
+                            "The room was a perfect sanctuary after a long day",
+                            "Appreciated the thoughtful room amenities",
+                            "The room was exactly what I needed for a great stay"
+                        ],
+                        location: [
+                            "The location couldn't have been better",
+                            "Perfectly situated for exploring the area",
+                            "Walking distance to everything I wanted to see",
+                            "The central location saved me so much time",
+                            "Ideal spot with easy access to attractions",
+                            "Located in the heart of it all",
+                            "The location alone makes this hotel worth it",
+                            "Convenient location with great surroundings"
+                        ],
+                        cleanliness: [
+                            "Everything was spotlessly clean",
+                            "The cleanliness standards were impressive",
+                            "Housekeeping did an excellent job every day",
+                            "The entire property was immaculate",
+                            "Pristine condition throughout the hotel",
+                            "Exceptional attention to cleanliness",
+                            "You could tell cleanliness is a priority here",
+                            "Everything sparkled with cleanliness"
+                        ],
+                        breakfast: [
+                            "The breakfast spread was fantastic",
+                            "Started each day with a delicious breakfast",
+                            "Impressive variety at breakfast",
+                            "The breakfast alone is worth coming back for",
+                            "Fresh and tasty breakfast options",
+                            "Breakfast exceeded my expectations",
+                            "Great way to start the day with their breakfast",
+                            "Quality breakfast with something for everyone"
+                        ],
+                        amenities: [
+                            "The facilities were top-notch",
+                            "Great amenities that enhanced my stay",
+                            "Loved using the hotel facilities",
+                            "The amenities really set this hotel apart",
+                            "Everything you could need and more",
+                            "Impressive range of amenities",
+                            "The facilities were well-maintained and modern",
+                            "Excellent amenities throughout the property"
+                        ],
+                        value: [
+                            "Excellent value for money",
+                            "Worth every penny",
+                            "Great quality at a fair price",
+                            "The value proposition is outstanding",
+                            "You get more than what you pay for",
+                            "Exceptional value considering the quality",
+                            "Very reasonably priced for what you get",
+                            "Great bang for your buck"
+                        ],
+                        quiet: [
+                            "Enjoyed the peaceful atmosphere",
+                            "Nice and quiet for a good night's sleep",
+                            "The tranquility was much appreciated",
+                            "Perfect for those seeking peace and quiet",
+                            "Wonderfully quiet and relaxing",
+                            "The calm environment was exactly what I needed",
+                            "Appreciated how quiet and serene it was",
+                            "Great soundproofing for peaceful nights"
+                        ]
+                    },
+                    
+                    transitions: [
+                        "Additionally,",
+                        "I was particularly impressed by",
+                        "Another highlight was",
+                        "I also appreciated",
+                        "What stood out was",
+                        "I must mention",
+                        "Worth noting is",
+                        "I especially enjoyed"
+                    ],
+                    
+                    closings: {
+                        5: [
+                            "I can't wait to return!",
+                            "Highly recommend Grand Hotel to anyone visiting the area!",
+                            "Will definitely be back on my next trip!",
+                            "Already planning my next stay!",
+                            "This is now my go-to hotel in the area.",
+                            "I'll be recommending Grand Hotel to all my friends!",
+                            "Looking forward to many more stays here!",
+                            "Grand Hotel has earned a loyal customer!",
+                            "Can't say enough good things about this place!",
+                            "If you're considering Grand Hotel, don't hesitate!"
+                        ],
+                        4: [
+                            "Would definitely stay here again.",
+                            "I'd recommend Grand Hotel to others.",
+                            "Will consider for future trips.",
+                            "Happy to recommend this hotel.",
+                            "A solid choice for anyone visiting.",
+                            "Would return without hesitation.",
+                            "Definitely worth considering.",
+                            "I'd choose Grand Hotel again."
+                        ],
+                        3: [
+                            "Would consider staying again.",
+                            "A decent option for the area.",
+                            "Worth a look if you're in town.",
+                            "Satisfied with my choice.",
+                            "Met my needs for this trip."
+                        ]
+                    },
+                    
+                    staffRecognition: [
+                        "{name} deserves special recognition for exceptional service!",
+                        "Special thanks to {name} who made our stay extra special.",
+                        "I must give a shout-out to {name} for going above and beyond.",
+                        "{name} was absolutely wonderful and made such a difference.",
+                        "Big thanks to {name} for the outstanding service!",
+                        "{name} is a credit to your team - truly exceptional!",
+                        "Please recognize {name} for their incredible hospitality.",
+                        "{name} made me feel like a VIP guest!"
+                    ]
+                };
+            }
+            
+            generateReview(rating, highlights, staffName, comments, context = {}) {
+                let review = "";
+                
+                // Select random opening based on rating
+                const openings = this.templates.openings[rating];
+                review += openings[Math.floor(Math.random() * openings.length)] + " ";
+                
+                // Add highlights with natural transitions
+                if (highlights.length > 0) {
+                    highlights.forEach((highlight, index) => {
+                        const highlightTemplates = this.templates.highlights[highlight];
+                        if (highlightTemplates) {
+                            if (index > 0 && index < highlights.length) {
+                                // Add transition for flow
+                                const transitions = this.templates.transitions;
+                                if (Math.random() > 0.5) {
+                                    review += transitions[Math.floor(Math.random() * transitions.length)] + " ";
+                                }
+                            }
+                            
+                            // Add highlight description
+                            review += highlightTemplates[Math.floor(Math.random() * highlightTemplates.length)];
+                            
+                            // Natural sentence ending
+                            if (index < highlights.length - 1) {
+                                review += ". ";
+                            } else {
+                                review += ". ";
+                            }
+                        }
+                    });
+                }
+                
+                // Add staff recognition if provided
+                if (staffName) {
+                    const staffTemplates = this.templates.staffRecognition;
+                    const staffTemplate = staffTemplates[Math.floor(Math.random() * staffTemplates.length)];
+                    review += staffTemplate.replace('{name}', staffName) + " ";
+                }
+                
+                // Add personal comments if provided
+                if (comments) {
+                    review += comments + " ";
+                }
+                
+                // Add closing based on rating
+                const closings = this.templates.closings[rating];
+                review += closings[Math.floor(Math.random() * closings.length)];
+                
+                return review;
+            }
+        }
+        
+        const reviewBuilder = new NaturalReviewBuilder();
+        let allGeneratedReviews = [];
+        
+        function updateStats() {
+            document.getElementById('totalTests').textContent = allGeneratedReviews.length;
+            
+            const uniqueReviews = new Set(allGeneratedReviews);
+            document.getElementById('uniqueReviews').textContent = uniqueReviews.size;
+            
+            const avgWords = allGeneratedReviews.length > 0 
+                ? Math.round(allGeneratedReviews.reduce((sum, r) => sum + r.split(' ').length, 0) / allGeneratedReviews.length)
+                : 0;
+            document.getElementById('avgLength').textContent = avgWords;
+            
+            const uniqueRate = allGeneratedReviews.length > 0
+                ? Math.round((uniqueReviews.size / allGeneratedReviews.length) * 100)
+                : 0;
+            document.getElementById('uniqueRate').textContent = uniqueRate + '%';
+        }
+        
+        function runTest1() {
+            const review = reviewBuilder.generateReview(
+                5, 
+                ['staff', 'location', 'cleanliness'],
+                'Maria at reception',
+                ''
+            );
+            
+            allGeneratedReviews.push(review);
+            
+            const resultsDiv = document.getElementById('test1Results');
+            const testCase = document.createElement('div');
+            testCase.className = 'test-case';
+            testCase.innerHTML = `
+                <strong>Test #${allGeneratedReviews.length}</strong>
+                <div class="review-output">${review}</div>
+                <small>Word count: ${review.split(' ').length} words</small>
+            `;
+            resultsDiv.insertBefore(testCase, resultsDiv.firstChild);
+            
+            updateStats();
+        }
+        
+        function runTest2(rating) {
+            const review = reviewBuilder.generateReview(
+                rating,
+                ['room', 'breakfast'],
+                '',
+                ''
+            );
+            
+            allGeneratedReviews.push(review);
+            
+            const resultsDiv = document.getElementById('test2Results');
+            const testCase = document.createElement('div');
+            testCase.className = 'test-case';
+            testCase.innerHTML = `
+                <strong>${rating} Star Review</strong>
+                <div class="review-output">${review}</div>
+                <small>Tone: ${rating === 5 ? 'Enthusiastic' : rating === 4 ? 'Positive' : 'Moderate'}</small>
+            `;
+            resultsDiv.insertBefore(testCase, resultsDiv.firstChild);
+            
+            updateStats();
+        }
+        
+        function runTest3(highlights) {
+            const review = reviewBuilder.generateReview(
+                5,
+                highlights,
+                '',
+                ''
+            );
+            
+            allGeneratedReviews.push(review);
+            
+            const resultsDiv = document.getElementById('test3Results');
+            const testCase = document.createElement('div');
+            testCase.className = 'test-case';
+            testCase.innerHTML = `
+                <strong>Highlights: ${highlights.join(', ')}</strong>
+                <div class="review-output">${review}</div>
+                <small>Natural flow with ${highlights.length} aspects</small>
+            `;
+            resultsDiv.insertBefore(testCase, resultsDiv.firstChild);
+            
+            updateStats();
+        }
+        
+        function runBatchTest() {
+            const batchReviews = [];
+            for (let i = 0; i < 10; i++) {
+                const review = reviewBuilder.generateReview(
+                    5,
+                    ['staff', 'location'],
+                    'John at concierge',
+                    ''
+                );
+                batchReviews.push(review);
+                allGeneratedReviews.push(review);
+            }
+            
+            const uniqueSet = new Set(batchReviews);
+            const uniqueCount = uniqueSet.size;
+            
+            const resultsDiv = document.getElementById('batchResults');
+            resultsDiv.innerHTML = `
+                <div class="test-case">
+                    <strong>Batch Test Results:</strong>
+                    <p>Generated 10 reviews with identical inputs</p>
+                    <p><strong style="color: ${uniqueCount === 10 ? 'green' : 'orange'}">
+                        ${uniqueCount} out of 10 are unique (${uniqueCount * 10}% uniqueness)
+                    </strong></p>
+                    <details>
+                        <summary>View all generated reviews</summary>
+                        ${batchReviews.map((r, i) => `
+                            <div class="review-output" style="margin: 10px 0;">
+                                <strong>#${i + 1}:</strong> ${r}
+                            </div>
+                        `).join('')}
+                    </details>
+                </div>
+            `;
+            
+            updateStats();
+        }
+    </script>
+</body>
+</html>
