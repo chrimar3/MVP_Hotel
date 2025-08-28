@@ -1,8 +1,12 @@
 {
   "name": "mvp-hotel-review-generator",
-  "version": "1.1.0",
-  "description": "Professional hotel review generator with automated testing",
-  "main": "src/ultimate-ux-enhanced.html",
+  "version": "2.0.0",
+  "description": "Lightweight hotel review generator supporting multiple platforms and languages",
+  "main": "public/index.html",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
   "scripts": {
     "start": "npx http-server public -p 3000 -o",
     "dev": "npx http-server public -p 3000 -c-1 --cors",
