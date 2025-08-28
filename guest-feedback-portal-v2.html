@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Experience Portal - Grand Hotel</title>
+    <meta name="description" content="Share your Grand Hotel experience and help future guests">
+    
+    <!-- Professional Hotel Branding -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            /* Hotel Brand Colors - Customizable */
+            --hotel-primary: #1a365d;
+            --hotel-secondary: #2c5282;
+            --hotel-accent: #d4af37;
+            --hotel-light: #f7fafc;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border: #e2e8f0;
+            --success: #48bb78;
+            --trust-blue: #2563eb;
+            
+            /* Context-based colors */
+            --business: #4a5568;
+            --leisure: #ed8936;
+            --romance: #e53e3e;
+            --family: #38b2ac;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(180deg, var(--hotel-light) 0%, #ffffff 100%);
+            min-height: 100vh;
+        }
+        
+        /* Context Banner - NEW */
+        .context-banner {
+            background: linear-gradient(135deg, var(--hotel-primary), var(--hotel-secondary));
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .context-banner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100px); }
+        }
+        
+        .context-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .context-greeting {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .context-details {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Professional Header */
+        .hotel-header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .hotel-branding {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .hotel-logo {
+            width: 50px;
+            height: 50px;
+            background: var(--hotel-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .hotel-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--hotel-primary);
+        }
+        
+        .trust-badges {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: var(--hotel-light);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* Sentiment Selector - NEW */
+        .sentiment-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 900px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+        
+        .sentiment-title {
+            font-size: 22px;
+            color: var(--hotel-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .mood-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .mood-btn {
+            padding: 15px 25px;
+            border: 2px solid var(--border);
+            border-radius: 50px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mood-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .mood-btn.selected {
+            background: linear-gradient(135deg, var(--hotel-light), white);
+            border-color: var(--hotel-primary);
+        }
+        
+        .mood-emoji {
+            font-size: 24px;
+        }
+        
+        /* Trip Type Selector - NEW */
+        .trip-type-section {
+            margin-bottom: 30px;
+        }
+        
+        .trip-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .trip-type-card {
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .trip-type-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .trip-type-card.selected {
+            border-color: var(--hotel-primary);
+            background: linear-gradient(135deg, var(--hotel-light), white);
+        }
+        
+        .trip-type-card.business.selected {
+            border-color: var(--business);
+        }
+        
+        .trip-type-card.leisure.selected {
+            border-color: var(--leisure);
+        }
+        
+        .trip-type-card.romance.selected {
+            border-color: var(--romance);
+        }
+        
+        .trip-type-card.family.selected {
+            border-color: var(--family);
+        }
+        
+        .trip-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .trip-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .trip-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Welcome Section with Context */
+        .welcome-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            text-align: center;
+        }
+        
+        .welcome-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            color: var(--hotel-primary);
+            margin-bottom: 10px;
+        }
+        
+        .welcome-subtitle {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .context-info {
+            background: var(--hotel-light);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--hotel-accent);
+        }
+        
+        .context-info p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        /* Enhanced Social Proof with Context */
+        .social-proof {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .proof-stat {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .proof-stat.highlighted {
+            border-color: var(--hotel-accent);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), white);
+        }
+        
+        .proof-number {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--hotel-primary);
+            display: block;
+        }
+        
+        .proof-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .proof-context {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--hotel-accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        /* Adaptive Feedback Form */
+        .feedback-form {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+        
+        .form-section {
+            margin-bottom: 35px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--hotel-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .context-hint {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--hotel-light);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 10px;
+        }
+        
+        /* Contextual Highlights */
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+        
+        .highlight-chip {
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .highlight-chip.recommended {
+            border-color: var(--hotel-accent);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), white);
+        }
+        
+        .highlight-chip.recommended::before {
+            content: '✨';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--hotel-accent);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        .highlight-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .highlight-chip.selected {
+            border-color: var(--hotel-primary);
+            background: var(--hotel-light);
+        }
+        
+        .highlight-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        /* Time-aware prompts */
+        .time-prompt {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-icon {
+            font-size: 24px;
+        }
+        
+        .time-text {
+            flex: 1;
+            font-size: 14px;
+            color: #92400e;
+        }
+        
+        /* Generate Button with Context */
+        .generate-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .generate-btn {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, var(--hotel-primary), var(--hotel-secondary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .generate-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .generate-btn:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.3);
+        }
+        
+        /* Feedback Output with Quality Score */
+        .feedback-output {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            display: none;
+        }
+        
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .output-title {
+            font-size: 24px;
+            color: var(--hotel-primary);
+            font-weight: 600;
+        }
+        
+        .quality-score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quality-meter {
+            width: 100px;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #10b981);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .quality-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .review-preview {
+            padding: 20px;
+            background: var(--hotel-light);
+            border-radius: 12px;
+            border-left: 4px solid var(--hotel-accent);
+            margin: 20px 0;
+            line-height: 1.8;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        
+        /* Context indicators in review */
+        .review-metadata {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .meta-tag {
+            padding: 4px 10px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* Season-aware decorations */
+        .seasonal-decoration {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .seasonal-decoration.spring {
+            /* Cherry blossoms */
+        }
+        
+        .seasonal-decoration.summer {
+            /* Sun rays */
+        }
+        
+        .seasonal-decoration.fall {
+            /* Falling leaves */
+        }
+        
+        .seasonal-decoration.winter {
+            /* Snowflakes */
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .mood-selector {
+                flex-direction: column;
+            }
+            
+            .trip-types {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Context Banner -->
+    <div class="context-banner" id="contextBanner">
+        <div class="context-content">
+            <div class="context-greeting" id="contextGreeting">Welcome Back!</div>
+            <div class="context-details" id="contextDetails">We hope you enjoyed your stay</div>
+        </div>
+    </div>
+    
+    <!-- Professional Hotel Header -->
+    <header class="hotel-header">
+        <div class="header-content">
+            <div class="hotel-branding">
+                <div class="hotel-logo">G</div>
+                <h1 class="hotel-name">Grand Hotel</h1>
+            </div>
+            <div class="trust-badges">
+                <span class="trust-badge">
+                    <span class="verified-icon">✓</span>
+                    Verified Property
+                </span>
+                <span class="trust-badge">
+                    <span class="verified-icon">★</span>
+                    4.8 Rating
+                </span>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Sentiment Selector -->
+        <div class="sentiment-section">
+            <h2 class="sentiment-title">How are you feeling about your stay?</h2>
+            <div class="mood-selector">
+                <button class="mood-btn" onclick="selectMood('delighted')" data-mood="delighted">
+                    <span class="mood-emoji">😊</span>
+                    <span>Delighted</span>
+                </button>
+                <button class="mood-btn" onclick="selectMood('satisfied')" data-mood="satisfied">
+                    <span class="mood-emoji">🙂</span>
+                    <span>Satisfied</span>
+                </button>
+                <button class="mood-btn" onclick="selectMood('professional')" data-mood="professional">
+                    <span class="mood-emoji">💼</span>
+                    <span>Professional</span>
+                </button>
+                <button class="mood-btn" onclick="selectMood('relaxed')" data-mood="relaxed">
+                    <span class="mood-emoji">😌</span>
+                    <span>Relaxed</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Welcome Section with Context -->
+        <div class="welcome-section">
+            <h2 class="welcome-title">Thank You for Choosing Grand Hotel</h2>
+            <p class="welcome-subtitle" id="contextSubtitle">Your feedback helps us maintain excellence</p>
+            
+            <div class="context-info" id="contextInfo">
+                <p>We noticed you stayed with us for <strong>business</strong>. How was your experience?</p>
+            </div>
+            
+            <!-- Enhanced Social Proof -->
+            <div class="social-proof">
+                <div class="proof-stat highlighted" id="contextStat1">
+                    <span class="proof-context">This Week</span>
+                    <span class="proof-number">147</span>
+                    <span class="proof-label">Business Travelers</span>
+                </div>
+                <div class="proof-stat">
+                    <span class="proof-number">98%</span>
+                    <span class="proof-label">Recommend Us</span>
+                </div>
+                <div class="proof-stat">
+                    <span class="proof-number">4.8★</span>
+                    <span class="proof-label">Average Rating</span>
+                </div>
+                <div class="proof-stat" id="timeContext">
+                    <span class="proof-number">23</span>
+                    <span class="proof-label">Reviews Today</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Feedback Form -->
+        <div class="feedback-form">
+            <!-- Trip Type Selection -->
+            <div class="form-section trip-type-section">
+                <h3 class="section-title">
+                    <span>What brought you to Grand Hotel?</span>
+                    <span class="context-hint">Helps us personalize your experience</span>
+                </h3>
+                
+                <div class="trip-types">
+                    <div class="trip-type-card business" onclick="selectTripType('business')">
+                        <span class="trip-icon">💼</span>
+                        <div class="trip-label">Business</div>
+                        <div class="trip-description">Meetings, conferences, work</div>
+                    </div>
+                    <div class="trip-type-card leisure" onclick="selectTripType('leisure')">
+                        <span class="trip-icon">🏖️</span>
+                        <div class="trip-label">Leisure</div>
+                        <div class="trip-description">Vacation, tourism, relaxation</div>
+                    </div>
+                    <div class="trip-type-card romance" onclick="selectTripType('romance')">
+                        <span class="trip-icon">💕</span>
+                        <div class="trip-label">Romance</div>
+                        <div class="trip-description">Anniversary, honeymoon, couples</div>
+                    </div>
+                    <div class="trip-type-card family" onclick="selectTripType('family')">
+                        <span class="trip-icon">👨‍👩‍👧‍👦</span>
+                        <div class="trip-label">Family</div>
+                        <div class="trip-description">Family vacation, reunion</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Time-aware prompt -->
+            <div class="time-prompt" id="timePrompt" style="display: none;">
+                <span class="time-icon">🌅</span>
+                <span class="time-text">Good morning! How was your breakfast experience today?</span>
+            </div>
+            
+            <!-- Contextual Highlights -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span id="highlightsTitle">What made your stay special?</span>
+                </h3>
+                <p class="section-subtitle" id="highlightsSubtitle">Select all that apply</p>
+                
+                <div class="highlights-grid" id="highlightsGrid">
+                    <!-- Dynamically populated based on context -->
+                </div>
+            </div>
+            
+            <!-- Staff Recognition -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span>Anyone we should recognize?</span>
+                </h3>
+                <p class="section-subtitle">Help us celebrate exceptional service</p>
+                
+                <input type="text" 
+                       class="staff-input" 
+                       id="staffName"
+                       placeholder="e.g., Maria at reception, John from housekeeping"
+                       autocomplete="off">
+            </div>
+            
+            <!-- Personal Touch -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <span id="personalTitle">Anything else you'd like to share?</span>
+                </h3>
+                <p class="section-subtitle" id="personalSubtitle">Your unique perspective matters</p>
+                
+                <textarea class="personal-textarea"
+                          id="personalComments"
+                          placeholder="Tell us about a special moment, suggestion, or anything that made your stay memorable..."
+                          rows="4"></textarea>
+            </div>
+            
+            <!-- Generate Button -->
+            <div class="generate-section">
+                <button class="generate-btn" onclick="generateContextualFeedback()">
+                    Share My Experience
+                </button>
+            </div>
+        </div>
+        
+        <!-- Enhanced Feedback Output -->
+        <div class="feedback-output" id="feedbackOutput">
+            <div class="output-header">
+                <h3 class="output-title">Thank You for Your Feedback!</h3>
+                <div class="quality-score">
+                    <div class="quality-meter">
+                        <div class="quality-fill" id="qualityFill" style="width: 0%"></div>
+                    </div>
+                    <span class="quality-label" id="qualityLabel">Excellent</span>
+                </div>
+            </div>
+            
+            <div class="review-metadata">
+                <span class="meta-tag" id="tripTag">Business Trip</span>
+                <span class="meta-tag" id="seasonTag">Winter Stay</span>
+                <span class="meta-tag" id="lengthTag">3 Nights</span>
+                <span class="meta-tag" id="sentimentTag">Professional Tone</span>
+            </div>
+            
+            <div class="review-preview" id="reviewText">
+                <!-- Contextual review appears here -->
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" onclick="copyFeedback()">
+                    <span>📋</span>
+                    <span>Copy Text</span>
+                </button>
+                <button class="action-btn" onclick="improveQuality()">
+                    <span>✨</span>
+                    <span>Enhance</span>
+                </button>
+                <button class="action-btn primary" onclick="shareOnPlatform()">
+                    <span>🚀</span>
+                    <span id="platformBtn">Share on TripAdvisor</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Context Intelligence System
+        class ContextIntelligence {
+            constructor() {
+                this.params = new URLSearchParams(window.location.search);
+                this.context = this.detectContext();
+            }
+            
+            detectContext() {
+                const now = new Date();
+                const hour = now.getHours();
+                const month = now.getMonth();
+                const dayOfWeek = now.getDay();
+                
+                return {
+                    // URL parameters
+                    source: this.params.get('source') || 'direct',
+                    tripType: this.params.get('trip') || this.inferTripType(),
+                    nights: this.params.get('nights') || this.inferNights(),
+                    room: this.params.get('room') || 'standard',
+                    
+                    // Temporal context
+                    timeOfDay: this.getTimeOfDay(hour),
+                    season: this.getSeason(month),
+                    isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+                    isHoliday: this.checkHoliday(now),
+                    
+                    // Guest context
+                    guestName: this.params.get('name') || '',
+                    checkoutDate: this.params.get('checkout') || this.getTodayString(),
+                    returnGuest: this.params.get('return') === 'true',
+                    
+                    // Behavioral context
+                    responseTime: 'immediate', // Could be 'delayed' if days after checkout
+                    deviceType: this.detectDevice(),
+                    language: navigator.language
+                };
+            }
+            
+            inferTripType() {
+                const source = this.params.get('source');
+                const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
+                
+                if (source === 'corporate' || (!isWeekend && !this.checkHoliday(new Date()))) {
+                    return 'business';
+                }
+                return 'leisure';
+            }
+            
+            inferNights() {
+                const checkin = this.params.get('checkin');
+                const checkout = this.params.get('checkout');
+                
+                if (checkin && checkout) {
+                    const nights = Math.ceil((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
+                    return nights > 0 ? nights : 2;
+                }
+                return Math.floor(Math.random() * 3) + 2; // Default 2-4 nights
+            }
+            
+            getTimeOfDay(hour) {
+                if (hour < 6) return 'night';
+                if (hour < 12) return 'morning';
+                if (hour < 17) return 'afternoon';
+                if (hour < 21) return 'evening';
+                return 'night';
+            }
+            
+            getSeason(month) {
+                if (month >= 2 && month <= 4) return 'spring';
+                if (month >= 5 && month <= 7) return 'summer';
+                if (month >= 8 && month <= 10) return 'fall';
+                return 'winter';
+            }
+            
+            checkHoliday(date) {
+                // Simple holiday check - could be expanded
+                const month = date.getMonth();
+                const day = date.getDate();
+                
+                // Christmas season
+                if (month === 11 && day >= 20) return true;
+                // New Year
+                if (month === 0 && day <= 3) return true;
+                // Summer vacation (July-August)
+                if (month === 6 || month === 7) return true;
+                
+                return false;
+            }
+            
+            detectDevice() {
+                const userAgent = navigator.userAgent.toLowerCase();
+                if (/mobile|android|iphone/.test(userAgent)) return 'mobile';
+                if (/tablet|ipad/.test(userAgent)) return 'tablet';
+                return 'desktop';
+            }
+            
+            getTodayString() {
+                return new Date().toISOString().split('T')[0];
+            }
+            
+            getContextualHighlights() {
+                const baseHighlights = [
+                    { id: 'staff', icon: '👥', label: 'Friendly Staff', recommended: true },
+                    { id: 'room', icon: '🛏️', label: 'Comfortable Room', recommended: true },
+                    { id: 'location', icon: '📍', label: 'Great Location', recommended: false },
+                    { id: 'cleanliness', icon: '✨', label: 'Spotless Clean', recommended: true }
+                ];
+                
+                // Add context-specific highlights
+                if (this.context.tripType === 'business') {
+                    baseHighlights.push(
+                        { id: 'wifi', icon: '📶', label: 'Fast WiFi', recommended: true },
+                        { id: 'workspace', icon: '💻', label: 'Work Area', recommended: true },
+                        { id: 'quiet', icon: '🔇', label: 'Quiet Environment', recommended: false }
+                    );
+                } else if (this.context.tripType === 'leisure') {
+                    baseHighlights.push(
+                        { id: 'pool', icon: '🏊', label: 'Pool & Spa', recommended: false },
+                        { id: 'dining', icon: '🍽️', label: 'Restaurant', recommended: false },
+                        { id: 'activities', icon: '🎯', label: 'Activities', recommended: false }
+                    );
+                } else if (this.context.tripType === 'family') {
+                    baseHighlights.push(
+                        { id: 'family', icon: '👨‍👩‍👧‍👦', label: 'Family Friendly', recommended: true },
+                        { id: 'spacious', icon: '🏠', label: 'Spacious', recommended: false },
+                        { id: 'kids', icon: '🧸', label: 'Kids Activities', recommended: false }
+                    );
+                } else if (this.context.tripType === 'romance') {
+                    baseHighlights.push(
+                        { id: 'romantic', icon: '💕', label: 'Romantic Atmosphere', recommended: true },
+                        { id: 'privacy', icon: '🔒', label: 'Privacy', recommended: false },
+                        { id: 'special', icon: '🌹', label: 'Special Touches', recommended: true }
+                    );
+                }
+                
+                // Time-based highlights
+                if (this.context.timeOfDay === 'morning') {
+                    baseHighlights.push({ id: 'breakfast', icon: '🍳', label: 'Delicious Breakfast', recommended: true });
+                }
+                
+                // Season-based highlights
+                if (this.context.season === 'summer') {
+                    baseHighlights.push({ id: 'cooling', icon: '❄️', label: 'Great AC', recommended: false });
+                } else if (this.context.season === 'winter') {
+                    baseHighlights.push({ id: 'heating', icon: '🔥', label: 'Cozy & Warm', recommended: false });
+                }
+                
+                return baseHighlights;
+            }
+            
+            updateUI() {
+                // Update context banner
+                const greeting = this.getContextualGreeting();
+                document.getElementById('contextGreeting').textContent = greeting.title;
+                document.getElementById('contextDetails').textContent = greeting.subtitle;
+                
+                // Update welcome section
+                document.getElementById('contextSubtitle').textContent = this.getContextualSubtitle();
+                
+                // Update context info
+                const contextInfo = document.getElementById('contextInfo');
+                contextInfo.innerHTML = this.getContextInfoHTML();
+                
+                // Update social proof
+                this.updateSocialProof();
+                
+                // Update highlights
+                this.renderHighlights();
+                
+                // Show time-based prompts
+                this.showTimePrompt();
+            }
+            
+            getContextualGreeting() {
+                const greetings = {
+                    morning: {
+                        title: 'Good Morning! ☀️',
+                        subtitle: 'We hope you had a restful night'
+                    },
+                    afternoon: {
+                        title: 'Good Afternoon! 🌤️',
+                        subtitle: 'Thank you for taking time to share your experience'
+                    },
+                    evening: {
+                        title: 'Good Evening! 🌙',
+                        subtitle: 'We appreciate you sharing your thoughts'
+                    },
+                    night: {
+                        title: 'Good Evening! ✨',
+                        subtitle: 'Thank you for your feedback before retiring'
+                    }
+                };
+                
+                return greetings[this.context.timeOfDay];
+            }
+            
+            getContextualSubtitle() {
+                if (this.context.tripType === 'business') {
+                    return 'Your feedback helps us serve business travelers better';
+                } else if (this.context.tripType === 'family') {
+                    return 'We hope your family enjoyed their stay';
+                } else if (this.context.tripType === 'romance') {
+                    return 'We hope we made your special occasion memorable';
+                }
+                return 'Your feedback helps us maintain excellence';
+            }
+            
+            getContextInfoHTML() {
+                let info = '<p>';
+                
+                if (this.context.returnGuest) {
+                    info += 'Welcome back! ';
+                }
+                
+                if (this.context.nights) {
+                    info += `Thank you for staying with us for <strong>${this.context.nights} nights</strong>. `;
+                }
+                
+                if (this.context.tripType) {
+                    const tripLabels = {
+                        business: 'business trip',
+                        leisure: 'vacation',
+                        family: 'family vacation',
+                        romance: 'romantic getaway'
+                    };
+                    info += `We hope your <strong>${tripLabels[this.context.tripType]}</strong> was wonderful.`;
+                }
+                
+                info += '</p>';
+                return info;
+            }
+            
+            updateSocialProof() {
+                // Update stats based on context
+                if (this.context.tripType === 'business') {
+                    document.getElementById('contextStat1').innerHTML = `
+                        <span class="proof-context">This Week</span>
+                        <span class="proof-number">147</span>
+                        <span class="proof-label">Business Travelers</span>
+                    `;
+                } else if (this.context.tripType === 'family') {
+                    document.getElementById('contextStat1').innerHTML = `
+                        <span class="proof-context">This Month</span>
+                        <span class="proof-number">89</span>
+                        <span class="proof-label">Families Stayed</span>
+                    `;
+                }
+                
+                // Update time context
+                const timeContext = document.getElementById('timeContext');
+                if (this.context.timeOfDay === 'morning') {
+                    timeContext.innerHTML = `
+                        <span class="proof-number">12</span>
+                        <span class="proof-label">Reviews This Morning</span>
+                    `;
+                }
+            }
+            
+            renderHighlights() {
+                const highlights = this.getContextualHighlights();
+                const grid = document.getElementById('highlightsGrid');
+                
+                grid.innerHTML = highlights.map(h => `
+                    <button class="highlight-chip ${h.recommended ? 'recommended' : ''}" 
+                            onclick="toggleHighlight(this, '${h.id}')">
+                        <span class="highlight-icon">${h.icon}</span>
+                        <span>${h.label}</span>
+                    </button>
+                `).join('');
+            }
+            
+            showTimePrompt() {
+                const prompt = document.getElementById('timePrompt');
+                
+                if (this.context.timeOfDay === 'morning') {
+                    prompt.style.display = 'flex';
+                    prompt.innerHTML = `
+                        <span class="time-icon">🌅</span>
+                        <span class="time-text">Good morning! How was your breakfast experience today?</span>
+                    `;
+                } else if (this.context.timeOfDay === 'evening' && this.context.tripType === 'romance') {
+                    prompt.style.display = 'flex';
+                    prompt.innerHTML = `
+                        <span class="time-icon">🌹</span>
+                        <span class="time-text">We hope you enjoyed a romantic evening at our restaurant!</span>
+                    `;
+                }
+            }
+        }
+        
+        // Sentiment Engine
+        class SentimentEngine {
+            constructor() {
+                this.selectedMood = null;
+                this.selectedTripType = null;
+                this.sentimentMap = {
+                    delighted: { enthusiasm: 0.9, formality: 0.3, detail: 0.8 },
+                    satisfied: { enthusiasm: 0.6, formality: 0.5, detail: 0.6 },
+                    professional: { enthusiasm: 0.4, formality: 0.9, detail: 0.7 },
+                    relaxed: { enthusiasm: 0.5, formality: 0.2, detail: 0.5 }
+                };
+            }
+            
+            analyzeSentiment(selections) {
+                // Analyze mood, trip type, and selections to determine tone
+                const sentiment = this.sentimentMap[this.selectedMood] || this.sentimentMap.satisfied;
+                
+                // Adjust based on trip type
+                if (this.selectedTripType === 'business') {
+                    sentiment.formality += 0.2;
+                    sentiment.enthusiasm -= 0.1;
+                } else if (this.selectedTripType === 'romance') {
+                    sentiment.enthusiasm += 0.2;
+                    sentiment.detail += 0.1;
+                }
+                
+                // Normalize values
+                Object.keys(sentiment).forEach(key => {
+                    sentiment[key] = Math.min(Math.max(sentiment[key], 0), 1);
+                });
+                
+                return sentiment;
+            }
+            
+            generateTone(sentiment) {
+                if (sentiment.enthusiasm > 0.7 && sentiment.formality < 0.5) {
+                    return 'enthusiastic-casual';
+                } else if (sentiment.enthusiasm > 0.7 && sentiment.formality > 0.5) {
+                    return 'enthusiastic-formal';
+                } else if (sentiment.formality > 0.7) {
+                    return 'professional';
+                } else if (sentiment.enthusiasm < 0.5 && sentiment.formality < 0.5) {
+                    return 'relaxed';
+                } else {
+                    return 'balanced';
+                }
+            }
+        }
+        
+        // Enhanced Natural Review Builder with Context
+        class ContextualReviewBuilder {
+            constructor() {
+                this.contextTemplates = {
+                    business: {
+                        openings: [
+                            "During my recent business trip to Grand Hotel, I found everything I needed for a productive stay.",
+                            "Grand Hotel proved to be an excellent choice for my business travel needs.",
+                            "As a business traveler, I was impressed with Grand Hotel's professional service.",
+                            "My work trip to Grand Hotel exceeded my professional requirements."
+                        ],
+                        closings: [
+                            "I'll definitely choose Grand Hotel for future business trips.",
+                            "Highly recommend for business travelers.",
+                            "An excellent choice for professional stays.",
+                            "Will be my go-to for business travel in this area."
+                        ]
+                    },
+                    leisure: {
+                        openings: [
+                            "Our vacation at Grand Hotel was absolutely wonderful!",
+                            "Grand Hotel made our getaway truly special.",
+                            "What a fantastic holiday experience at Grand Hotel!",
+                            "Our leisure stay at Grand Hotel was everything we hoped for."
+                        ],
+                        closings: [
+                            "Can't wait for our next vacation here!",
+                            "Already planning our return trip!",
+                            "The perfect vacation spot!",
+                            "Highly recommend for a relaxing getaway!"
+                        ]
+                    },
+                    romance: {
+                        openings: [
+                            "Grand Hotel created the perfect romantic atmosphere for our special occasion.",
+                            "Our romantic getaway at Grand Hotel was absolutely magical.",
+                            "Grand Hotel made our anniversary celebration unforgettable.",
+                            "We couldn't have chosen a better place for our romantic escape."
+                        ],
+                        closings: [
+                            "Thank you for making our special occasion so memorable!",
+                            "The perfect romantic destination!",
+                            "We'll treasure these memories forever!",
+                            "Already dreaming of our next romantic stay!"
+                        ]
+                    },
+                    family: {
+                        openings: [
+                            "Grand Hotel was perfect for our family vacation!",
+                            "Our family had an amazing time at Grand Hotel.",
+                            "Grand Hotel exceeded our expectations for a family-friendly stay.",
+                            "The kids and adults alike loved Grand Hotel!"
+                        ],
+                        closings: [
+                            "The whole family is already asking when we can come back!",
+                            "Highly recommend for families!",
+                            "Perfect for a family getaway!",
+                            "We'll definitely bring the family back!"
+                        ]
+                    }
+                };
+                
+                this.seasonalPhrases = {
+                    summer: ["enjoyed the pool", "perfect for summer", "great escape from the heat"],
+                    winter: ["cozy and warm", "perfect winter retreat", "wonderful holiday atmosphere"],
+                    spring: ["beautiful spring weather", "lovely time of year to visit", "fresh and renewed"],
+                    fall: ["gorgeous autumn colors", "perfect fall getaway", "seasonal charm"]
+                };
+                
+                this.timeAwarePhrases = {
+                    morning: ["wonderful breakfast", "great start to each day", "morning service was excellent"],
+                    evening: ["lovely dinner", "evening atmosphere", "relaxing evenings"],
+                    night: ["peaceful nights", "slept wonderfully", "quiet and restful"]
+                };
+            }
+            
+            generateContextualReview(context, sentiment, highlights, staffName, comments) {
+                const tripType = context.tripType || 'leisure';
+                const templates = this.contextTemplates[tripType];
+                const tone = sentiment.generateTone(sentiment.analyzeSentiment(highlights));
+                
+                let review = "";
+                
+                // Context-aware opening
+                review += templates.openings[Math.floor(Math.random() * templates.openings.length)] + " ";
+                
+                // Add seasonal context if relevant
+                if (context.season && Math.random() > 0.6) {
+                    const seasonalPhrase = this.seasonalPhrases[context.season];
+                    if (seasonalPhrase) {
+                        review += "The " + seasonalPhrase[Math.floor(Math.random() * seasonalPhrase.length)] + ". ";
+                    }
+                }
+                
+                // Add highlights with context-appropriate language
+                if (highlights.length > 0) {
+                    review += this.buildHighlightSection(highlights, tone, context) + " ";
+                }
+                
+                // Add time-aware elements
+                if (context.timeOfDay && this.timeAwarePhrases[context.timeOfDay] && Math.random() > 0.5) {
+                    const timePhrase = this.timeAwarePhrases[context.timeOfDay];
+                    review += "The " + timePhrase[Math.floor(Math.random() * timePhrase.length)] + ". ";
+                }
+                
+                // Add staff recognition
+                if (staffName) {
+                    review += this.getStaffRecognition(staffName, tone) + " ";
+                }
+                
+                // Add personal comments
+                if (comments) {
+                    review += comments + " ";
+                }
+                
+                // Add nights stayed if available
+                if (context.nights && Math.random() > 0.6) {
+                    review += `Our ${context.nights}-night stay was just the right length. `;
+                }
+                
+                // Context-aware closing
+                review += templates.closings[Math.floor(Math.random() * templates.closings.length)];
+                
+                return review;
+            }
+            
+            buildHighlightSection(highlights, tone, context) {
+                // Build natural highlight descriptions based on tone and context
+                const phrases = [];
+                
+                highlights.forEach(highlight => {
+                    // Get appropriate phrase based on tone
+                    const phraseVariations = this.getHighlightPhrase(highlight, tone, context);
+                    phrases.push(phraseVariations);
+                });
+                
+                // Join phrases naturally
+                if (phrases.length === 1) {
+                    return phrases[0];
+                } else if (phrases.length === 2) {
+                    return phrases[0] + " and " + phrases[1];
+                } else {
+                    const last = phrases.pop();
+                    return phrases.join(", ") + ", and " + last;
+                }
+            }
+            
+            getHighlightPhrase(highlight, tone, context) {
+                const variations = {
+                    staff: {
+                        'enthusiastic-casual': "The staff were absolutely amazing",
+                        'professional': "The service was highly professional",
+                        'relaxed': "Everyone was so friendly and helpful"
+                    },
+                    room: {
+                        'enthusiastic-casual': "Our room was fantastic",
+                        'professional': "The accommodations met all expectations",
+                        'relaxed': "Really enjoyed the comfortable room"
+                    },
+                    wifi: {
+                        'professional': "The WiFi connectivity was excellent for work",
+                        'default': "Great internet connection"
+                    },
+                    breakfast: {
+                        'enthusiastic-casual': "Breakfast was delicious every morning",
+                        'professional': "The breakfast selection was comprehensive",
+                        'relaxed': "Loved starting each day with breakfast"
+                    }
+                };
+                
+                return variations[highlight]?.[tone] || variations[highlight]?.['default'] || `The ${highlight} was great`;
+            }
+            
+            getStaffRecognition(name, tone) {
+                const recognitions = {
+                    'enthusiastic-casual': `${name} was absolutely wonderful and made our stay extra special!`,
+                    'professional': `I'd like to commend ${name} for their exceptional service.`,
+                    'relaxed': `Big thanks to ${name} who was super helpful.`,
+                    'balanced': `Special recognition to ${name} for excellent service.`
+                };
+                
+                return recognitions[tone] || recognitions['balanced'];
+            }
+        }
+        
+        // Initialize systems
+        const contextIntelligence = new ContextIntelligence();
+        const sentimentEngine = new SentimentEngine();
+        const reviewBuilder = new ContextualReviewBuilder();
+        
+        // State management
+        let selectedHighlights = [];
+        
+        // UI Functions
+        function selectMood(mood) {
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.closest('.mood-btn').classList.add('selected');
+            sentimentEngine.selectedMood = mood;
+            
+            // Update UI based on mood
+            updateUIForMood(mood);
+        }
+        
+        function selectTripType(type) {
+            document.querySelectorAll('.trip-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.trip-type-card').classList.add('selected');
+            sentimentEngine.selectedTripType = type;
+            contextIntelligence.context.tripType = type;
+            
+            // Update highlights for trip type
+            contextIntelligence.renderHighlights();
+        }
+        
+        function toggleHighlight(button, highlight) {
+            button.classList.toggle('selected');
+            
+            if (selectedHighlights.includes(highlight)) {
+                selectedHighlights = selectedHighlights.filter(h => h !== highlight);
+            } else {
+                selectedHighlights.push(highlight);
+            }
+        }
+        
+        function updateUIForMood(mood) {
+            const container = document.querySelector('.container');
+            
+            if (mood === 'delighted') {
+                container.style.setProperty('--hotel-primary', '#6b46c1');
+                container.style.setProperty('--hotel-accent', '#fbbf24');
+            } else if (mood === 'professional') {
+                container.style.setProperty('--hotel-primary', '#1e40af');
+                container.style.setProperty('--hotel-accent', '#94a3b8');
+            }
+        }
+        
+        function generateContextualFeedback() {
+            const staffName = document.getElementById('staffName').value;
+            const comments = document.getElementById('personalComments').value;
+            
+            // Generate contextual review
+            const review = reviewBuilder.generateContextualReview(
+                contextIntelligence.context,
+                sentimentEngine,
+                selectedHighlights,
+                staffName,
+                comments
+            );
+            
+            // Display review
+            document.getElementById('reviewText').textContent = review;
+            document.getElementById('feedbackOutput').style.display = 'block';
+            
+            // Update metadata
+            updateReviewMetadata();
+            
+            // Calculate and show quality score
+            calculateQualityScore();
+            
+            // Smooth scroll
+            document.getElementById('feedbackOutput').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }
+        
+        function updateReviewMetadata() {
+            const context = contextIntelligence.context;
+            
+            document.getElementById('tripTag').textContent = 
+                context.tripType.charAt(0).toUpperCase() + context.tripType.slice(1) + ' Trip';
+            document.getElementById('seasonTag').textContent = 
+                context.season.charAt(0).toUpperCase() + context.season.slice(1) + ' Stay';
+            document.getElementById('lengthTag').textContent = 
+                context.nights + ' Nights';
+            document.getElementById('sentimentTag').textContent = 
+                (sentimentEngine.selectedMood || 'Balanced') + ' Tone';
+        }
+        
+        function calculateQualityScore() {
+            let score = 50; // Base score
+            
+            // Add points for various factors
+            if (selectedHighlights.length >= 3) score += 20;
+            if (document.getElementById('staffName').value) score += 15;
+            if (document.getElementById('personalComments').value) score += 15;
+            if (sentimentEngine.selectedMood) score += 10;
+            if (sentimentEngine.selectedTripType) score += 10;
+            
+            // Cap at 100
+            score = Math.min(score, 100);
+            
+            // Update UI
+            document.getElementById('qualityFill').style.width = score + '%';
+            
+            if (score >= 90) {
+                document.getElementById('qualityLabel').textContent = 'Excellent';
+            } else if (score >= 70) {
+                document.getElementById('qualityLabel').textContent = 'Very Good';
+            } else {
+                document.getElementById('qualityLabel').textContent = 'Good';
+            }
+        }
+        
+        function copyFeedback() {
+            const reviewText = document.getElementById('reviewText').textContent;
+            navigator.clipboard.writeText(reviewText).then(() => {
+                event.target.innerHTML = '<span>✓</span><span>Copied!</span>';
+                setTimeout(() => {
+                    event.target.innerHTML = '<span>📋</span><span>Copy Text</span>';
+                }, 2000);
+            });
+        }
+        
+        function improveQuality() {
+            // Add more detail to the review
+            alert('Try adding more specific details about your stay to enhance your review!');
+        }
+        
+        function shareOnPlatform() {
+            window.open('https://www.tripadvisor.com', '_blank');
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            contextIntelligence.updateUI();
+            
+            // Auto-select trip type if in URL
+            if (contextIntelligence.context.tripType) {
+                const card = document.querySelector(`.trip-type-card.${contextIntelligence.context.tripType}`);
+                if (card) {
+                    card.classList.add('selected');
+                    sentimentEngine.selectedTripType = contextIntelligence.context.tripType;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
