@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Experience Portal - Share Your Story</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Advanced Progress System */
+        .progress-container {
+            background: linear-gradient(to right, #f9fafb, #f3f4f6);
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .progress-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        
+        .progress-stats {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .progress-percentage {
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .ai-indicator.active {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Header Section */
+        .header {
+            padding: 32px 40px;
+            text-align: center;
+            background: linear-gradient(to bottom, #f9fafb, white);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .hotel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        .hotel-badge .verified {
+            color: var(--success);
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            font-size: clamp(24px, 4vw, 32px);
+            margin-bottom: 12px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Content Section */
+        .content {
+            padding: 32px 40px;
+        }
+        
+        /* Rating Component with Emotion Detection */
+        .form-group {
+            margin-bottom: 28px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .rating-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .rating-star {
+            font-size: 36px;
+            color: #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            padding: 8px;
+        }
+        
+        .rating-star:hover {
+            transform: scale(1.1);
+        }
+        
+        .rating-star.filled {
+            color: #fbbf24;
+        }
+        
+        .rating-star.filled::after {
+            content: attr(data-emotion);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        
+        /* Smart Highlights with Categories */
+        .highlights-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 28px;
+        }
+        
+        .highlight-category {
+            margin-bottom: 16px;
+        }
+        
+        .highlight-category:last-child {
+            margin-bottom: 0;
+        }
+        
+        .category-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .highlight-chip {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 100px;
+            font-size: 14px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+            overflow: hidden;
+            word-break: keep-all;
+            white-space: nowrap;
+        }
+        
+        .highlight-chip:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .highlight-chip.selected {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .highlight-chip .emoji {
+            margin-right: 6px;
+        }
+        
+        /* Advanced Review Composer */
+        .review-composer {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 28px;
+            position: relative;
+        }
+        
+        .composer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .composer-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: 100px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        
+        .ai-status.generating {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        .review-display {
+            min-height: 180px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-size: 15px;
+            position: relative;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+        
+        .review-display.typing {
+            animation: typewriter 0.3s ease;
+        }
+        
+        @keyframes typewriter {
+            from { opacity: 0.7; transform: translateY(2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .review-placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .review-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .review-quality {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .quality-indicators {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .quality-metric {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+        
+        .metric-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        .metric-value {
+            padding: 2px 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .metric-value.high {
+            background: #d1fae5;
+            color: #047857;
+        }
+        
+        .metric-value.medium {
+            background: #fed7aa;
+            color: #c2410c;
+        }
+        
+        .metric-value.low {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .regenerate-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .regenerate-btn:hover {
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+        }
+        
+        /* Voice Tone Selector */
+        .voice-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        
+        .voice-option {
+            padding: 12px 8px;
+            text-align: center;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .voice-option:hover {
+            border-color: var(--primary);
+        }
+        
+        .voice-option.selected {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .voice-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .voice-label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* Submit Section */
+        .submit-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid var(--border);
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgb(99 102 241 / 0.25);
+        }
+        
+        .submit-button:active {
+            transform: translateY(0);
+        }
+        
+        /* Preview Modal */
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .preview-modal.show {
+            display: flex;
+        }
+        
+        .preview-content {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .preview-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .preview-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .preview-close:hover {
+            background: var(--border);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 16px;
+                min-height: 100vh;
+            }
+            
+            .header {
+                padding: 24px 20px;
+            }
+            
+            .content {
+                padding: 24px 20px;
+            }
+            
+            .progress-container {
+                padding: 16px 20px;
+            }
+            
+            .rating-container {
+                gap: 8px;
+                justify-content: center;
+            }
+            
+            .rating-star {
+                font-size: 32px;
+                padding: 4px;
+            }
+            
+            .voice-selector {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 12px;
+            }
+            
+            .voice-option {
+                padding: 10px 4px;
+            }
+            
+            .voice-icon {
+                font-size: 18px;
+            }
+            
+            .highlights-section {
+                padding: 16px;
+            }
+            
+            .review-composer {
+                padding: 16px;
+            }
+            
+            .review-display {
+                min-height: 160px;
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .preview-content {
+                padding: 24px;
+                margin: 10px;
+            }
+            
+            .form-label {
+                font-size: 14px;
+            }
+            
+            .highlight-chips {
+                gap: 6px;
+            }
+            
+            .highlight-chip {
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .progress-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .voice-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .composer-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .quality-indicators {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Container -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <div class="progress-title">Creating Your Review</div>
+                <div class="progress-stats">
+                    <div class="progress-percentage">0%</div>
+                    <div class="ai-indicator">
+                        <span>✨</span>
+                        <span>Human-Like AI</span>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-bar" style="height: 6px; background: #e5e7eb; border-radius: 100px; overflow: hidden;">
+                <div class="progress-fill" style="height: 100%; background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%); width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+        </div>
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="hotel-badge">
+                <span class="verified">✓</span>
+                <span>Verified Guest</span>
+            </div>
+            <h1>Share Your Experience</h1>
+            <p class="subtitle">Your story helps future guests and improves our service</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Rating Section -->
+            <div class="form-group">
+                <label class="form-label">How was your overall experience?</label>
+                <div class="rating-container" id="ratingContainer">
+                    <span class="rating-star" data-rating="1" data-emotion="Disappointed">☆</span>
+                    <span class="rating-star" data-rating="2" data-emotion="Below Average">☆</span>
+                    <span class="rating-star" data-rating="3" data-emotion="Acceptable">☆</span>
+                    <span class="rating-star" data-rating="4" data-emotion="Great">☆</span>
+                    <span class="rating-star" data-rating="5" data-emotion="Outstanding">☆</span>
+                </div>
+            </div>
+            
+            <!-- Voice Tone Selector -->
+            <div class="voice-selector" id="voiceSelector" style="display: none;">
+                <div class="voice-option" data-voice="professional">
+                    <div class="voice-icon">💼</div>
+                    <div class="voice-label">Professional</div>
+                </div>
+                <div class="voice-option selected" data-voice="friendly">
+                    <div class="voice-icon">😊</div>
+                    <div class="voice-label">Friendly</div>
+                </div>
+                <div class="voice-option" data-voice="enthusiastic">
+                    <div class="voice-icon">🎉</div>
+                    <div class="voice-label">Enthusiastic</div>
+                </div>
+                <div class="voice-option" data-voice="detailed">
+                    <div class="voice-icon">📝</div>
+                    <div class="voice-label">Detailed</div>
+                </div>
+            </div>
+            
+            <!-- Smart Highlights -->
+            <div class="highlights-section" id="highlightsSection" style="display: none;">
+                <div class="form-label">What stood out during your stay?</div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Service & Staff</div>
+                    <div class="highlight-chips" id="serviceHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Room & Comfort</div>
+                    <div class="highlight-chips" id="roomHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Amenities & Facilities</div>
+                    <div class="highlight-chips" id="amenityHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+                
+                <div class="highlight-category">
+                    <div class="category-title">Location & Value</div>
+                    <div class="highlight-chips" id="locationHighlights">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Advanced Review Composer -->
+            <div class="review-composer" id="reviewComposer" style="display: none;">
+                <div class="composer-header">
+                    <div class="composer-title">📝 Your Generated Review</div>
+                    <div class="ai-status" id="aiStatus">
+                        <span>✨</span>
+                        <span>AI Ready</span>
+                    </div>
+                </div>
+                
+                <div class="review-display" id="reviewDisplay">
+                    <div class="review-placeholder">Your personalized review will appear here...</div>
+                </div>
+                
+                <div class="review-quality">
+                    <div class="quality-indicators">
+                        <div class="quality-metric">
+                            <span class="metric-label">Authenticity:</span>
+                            <span class="metric-value high" id="authenticityScore">High</span>
+                        </div>
+                        <div class="quality-metric">
+                            <span class="metric-label">Detail:</span>
+                            <span class="metric-value high" id="detailScore">Rich</span>
+                        </div>
+                        <div class="quality-metric">
+                            <span class="metric-label">Readability:</span>
+                            <span class="metric-value high" id="readabilityScore">Natural</span>
+                        </div>
+                    </div>
+                    <button class="regenerate-btn" id="regenerateBtn">
+                        <span>🔄</span>
+                        <span>Regenerate</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Submit Section -->
+            <div class="submit-section" id="submitSection" style="display: none;">
+                <button class="submit-button" id="submitButton">
+                    Review & Submit Your Feedback
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2 class="preview-title">Review Your Feedback</h2>
+                <button class="preview-close" id="closePreview">✕</button>
+            </div>
+            <div id="previewBody">
+                <!-- Preview content inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="src/js/human-like-nlg-engine.js"></script>
+    <script>
+        // Enhanced Human-Like Review Generation System
+        class HumanReviewPortal {
+            constructor() {
+                this.nlgEngine = new HumanLikeNLGEngine();
+                this.state = {
+                    rating: 0,
+                    voice: 'friendly',
+                    highlights: [],
+                    reviewText: '',
+                    context: this.detectContext(),
+                    generationCount: 0,
+                    isGenerating: false
+                };
+                
+                this.init();
+            }
+            
+            detectContext() {
+                const params = new URLSearchParams(window.location.search);
+                const date = new Date();
+                
+                return {
+                    hotelName: params.get('hotel') || 'Grand Hotel',
+                    tripType: params.get('tripType') || 'leisure',
+                    duration: parseInt(params.get('nights')) || Math.floor(Math.random() * 3) + 2,
+                    checkIn: this.formatDate(new Date(Date.now() - 86400000 * 3)),
+                    checkOut: this.formatDate(date),
+                    companion: this.getCompanion(params.get('tripType')),
+                    occasion: this.getOccasion(params.get('tripType'))
+                };
+            }
+            
+            getCompanion(tripType) {
+                const companions = {
+                    leisure: ['partner', 'family', 'friends'],
+                    business: ['colleague', 'team'],
+                    romantic: ['partner', 'spouse'],
+                    family: ['kids', 'parents', 'extended family']
+                };
+                const options = companions[tripType] || companions.leisure;
+                return options[Math.floor(Math.random() * options.length)];
+            }
+            
+            getOccasion(tripType) {
+                const occasions = {
+                    leisure: ['weekend getaway', 'vacation', 'city break'],
+                    business: ['conference', 'client meeting', 'team retreat'],
+                    romantic: ['anniversary', 'celebration', 'special occasion'],
+                    family: ['reunion', 'holiday', 'celebration']
+                };
+                const options = occasions[tripType] || occasions.leisure;
+                return options[Math.floor(Math.random() * options.length)];
+            }
+            
+            formatDate(date) {
+                const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+                return `${months[date.getMonth()]} ${date.getDate()}`;
+            }
+            
+            init() {
+                this.setupRating();
+                this.setupVoiceSelector();
+                this.setupHighlights();
+                this.setupRegenerate();
+                this.setupSubmit();
+            }
+            
+            setupRating() {
+                const stars = document.querySelectorAll('.rating-star');
+                
+                stars.forEach(star => {
+                    star.addEventListener('click', () => {
+                        const rating = parseInt(star.dataset.rating);
+                        this.state.rating = rating;
+                        
+                        // Update visual immediately
+                        stars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.textContent = '★';
+                                s.classList.add('filled');
+                            } else {
+                                s.textContent = '☆';
+                                s.classList.remove('filled');
+                            }
+                        });
+                        
+                        // Show next sections
+                        document.getElementById('voiceSelector').style.display = 'grid';
+                        document.getElementById('highlightsSection').style.display = 'block';
+                        document.getElementById('reviewComposer').style.display = 'block';
+                        document.getElementById('submitSection').style.display = 'block';
+                        
+                        this.populateHighlights();
+                        this.updateProgress(25);
+                        
+                        // Generate initial review with human-like NLG
+                        this.generateHumanLikeReview();
+                    });
+                });
+            }
+            
+            setupVoiceSelector() {
+                const options = document.querySelectorAll('.voice-option');
+                
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        options.forEach(o => o.classList.remove('selected'));
+                        option.classList.add('selected');
+                        this.state.voice = option.dataset.voice;
+                        this.generateHumanLikeReview();
+                    });
+                });
+            }
+            
+            populateHighlights() {
+                const categories = {
+                    service: [
+                        { id: 'staff', text: '👥 Helpful Staff' },
+                        { id: 'checkin', text: '✓ Smooth Check-in' },
+                        { id: 'concierge', text: '🎯 Great Concierge' },
+                        { id: 'housekeeping', text: '🧹 Excellent Housekeeping' },
+                        { id: 'responsive', text: '⚡ Quick Response' },
+                        { id: 'personal', text: '💝 Personal Touch' }
+                    ],
+                    room: [
+                        { id: 'comfort', text: '🛏️ Comfortable Bed' },
+                        { id: 'clean', text: '✨ Spotlessly Clean' },
+                        { id: 'view', text: '🌅 Great Views' },
+                        { id: 'quiet', text: '🔇 Quiet Room' },
+                        { id: 'spacious', text: '📐 Spacious' },
+                        { id: 'modern', text: '🆕 Modern Decor' }
+                    ],
+                    amenities: [
+                        { id: 'breakfast', text: '🍳 Excellent Breakfast' },
+                        { id: 'pool', text: '🏊 Nice Pool' },
+                        { id: 'gym', text: '💪 Well-equipped Gym' },
+                        { id: 'wifi', text: '📶 Fast WiFi' },
+                        { id: 'spa', text: '💆 Relaxing Spa' },
+                        { id: 'bar', text: '🍸 Great Bar' }
+                    ],
+                    location: [
+                        { id: 'central', text: '📍 Central Location' },
+                        { id: 'transport', text: '🚇 Near Transport' },
+                        { id: 'restaurants', text: '🍽️ Great Restaurants' },
+                        { id: 'safe', text: '🔒 Safe Area' },
+                        { id: 'walkable', text: '🚶 Walkable' },
+                        { id: 'parking', text: '🚗 Easy Parking' }
+                    ]
+                };
+                
+                Object.entries(categories).forEach(([category, items]) => {
+                    const container = document.getElementById(`${category}Highlights`);
+                    container.innerHTML = '';
+                    
+                    items.forEach(item => {
+                        const chip = document.createElement('div');
+                        chip.className = 'highlight-chip';
+                        chip.dataset.id = item.id;
+                        chip.dataset.category = category;
+                        chip.innerHTML = item.text;
+                        
+                        chip.addEventListener('click', () => {
+                            chip.classList.toggle('selected');
+                            this.updateHighlights();
+                            this.generateHumanLikeReview();
+                        });
+                        
+                        container.appendChild(chip);
+                    });
+                });
+            }
+            
+            updateHighlights() {
+                const selected = document.querySelectorAll('.highlight-chip.selected');
+                this.state.highlights = Array.from(selected).map(chip => ({
+                    id: chip.dataset.id,
+                    category: chip.dataset.category,
+                    text: chip.textContent
+                }));
+                
+                const progress = Math.min(25 + (this.state.highlights.length * 10), 90);
+                this.updateProgress(progress);
+            }
+            
+            generateHumanLikeReview() {
+                if (this.state.isGenerating) return;
+                this.state.isGenerating = true;
+                
+                const aiStatus = document.getElementById('aiStatus');
+                const display = document.getElementById('reviewDisplay');
+                
+                // Show generating status
+                aiStatus.classList.add('generating');
+                aiStatus.innerHTML = '<span>✨</span><span>Crafting human-like text...</span>';
+                display.classList.add('typing');
+                
+                // Generate using the human-like NLG engine
+                const review = this.nlgEngine.generateHumanLikeReview(
+                    this.state.rating,
+                    this.state.highlights,
+                    this.state.voice,
+                    this.state.context
+                );
+                
+                // Simulate natural typing delay (but keep it fast)
+                setTimeout(() => {
+                    display.innerHTML = `<div class="review-text">${review}</div>`;
+                    display.classList.remove('typing');
+                    aiStatus.classList.remove('generating');
+                    aiStatus.innerHTML = '<span>✨</span><span>Human-like text generated</span>';
+                    
+                    // Update quality metrics
+                    this.updateQualityMetrics(review);
+                    
+                    // Store for submission
+                    this.state.reviewText = review;
+                    this.state.generationCount++;
+                    this.state.isGenerating = false;
+                    
+                    // Update progress
+                    if (review.length > 100) {
+                        this.updateProgress(100);
+                    }
+                }, 300);
+            }
+            
+            updateQualityMetrics(review) {
+                // Calculate authenticity based on variation and natural flow
+                const sentences = review.split(/[.!?]/).filter(s => s.trim());
+                const uniqueStarts = new Set(sentences.map(s => s.trim().split(' ').slice(0, 3).join(' ')));
+                const authenticityRatio = uniqueStarts.size / sentences.length;
+                
+                // Calculate detail level
+                const words = review.split(' ').length;
+                const detailLevel = words >= 200 ? 'Rich' : words >= 100 ? 'Good' : 'Basic';
+                
+                // Calculate readability (sentence length variation)
+                const sentenceLengths = sentences.map(s => s.trim().split(' ').length);
+                const avgLength = sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length;
+                const variance = sentenceLengths.map(l => Math.pow(l - avgLength, 2)).reduce((a, b) => a + b, 0) / sentenceLengths.length;
+                const readability = variance > 20 ? 'Natural' : variance > 10 ? 'Good' : 'Robotic';
+                
+                // Update UI
+                const authScore = document.getElementById('authenticityScore');
+                authScore.textContent = authenticityRatio > 0.8 ? 'High' : authenticityRatio > 0.6 ? 'Good' : 'Low';
+                authScore.className = `metric-value ${authenticityRatio > 0.8 ? 'high' : authenticityRatio > 0.6 ? 'medium' : 'low'}`;
+                
+                const detailScore = document.getElementById('detailScore');
+                detailScore.textContent = detailLevel;
+                detailScore.className = `metric-value ${words >= 200 ? 'high' : words >= 100 ? 'medium' : 'low'}`;
+                
+                const readScore = document.getElementById('readabilityScore');
+                readScore.textContent = readability;
+                readScore.className = `metric-value ${variance > 20 ? 'high' : variance > 10 ? 'medium' : 'low'}`;
+            }
+            
+            setupRegenerate() {
+                document.getElementById('regenerateBtn').addEventListener('click', () => {
+                    // Add variation by slightly modifying context
+                    this.state.context.variation = Date.now();
+                    this.generateHumanLikeReview();
+                });
+            }
+            
+            updateProgress(value) {
+                document.querySelector('.progress-percentage').textContent = `${value}%`;
+                document.querySelector('.progress-fill').style.width = `${value}%`;
+                
+                if (value >= 90) {
+                    document.querySelector('.ai-indicator').classList.add('active');
+                }
+            }
+            
+            setupSubmit() {
+                document.getElementById('submitButton').addEventListener('click', () => {
+                    this.showPreview();
+                });
+            }
+            
+            showPreview() {
+                const modal = document.getElementById('previewModal');
+                const body = document.getElementById('previewBody');
+                
+                body.innerHTML = `
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px;">RATING</div>
+                        <div style="font-size: 32px;">
+                            ${'★'.repeat(this.state.rating)}${'☆'.repeat(5 - this.state.rating)}
+                        </div>
+                    </div>
+                    
+                    ${this.state.highlights.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">HIGHLIGHTED FEATURES</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${this.state.highlights.map(h => `
+                                <span style="padding: 6px 12px; background: #f3f4f6; border-radius: 100px; font-size: 14px;">
+                                    ${h.text}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">YOUR REVIEW</div>
+                        <div style="padding: 20px; background: #f9fafb; border-radius: 12px; line-height: 1.8; white-space: pre-wrap; word-wrap: break-word;">
+                            ${this.state.reviewText}
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button onclick="document.getElementById('previewModal').classList.remove('show')" 
+                                style="flex: 1; min-width: 140px; padding: 14px; background: #f3f4f6; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                            Back to Edit
+                        </button>
+                        <button onclick="window.humanPortal.submitReview()" 
+                                style="flex: 1; min-width: 140px; padding: 14px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                            Submit Review
+                        </button>
+                    </div>
+                `;
+                
+                modal.classList.add('show');
+            }
+            
+            submitReview() {
+                document.getElementById('previewModal').classList.remove('show');
+                
+                alert('Review submitted successfully! Thank you for your authentic feedback.');
+                
+                console.log('Submitted human-like review:', {
+                    text: this.state.reviewText,
+                    rating: this.state.rating,
+                    highlights: this.state.highlights,
+                    voice: this.state.voice,
+                    metrics: {
+                        authenticity: document.getElementById('authenticityScore').textContent,
+                        detail: document.getElementById('detailScore').textContent,
+                        readability: document.getElementById('readabilityScore').textContent
+                    }
+                });
+            }
+        }
+        
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            window.humanPortal = new HumanReviewPortal();
+            
+            // Modal handlers
+            document.getElementById('closePreview').addEventListener('click', () => {
+                document.getElementById('previewModal').classList.remove('show');
+            });
+            
+            document.getElementById('previewModal').addEventListener('click', (e) => {
+                if (e.target.id === 'previewModal') {
+                    document.getElementById('previewModal').classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
