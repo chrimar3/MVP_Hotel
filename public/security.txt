@@ -1,0 +1,20 @@
+# Security Policy for Hotel Review Generator
+
+Contact: security@your-domain.com
+Expires: 2025-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://your-domain.com/security.txt
+
+# Vulnerability Disclosure
+We appreciate security researchers who help us keep our application secure.
+Please report security vulnerabilities responsibly.
+
+# Reporting
+Email: security@your-domain.com
+Response Time: 48 hours
+
+# Bug Bounty
+Currently not offering monetary rewards, but we acknowledge researchers in our Hall of Fame.
+
+# PGP Key (Optional)
+# Add your PGP public key here for encrypted communications

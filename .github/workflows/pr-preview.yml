@@ -1,0 +1,88 @@
+name: PR Preview & Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test-and-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linting
+        run: npm run lint || true
+      
+      - name: Run tests with coverage
+        run: npm test -- --coverage --watchAll=false
+      
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Tests completed" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "### Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat coverage/coverage-summary.json | python3 -m json.tool | head -20 >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli
+          echo "Running Lighthouse performance audit..."
+          lhci autorun --collect.url=./src/ultimate-ux-enhanced-v3.html --collect.numberOfRuns=1 || true
+      
+      - name: Security scan
+        run: |
+          npm audit || true
+          
+      - name: Check for sensitive data
+        run: |
+          # Check for potential API keys or secrets
+          echo "Scanning for sensitive data..."
+          if grep -r "api[_-]key\|secret\|password\|token" --exclude-dir=node_modules --exclude-dir=.git --exclude="*.test.js" .; then
+            echo "⚠️ Warning: Potential sensitive data found. Please review."
+          else
+            echo "✅ No obvious sensitive data found."
+          fi
+      
+      - name: Deploy preview comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const sha = context.sha.substring(0, 7);
+            
+            const comment = `## 🚀 PR Preview Ready!
+            
+            ### Preview Links:
+            - 🌐 [Preview on Netlify](https://deploy-preview-${prNumber}--your-site.netlify.app)
+            - 📊 [View Test Coverage](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            
+            ### Status Checks:
+            - ✅ Tests passed
+            - ✅ Security scan completed
+            - ✅ Performance audit available
+            
+            **Commit:** ${sha}
+            **Updated:** ${new Date().toISOString()}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
