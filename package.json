@@ -4,12 +4,22 @@
   "description": "Professional hotel review generator with automated testing",
   "main": "src/ultimate-ux-enhanced.html",
   "scripts": {
-    "test": "jest --config config/jest.config.js",
-    "test:watch": "jest --config config/jest.config.js --watch",
-    "test:coverage": "jest --config config/jest.config.js --coverage",
-    "test:ci": "jest --config config/jest.config.js --ci --coverage --watchAll=false",
+    "start": "npx http-server public -p 3000 -o",
+    "dev": "npx http-server public -p 3000 -c-1 --cors",
+    "build": "npm run lint && npm run test",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "test:ci": "jest --config jest.config.js --ci --coverage --watchAll=false",
+    "test:unit": "jest --config jest.config.js tests/unit",
+    "test:integration": "jest --config jest.config.js tests/integration",
+    "test:e2e": "jest --config jest.config.js tests/e2e",
     "lint": "eslint 'src/**/*.js'",
-    "format": "prettier --write 'src/**/*.{js,json,css,html}'"
+    "lint:fix": "eslint 'src/**/*.js' --fix",
+    "format": "prettier --write 'src/**/*.{js,json,css,html}'",
+    "format:check": "prettier --check 'src/**/*.{js,json,css,html}'",
+    "clean": "rm -rf dist coverage node_modules",
+    "serve": "python3 -m http.server 3000 --directory public"
   },
   "repository": {
     "type": "git",

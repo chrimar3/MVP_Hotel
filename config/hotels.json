@@ -1,0 +1,46 @@
+{
+  "hotels": {
+    "default": {
+      "name": "Grand Hotel",
+      "location": "City Center",
+      "rating": 5,
+      "amenities": ["Pool", "Spa", "Restaurant", "Bar", "Gym"],
+      "languages": ["en", "es", "fr", "de", "it"]
+    },
+    "properties": [
+      {
+        "id": "hotel-1",
+        "name": "Luxury Resort & Spa",
+        "location": "Beachfront",
+        "rating": 5,
+        "type": "resort"
+      },
+      {
+        "id": "hotel-2",
+        "name": "Business Hotel Downtown",
+        "location": "Business District",
+        "rating": 4,
+        "type": "business"
+      },
+      {
+        "id": "hotel-3",
+        "name": "Boutique Hotel",
+        "location": "Historic Quarter",
+        "rating": 4,
+        "type": "boutique"
+      }
+    ]
+  },
+  "api": {
+    "endpoint": "/api/reviews",
+    "version": "1.0",
+    "rateLimit": 100
+  },
+  "features": {
+    "aiReviews": true,
+    "multiLanguage": true,
+    "staffRecognition": true,
+    "analytics": true,
+    "mobileOptimized": true
+  }
+}

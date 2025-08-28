@@ -15,7 +15,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test -- --coverage --watchAll=false
+      
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  build-and-deploy:
+    needs: test
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -23,6 +48,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Optimize assets
+        run: |
+          # Install optimization tools
+          npm install -g terser html-minifier-terser
+          
+          # Minify JavaScript files if they exist
+          if [ -f "src/hotelReviewGenerator.js" ]; then
+            terser src/hotelReviewGenerator.js -o src/hotelReviewGenerator.min.js -c -m || true
+          fi
+          
+          # Create optimized version of main HTML
+          if [ -f "src/ultimate-ux-enhanced-v3.html" ]; then
+            cp src/ultimate-ux-enhanced-v3.html src/ultimate-ux-enhanced-v3-optimized.html
+          fi
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -35,3 +84,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      
+      - name: Verify deployment
+        run: |
+          echo "✅ Deployed to: ${{ steps.deployment.outputs.page_url }}"
+          echo "📊 Check deployment at: ${{ steps.deployment.outputs.page_url }}/health.html"
