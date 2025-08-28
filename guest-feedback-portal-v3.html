@@ -1023,10 +1023,21 @@
                 <div class="helper-text">Your detailed feedback helps future guests</div>
             </div>
             
+            <!-- Generated Review Preview -->
+            <div class="form-group" id="generatedReviewSection" style="display: none;">
+                <label class="form-label">📝 Your Generated Review</label>
+                <div style="padding: 15px; background: #f0fff4; border: 2px solid #48bb78; border-radius: 12px; margin-bottom: 15px;">
+                    <div id="liveGeneratedReview" style="line-height: 1.6; color: #22543d; min-height: 60px;">
+                        Your review will appear here as you make selections...
+                    </div>
+                </div>
+                <div class="helper-text">This is the review that will be submitted. You can edit the text above or write your own.</div>
+            </div>
+            
             <!-- Submit Section -->
             <div class="submit-section" id="submitSection" style="display: none;">
                 <button class="submit-button" id="submitButton">
-                    Complete Review & Earn Rewards
+                    Preview & Complete Review
                 </button>
                 <div class="submit-helper">
                     <span class="time-saved">⏱️ Average time: 2 minutes</span> • 
@@ -1310,6 +1321,10 @@
                             this.populateSuggestions();
                             this.updateProgress(25);
                             
+                            // Show generated review section
+                            document.getElementById('generatedReviewSection').style.display = 'block';
+                            this.updateLivePreview();
+                            
                             if (this.state.interactions === 1) {
                                 this.triggerAchievement('firstStar');
                             }
@@ -1399,6 +1414,9 @@
                 const progress = Math.min(25 + (this.state.highlights.length * 10), 60);
                 this.updateProgress(progress);
                 
+                // Update live preview
+                this.updateLivePreview();
+                
                 // Show motivator and review section after first selection
                 if (this.state.highlights.length === 1) {
                     setTimeout(() => {
@@ -1474,6 +1492,9 @@
                     const textProgress = Math.min((length / 200) * 20, 20);
                     const totalProgress = 25 + (this.state.highlights.length * 10) + textProgress;
                     this.updateProgress(Math.min(totalProgress, 95));
+                    
+                    // Update live preview
+                    this.updateLivePreview();
                 });
             }
             
@@ -1557,6 +1578,21 @@
                         modal.classList.remove('show');
                     }
                 });
+            }
+            
+            updateLivePreview() {
+                const livePreview = document.getElementById('liveGeneratedReview');
+                if (!livePreview) return;
+                
+                // Generate current review
+                const review = this.generateNaturalReview();
+                
+                // Animate the update
+                livePreview.style.opacity = '0.5';
+                setTimeout(() => {
+                    livePreview.textContent = review;
+                    livePreview.style.opacity = '1';
+                }, 100);
             }
             
             showPreview() {
@@ -1756,40 +1792,153 @@
             
             generateNaturalReview() {
                 const { rating, highlights, reviewText } = this.state;
-                const { tripType } = this.state.context;
+                const { tripType, stayLength } = this.state.context;
                 
-                // Build natural review from components
-                let review = reviewText || '';
+                // If user provided text, return it
+                if (reviewText && reviewText.trim()) {
+                    return reviewText;
+                }
                 
-                if (!review && highlights.length > 0) {
-                    // Auto-generate if no text provided
-                    const templates = {
+                // Generate review based on rating and highlights
+                if (!rating) {
+                    return "Please select a rating to generate your review.";
+                }
+                
+                // Get highlight texts
+                const highlightTexts = highlights
+                    .map(h => this.smartDefaults.find(s => s.id === h)?.text.substring(2))
+                    .filter(Boolean);
+                
+                // Templates based on rating and trip type
+                const templates = {
+                    business: {
                         5: [
-                            "Absolutely wonderful stay! ${highlights}. Highly recommend!",
-                            "Exceeded all expectations. ${highlights}. Will definitely return!",
-                            "Perfect in every way. ${highlights}. 10/10!"
+                            "Excellent business stay! ${highlights}The hotel exceeded my professional needs with outstanding ${context}. Will definitely book again for future business trips.",
+                            "Perfect for business travelers. ${highlights}${context} made this trip highly productive. Highly recommend for corporate stays!",
+                            "Outstanding business accommodation. ${highlights}Everything was optimized for efficiency and comfort. ${context}"
                         ],
                         4: [
-                            "Very good experience overall. ${highlights}. Would recommend.",
-                            "Great stay with minor room for improvement. ${highlights}.",
-                            "Enjoyed our time here. ${highlights}. Good value."
+                            "Very good business hotel. ${highlights}${context} with only minor areas for improvement. Would recommend to colleagues.",
+                            "Solid choice for business travel. ${highlights}${context}. Great value for corporate rates.",
+                            "Professional and comfortable. ${highlights}Met most business needs well. ${context}"
                         ],
                         3: [
-                            "Decent stay with pros and cons. ${highlights}.",
-                            "Average experience. ${highlights}. Met basic needs.",
-                            "Mixed feelings. ${highlights}. Could be better."
+                            "Adequate for business purposes. ${highlights}${context}, though some aspects could be improved.",
+                            "Mixed experience for business stay. ${highlights}${context}. Functional but not exceptional.",
+                            "Average business hotel. ${highlights}Basic needs met but nothing special. ${context}"
                         ]
-                    };
-                    
-                    const ratingTemplates = templates[rating] || templates[4];
-                    const template = ratingTemplates[Math.floor(Math.random() * ratingTemplates.length)];
-                    
-                    const highlightText = highlights
-                        .map(h => this.smartDefaults.find(s => s.id === h)?.text.substring(2))
-                        .filter(Boolean)
-                        .join(', ');
-                    
-                    review = template.replace('${highlights}', highlightText);
+                    },
+                    family: {
+                        5: [
+                            "Amazing family vacation! ${highlights}The kids loved every moment and ${context}. We'll definitely be back!",
+                            "Perfect family getaway! ${highlights}${context} made it memorable for everyone. Highly recommend for families!",
+                            "Exceptional family experience. ${highlights}Everything was family-friendly and ${context}. 10/10!"
+                        ],
+                        4: [
+                            "Great family stay overall. ${highlights}${context} with just a few minor issues. Kids enjoyed it!",
+                            "Very family-friendly hotel. ${highlights}${context}. Would recommend to other families.",
+                            "Good family vacation spot. ${highlights}Most amenities worked well for our family. ${context}"
+                        ],
+                        3: [
+                            "Decent family accommodation. ${highlights}${context}, though some family features were lacking.",
+                            "Average family experience. ${highlights}${context}. Kids were entertained but could be better.",
+                            "Mixed results for our family. ${highlights}Basic family needs met. ${context}"
+                        ]
+                    },
+                    romance: {
+                        5: [
+                            "Absolutely romantic paradise! ${highlights}${context} created the perfect intimate atmosphere. Unforgettable!",
+                            "Dream romantic getaway! ${highlights}Every detail was perfect for couples. ${context}. Highly recommend!",
+                            "Exceeded all romantic expectations. ${highlights}${context} made our stay magical. Will return for anniversaries!"
+                        ],
+                        4: [
+                            "Very romantic setting. ${highlights}${context} with mostly excellent touches for couples. Recommended.",
+                            "Great romantic escape. ${highlights}${context}. A few areas could enhance the romance further.",
+                            "Lovely couple's retreat. ${highlights}Most romantic elements were well done. ${context}"
+                        ],
+                        3: [
+                            "Adequate for couples. ${highlights}${context}, though romantic atmosphere could be improved.",
+                            "Mixed romantic experience. ${highlights}${context}. Some nice touches but inconsistent.",
+                            "Average couple's stay. ${highlights}Basic romantic elements present. ${context}"
+                        ]
+                    },
+                    leisure: {
+                        5: [
+                            "Absolutely wonderful stay! ${highlights}${context} made this the perfect vacation. Highly recommend!",
+                            "Exceeded all expectations! ${highlights}Everything was perfect and ${context}. Will definitely return!",
+                            "Outstanding experience from start to finish. ${highlights}${context}. 10/10 would recommend!"
+                        ],
+                        4: [
+                            "Very enjoyable stay overall. ${highlights}${context} with only minor room for improvement. Would recommend.",
+                            "Great vacation spot. ${highlights}${context}. Good value and mostly excellent service.",
+                            "Really nice getaway. ${highlights}Most aspects were great and ${context}. Would stay again."
+                        ],
+                        3: [
+                            "Decent accommodation. ${highlights}${context}, though several areas need improvement.",
+                            "Average experience overall. ${highlights}${context}. Met basic vacation needs.",
+                            "Mixed feelings about this stay. ${highlights}Some good points but ${context} could be better."
+                        ]
+                    }
+                };
+                
+                // Add context based on trip details
+                const contextPhrases = {
+                    business: [
+                        "the WiFi and workspace setup were ideal",
+                        "location was perfect for meetings",
+                        "the business facilities were top-notch"
+                    ],
+                    family: [
+                        "the staff were incredibly helpful with our children",
+                        "plenty of activities kept everyone happy",
+                        "the family facilities were excellent"
+                    ],
+                    romance: [
+                        "the ambiance was perfectly intimate",
+                        "special touches made it memorable",
+                        "the privacy and service were exceptional"
+                    ],
+                    leisure: [
+                        "the relaxing atmosphere was perfect",
+                        "amenities exceeded expectations",
+                        "service was consistently excellent"
+                    ]
+                };
+                
+                // Get appropriate templates
+                const typeTemplates = templates[tripType] || templates.leisure;
+                const ratingTemplates = typeTemplates[rating] || typeTemplates[4];
+                
+                // Select random template
+                const template = ratingTemplates[Math.floor(Math.random() * ratingTemplates.length)];
+                
+                // Build highlights text
+                let highlightsText = '';
+                if (highlightTexts.length > 0) {
+                    if (highlightTexts.length === 1) {
+                        highlightsText = highlightTexts[0] + " was excellent. ";
+                    } else if (highlightTexts.length === 2) {
+                        highlightsText = highlightTexts.join(' and ') + " were outstanding. ";
+                    } else {
+                        const last = highlightTexts.pop();
+                        highlightsText = highlightTexts.join(', ') + ', and ' + last + " all exceeded expectations. ";
+                    }
+                } else {
+                    highlightsText = "The overall experience was " + (rating >= 4 ? "great. " : "acceptable. ");
+                }
+                
+                // Add context phrase
+                const contextList = contextPhrases[tripType] || contextPhrases.leisure;
+                const context = contextList[Math.floor(Math.random() * contextList.length)];
+                
+                // Build final review
+                let review = template
+                    .replace('${highlights}', highlightsText)
+                    .replace('${context}', context);
+                
+                // Add stay length mention for longer stays
+                if (stayLength >= 7) {
+                    review += ` During our ${stayLength}-night stay, the consistency of service was impressive.`;
                 }
                 
                 return review;
