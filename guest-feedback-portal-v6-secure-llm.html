@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <title>Secure Guest Feedback Portal - AI-Powered Reviews</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border: #e5e7eb;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+        
+        /* Security Notice */
+        .security-badge {
+            background: var(--success);
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .security-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+        
+        /* Header */
+        .header {
+            padding: 40px;
+            text-align: center;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+        
+        /* API Status */
+        .api-status {
+            padding: 20px 40px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--error);
+        }
+        
+        .status-indicator.active {
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+        
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 32px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* Rating */
+        .rating-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .rating-star {
+            font-size: 36px;
+            color: #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .rating-star:hover {
+            transform: scale(1.1);
+        }
+        
+        .rating-star.filled {
+            color: #fbbf24;
+        }
+        
+        /* Highlights */
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .highlight-chip {
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            text-align: center;
+            user-select: none;
+        }
+        
+        .highlight-chip:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        .highlight-chip.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Review Generation */
+        .generation-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .generation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .generation-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .generation-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .generation-status.generating {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .review-display {
+            min-height: 150px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+        }
+        
+        .review-placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        /* Generation Info */
+        .generation-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Submit */
+        .submit-button {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(99,102,241,0.25);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* API Key Setup */
+        .setup-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .setup-modal.show {
+            display: flex;
+        }
+        
+        .setup-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .setup-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .setup-description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .setup-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        /* Loading */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .highlights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Security Badge -->
+        <div class="security-badge">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+            </svg>
+            <span>Secure & Private • XSS Protected • AI-Powered</span>
+        </div>
+        
+        <!-- Header -->
+        <div class="header">
+            <h1>AI-Powered Feedback Portal</h1>
+            <p class="subtitle">Generate authentic reviews with advanced language models</p>
+        </div>
+        
+        <!-- API Status -->
+        <div class="api-status">
+            <div class="status-item">
+                <span class="status-indicator" id="openaiStatus"></span>
+                <span>OpenAI GPT-4</span>
+            </div>
+            <div class="status-item">
+                <span class="status-indicator" id="groqStatus"></span>
+                <span>Groq Mixtral</span>
+            </div>
+            <div class="status-item">
+                <span class="status-indicator active" id="templateStatus"></span>
+                <span>Template Fallback</span>
+            </div>
+            <button class="btn btn-secondary" onclick="showSetupModal()">⚙️ Configure APIs</button>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Rating -->
+            <div class="form-group">
+                <label class="form-label">Overall Experience Rating</label>
+                <div class="rating-container" id="ratingContainer">
+                    <!-- Stars will be added by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Highlights -->
+            <div class="form-group">
+                <label class="form-label">What made your stay special?</label>
+                <div class="highlights-grid" id="highlightsGrid">
+                    <!-- Chips will be added by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Generated Review -->
+            <div class="generation-container">
+                <div class="generation-header">
+                    <div class="generation-title">
+                        <span>📝</span>
+                        <span>Generated Review</span>
+                    </div>
+                    <div class="generation-status" id="generationStatus">
+                        <span>Ready</span>
+                    </div>
+                </div>
+                
+                <div class="review-display" id="reviewDisplay">
+                    <div class="review-placeholder">
+                        Select a rating to generate your AI-powered review...
+                    </div>
+                </div>
+                
+                <div class="generation-info">
+                    <div class="info-item">
+                        <span>Source:</span>
+                        <strong id="sourceInfo">-</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Latency:</span>
+                        <strong id="latencyInfo">-</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Cost:</span>
+                        <strong id="costInfo">-</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit -->
+            <button class="submit-button" id="submitButton" disabled>
+                Submit Review
+            </button>
+        </div>
+    </div>
+    
+    <!-- API Setup Modal -->
+    <div class="setup-modal" id="setupModal">
+        <div class="setup-content">
+            <h2 class="setup-title">Configure API Keys</h2>
+            <p class="setup-description">
+                Add your API keys to enable AI-powered review generation. 
+                Keys are stored locally and never sent to any server.
+            </p>
+            
+            <div class="input-group">
+                <label class="input-label">OpenAI API Key (Optional)</label>
+                <input type="password" class="input-field" id="openaiKeyInput" 
+                    placeholder="sk-...">
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">Groq API Key (Optional)</label>
+                <input type="password" class="input-field" id="groqKeyInput" 
+                    placeholder="gsk_...">
+            </div>
+            
+            <div class="setup-actions">
+                <button class="btn btn-secondary" onclick="closeSetupModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAPIKeys()">Save Keys</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load Security Service -->
+    <script src="src/utils/security.js"></script>
+    
+    <!-- Load LLM Services -->
+    <script src="src/services/LLMReviewGenerator.js"></script>
+    <script src="src/config/llm.config.js"></script>
+    
+    <!-- Main Application -->
+    <script>
+        // Initialize security
+        const security = new SecurityService();
+        security.applyCSPHeaders();
+        
+        // Initialize LLM generator
+        let llmGenerator = null;
+        let currentReview = '';
+        
+        // Application state
+        const state = {
+            rating: 0,
+            highlights: [],
+            hotelName: 'Grand Hotel',
+            tripType: 'leisure',
+            nights: 3
+        };
+        
+        // Initialize application
+        async function init() {
+            // Get URL parameters safely
+            const params = new URLSearchParams(window.location.search);
+            const safeParams = security.validateURLParams(params);
+            
+            state.hotelName = safeParams.hotel;
+            state.tripType = safeParams.tripType;
+            state.nights = safeParams.nights;
+            
+            // Initialize components
+            initializeRating();
+            initializeHighlights();
+            initializeLLM();
+            
+            // Check stored API keys
+            checkAPIKeys();
+        }
+        
+        // Initialize rating stars
+        function initializeRating() {
+            const container = document.getElementById('ratingContainer');
+            
+            for (let i = 1; i <= 5; i++) {
+                const star = security.createElement('span', '☆', {
+                    class: 'rating-star',
+                    'data-rating': String(i)
+                });
+                
+                star.addEventListener('click', () => selectRating(i));
+                container.appendChild(star);
+            }
+        }
+        
+        // Initialize highlight chips
+        function initializeHighlights() {
+            const highlights = [
+                'Clean Rooms', 'Friendly Staff', 'Great Location',
+                'Comfortable Beds', 'Good Breakfast', 'Nice Pool',
+                'Fast WiFi', 'Quiet', 'Good Value',
+                'Modern Facilities', 'Great Views', 'Excellent Service'
+            ];
+            
+            const container = document.getElementById('highlightsGrid');
+            
+            highlights.forEach(text => {
+                const chip = security.createElement('div', text, {
+                    class: 'highlight-chip'
+                });
+                
+                chip.addEventListener('click', () => toggleHighlight(chip, text));
+                container.appendChild(chip);
+            });
+        }
+        
+        // Initialize LLM
+        function initializeLLM() {
+            const config = {
+                openaiKey: localStorage.getItem('openai_key') || '',
+                groqKey: localStorage.getItem('groq_key') || ''
+            };
+            
+            llmGenerator = new LLMReviewGenerator(config);
+        }
+        
+        // Select rating
+        function selectRating(rating) {
+            state.rating = security.validateRating(rating);
+            
+            // Update stars visually
+            document.querySelectorAll('.rating-star').forEach((star, index) => {
+                if (index < rating) {
+                    star.textContent = '★';
+                    star.classList.add('filled');
+                } else {
+                    star.textContent = '☆';
+                    star.classList.remove('filled');
+                }
+            });
+            
+            // Generate review
+            generateReview();
+        }
+        
+        // Toggle highlight
+        function toggleHighlight(chip, text) {
+            chip.classList.toggle('selected');
+            
+            if (chip.classList.contains('selected')) {
+                state.highlights.push(text);
+            } else {
+                state.highlights = state.highlights.filter(h => h !== text);
+            }
+            
+            // Regenerate if rating is selected
+            if (state.rating > 0) {
+                generateReview();
+            }
+        }
+        
+        // Generate review
+        async function generateReview() {
+            if (!llmGenerator) return;
+            
+            // Update UI
+            const statusEl = document.getElementById('generationStatus');
+            const displayEl = document.getElementById('reviewDisplay');
+            
+            statusEl.innerHTML = '<span class="spinner"></span> Generating...';
+            statusEl.classList.add('generating');
+            
+            try {
+                // Generate with LLM
+                const result = await llmGenerator.generateReview({
+                    hotelName: state.hotelName,
+                    rating: state.rating,
+                    tripType: state.tripType,
+                    highlights: state.highlights,
+                    nights: state.nights,
+                    voice: 'friendly'
+                });
+                
+                // Display review safely (no innerHTML with user content)
+                displayEl.textContent = result.text;
+                currentReview = result.text;
+                
+                // Update info
+                document.getElementById('sourceInfo').textContent = result.source;
+                document.getElementById('latencyInfo').textContent = result.latency + 'ms';
+                document.getElementById('costInfo').textContent = result.cost ? 
+                    '$' + result.cost.toFixed(5) : 'Free';
+                
+                // Enable submit
+                document.getElementById('submitButton').disabled = false;
+                
+            } catch (error) {
+                console.error('Generation failed:', error);
+                displayEl.textContent = 'Failed to generate review. Please try again.';
+            } finally {
+                statusEl.textContent = 'Ready';
+                statusEl.classList.remove('generating');
+            }
+        }
+        
+        // Check API keys
+        async function checkAPIKeys() {
+            const openaiKey = localStorage.getItem('openai_key');
+            const groqKey = localStorage.getItem('groq_key');
+            
+            if (openaiKey) {
+                document.getElementById('openaiStatus').classList.add('active');
+            }
+            
+            if (groqKey) {
+                document.getElementById('groqStatus').classList.add('active');
+            }
+        }
+        
+        // Setup modal functions
+        function showSetupModal() {
+            document.getElementById('setupModal').classList.add('show');
+            
+            // Pre-fill with existing keys (masked)
+            const openaiKey = localStorage.getItem('openai_key');
+            const groqKey = localStorage.getItem('groq_key');
+            
+            if (openaiKey) {
+                document.getElementById('openaiKeyInput').placeholder = 'sk-...****' + openaiKey.slice(-4);
+            }
+            
+            if (groqKey) {
+                document.getElementById('groqKeyInput').placeholder = 'gsk_...****' + groqKey.slice(-4);
+            }
+        }
+        
+        function closeSetupModal() {
+            document.getElementById('setupModal').classList.remove('show');
+        }
+        
+        function saveAPIKeys() {
+            const openaiKey = document.getElementById('openaiKeyInput').value;
+            const groqKey = document.getElementById('groqKeyInput').value;
+            
+            if (openaiKey) {
+                localStorage.setItem('openai_key', openaiKey);
+            }
+            
+            if (groqKey) {
+                localStorage.setItem('groq_key', groqKey);
+            }
+            
+            // Reinitialize LLM with new keys
+            initializeLLM();
+            checkAPIKeys();
+            closeSetupModal();
+            
+            // Show success
+            alert('API keys saved successfully!');
+        }
+        
+        // Submit review
+        document.getElementById('submitButton').addEventListener('click', () => {
+            if (!security.checkRateLimit('submit', 5, 60000)) {
+                alert('Too many submissions. Please wait a minute.');
+                return;
+            }
+            
+            console.log('Submitting review:', currentReview);
+            alert('Review submitted successfully!');
+        });
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
