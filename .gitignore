@@ -133,3 +133,42 @@ target/
 .history
 .svn/
 .hg/
+# Archive directories
+archive/
+.backup/
+
+# Test artifacts
+playwright-report/
+test-results/
+*.png
+*.jpg
+screenshots/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Production builds
+dist/
+build/
