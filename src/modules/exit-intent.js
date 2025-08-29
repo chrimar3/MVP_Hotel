@@ -4,17 +4,17 @@
  */
 
 export function showExitOffer() {
-    // Check if offer was already shown
-    if (sessionStorage.getItem('exitOfferShown')) {
-        return;
-    }
-    
-    sessionStorage.setItem('exitOfferShown', 'true');
-    
-    // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'exit-modal-overlay';
-    overlay.innerHTML = `
+  // Check if offer was already shown
+  if (sessionStorage.getItem('exitOfferShown')) {
+    return;
+  }
+
+  sessionStorage.setItem('exitOfferShown', 'true');
+
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'exit-modal-overlay';
+  overlay.innerHTML = `
         <div class="exit-modal">
             <button class="exit-close" onclick="this.closest('.exit-modal-overlay').remove()">×</button>
             
@@ -52,10 +52,10 @@ export function showExitOffer() {
             </div>
         </div>
     `;
-    
-    // Add styles
-    const style = document.createElement('style');
-    style.textContent = `
+
+  // Add styles
+  const style = document.createElement('style');
+  style.textContent = `
         .exit-modal-overlay {
             position: fixed;
             top: 0;
@@ -267,37 +267,37 @@ export function showExitOffer() {
             }
         }
     `;
-    
-    document.head.appendChild(style);
-    document.body.appendChild(overlay);
-    
-    // Track event
-    if (window.gtag) {
-        gtag('event', 'exit_intent_shown', {
-            'event_category': 'engagement'
-        });
-    }
+
+  document.head.appendChild(style);
+  document.body.appendChild(overlay);
+
+  // Track event
+  if (window.gtag) {
+    gtag('event', 'exit_intent_shown', {
+      event_category: 'engagement',
+    });
+  }
 }
 
 // Global function for staying
-window.stayAndComplete = function() {
-    document.querySelector('.exit-modal-overlay')?.remove();
-    
-    // Award bonus points
-    if (window.GameSystem) {
-        window.GameSystem.addPoints(50, 'staying to complete!');
-    }
-    
-    // Scroll to form
-    document.getElementById('reviewForm')?.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
+window.stayAndComplete = function () {
+  document.querySelector('.exit-modal-overlay')?.remove();
+
+  // Award bonus points
+  if (window.GameSystem) {
+    window.GameSystem.addPoints(50, 'staying to complete!');
+  }
+
+  // Scroll to form
+  document.getElementById('reviewForm')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
+
+  // Track event
+  if (window.gtag) {
+    gtag('event', 'exit_intent_stayed', {
+      event_category: 'engagement',
     });
-    
-    // Track event
-    if (window.gtag) {
-        gtag('event', 'exit_intent_stayed', {
-            'event_category': 'engagement'
-        });
-    }
+  }
 };

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Generate authentic, natural-sounding hotel reviews instantly. Perfect for travel platforms and hospitality businesses.">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.openai.com https://api.groq.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <title>Hotel Review Generator - Professional Edition</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e40af">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    
+    <!-- Critical CSS inline for performance -->
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --success: #10b981;
+            --error: #ef4444;
+            --text: #1f2937;
+            --bg: #f9fafb;
+            --white: #ffffff;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-size: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .review-output {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            min-height: 150px;
+            white-space: pre-wrap;
+        }
+        
+        .error-message {
+            color: var(--error);
+            padding: 12px;
+            background: #fee;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .error-message.active {
+            display: block;
+        }
+        
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Hotel Review Generator</h1>
+            <p>Generate authentic, natural-sounding hotel reviews instantly.</p>
+        </div>
+        
+        <div class="card">
+            <form id="reviewForm" novalidate>
+                <div class="form-group">
+                    <label for="hotelName">
+                        Hotel Name <span aria-label="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="hotelName" 
+                        name="hotelName" 
+                        required 
+                        aria-required="true"
+                        placeholder="e.g., Grand Plaza Hotel"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="rating">
+                        Rating <span aria-label="required">*</span>
+                    </label>
+                    <select id="rating" name="rating" required aria-required="true">
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                        <option value="4">⭐⭐⭐⭐ Very Good</option>
+                        <option value="3">⭐⭐⭐ Good</option>
+                        <option value="2">⭐⭐ Fair</option>
+                        <option value="1">⭐ Poor</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tripType">Trip Type</label>
+                    <select id="tripType" name="tripType">
+                        <option value="leisure">Leisure</option>
+                        <option value="business">Business</option>
+                        <option value="family">Family</option>
+                        <option value="romantic">Romantic</option>
+                        <option value="solo">Solo</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn" id="generateBtn">
+                    Generate Review
+                </button>
+                
+                <div class="loading" id="loading" role="status" aria-live="polite">
+                    <div class="spinner"></div>
+                    <p>Generating review...</p>
+                </div>
+                
+                <div class="error-message" id="errorMessage" role="alert"></div>
+            </form>
+            
+            <div id="reviewOutput" class="review-output" style="display: none;">
+                <h2 class="sr-only">Generated Review</h2>
+                <div id="reviewText"></div>
+                <button class="btn" id="copyBtn" style="margin-top: 16px;">
+                    Copy to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- DOMPurify for sanitization -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-yCjCEKasKSN1UmZg3c4VPjrM0WABuHYQT/WmbbFpCJnmDvLVmqYQVRuJlqTFfcJC" crossorigin="anonymous"></script>
+    
+    <script>
+        // Initialize app
+        (function() {
+            'use strict';
+            
+            // Cache DOM elements
+            const form = document.getElementById('reviewForm');
+            const generateBtn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const reviewOutput = document.getElementById('reviewOutput');
+            const reviewText = document.getElementById('reviewText');
+            const copyBtn = document.getElementById('copyBtn');
+            
+            // Configuration
+            const API_ENDPOINT = '/api/llm-proxy';
+            const FALLBACK_TEMPLATES = {
+                5: 'My stay at {hotel} was absolutely wonderful! Everything exceeded expectations.',
+                4: 'I had a great stay at {hotel}. Very satisfied with the service and amenities.',
+                3: 'My stay at {hotel} was satisfactory. Met basic expectations.',
+                2: 'Unfortunately, my stay at {hotel} had some issues that need improvement.',
+                1: 'I was disappointed with my stay at {hotel}. Significant improvements needed.'
+            };
+            
+            // Form submission handler
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Clear previous errors
+                hideError();
+                
+                // Validate form
+                if (!form.checkValidity()) {
+                    showError('Please fill in all required fields.');
+                    return;
+                }
+                
+                // Get form data
+                const formData = new FormData(form);
+                const data = {
+                    hotelName: DOMPurify.sanitize(formData.get('hotelName')),
+                    rating: parseInt(formData.get('rating')),
+                    tripType: formData.get('tripType')
+                };
+                
+                // Generate review
+                await generateReview(data);
+            });
+            
+            // Generate review function
+            async function generateReview(data) {
+                // Show loading
+                loading.classList.add('active');
+                generateBtn.disabled = true;
+                reviewOutput.style.display = 'none';
+                
+                try {
+                    // Try API call
+                    const response = await fetch(API_ENDPOINT + '/generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('API request failed');
+                    }
+                    
+                    const result = await response.json();
+                    displayReview(result.text);
+                    
+                } catch (error) {
+                    // Fallback to template
+                    const template = FALLBACK_TEMPLATES[data.rating];
+                    const review = template.replace('{hotel}', data.hotelName);
+                    displayReview(review);
+                }
+                
+                // Hide loading
+                loading.classList.remove('active');
+                generateBtn.disabled = false;
+            }
+            
+            // Display review
+            function displayReview(review) {
+                reviewText.textContent = review;
+                reviewOutput.style.display = 'block';
+                reviewText.focus();
+            }
+            
+            // Copy to clipboard
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(reviewText.textContent);
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copy to Clipboard';
+                    }, 2000);
+                } catch (error) {
+                    showError('Failed to copy to clipboard');
+                }
+            });
+            
+            // Error handling
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.add('active');
+            }
+            
+            function hideError() {
+                errorMessage.classList.remove('active');
+            }
+            
+            // Service Worker registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    // Silent fail
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const { HotelReviewGenerator, HotelAnalytics, PWAManager } = require('./hotelReviewGenerator');
+const { HotelReviewGenerator, HotelAnalytics, PWAManager } = require('../../src/services/hotelReviewGenerator');
 
 // Mock localStorage
 const localStorageMock = (() => {

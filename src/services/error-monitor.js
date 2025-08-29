@@ -9,10 +9,10 @@ class ErrorMonitor {
     this.errorQueue = [];
     this.maxQueueSize = 50;
     this.initialized = false;
-    
+
     this.initializeErrorTracking();
   }
-  
+
   initializeErrorTracking() {
     // Set up global error handlers
     window.addEventListener('error', (event) => {
@@ -22,24 +22,24 @@ class ErrorMonitor {
         lineno: event.lineno,
         colno: event.colno,
         error: event.error,
-        type: 'uncaught'
+        type: 'uncaught',
       });
     });
-    
+
     window.addEventListener('unhandledrejection', (event) => {
       this.handleError({
         message: `Unhandled Promise Rejection: ${event.reason}`,
         error: event.reason,
-        type: 'unhandledRejection'
+        type: 'unhandledRejection',
       });
     });
-    
+
     // Initialize Sentry if in production
     if (this.config.get('ENABLE_ERROR_TRACKING') && this.config.get('SENTRY_DSN')) {
       this.initializeSentry();
     }
   }
-  
+
   initializeSentry() {
     // Dynamically load Sentry
     const script = document.createElement('script');
@@ -58,45 +58,45 @@ class ErrorMonitor {
               delete event.request.headers;
             }
             return event;
-          }
+          },
         });
         this.initialized = true;
-        
+
         // Send queued errors
         this.flushErrorQueue();
       }
     };
     document.head.appendChild(script);
   }
-  
+
   handleError(errorInfo) {
     // Log to console in development
     if (this.config.isDevelopment()) {
       console.error('Error tracked:', errorInfo);
     }
-    
+
     // Add to queue
     this.errorQueue.push({
       ...errorInfo,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
     });
-    
+
     // Trim queue if too large
     if (this.errorQueue.length > this.maxQueueSize) {
       this.errorQueue.shift();
     }
-    
+
     // Send to Sentry if available
     if (this.initialized && window.Sentry) {
       this.sendToSentry(errorInfo);
     }
-    
+
     // Log to local storage for debugging
     this.logToLocalStorage(errorInfo);
   }
-  
+
   sendToSentry(errorInfo) {
     if (window.Sentry) {
       if (errorInfo.error instanceof Error) {
@@ -106,56 +106,56 @@ class ErrorMonitor {
       }
     }
   }
-  
+
   flushErrorQueue() {
     if (this.initialized && window.Sentry) {
-      this.errorQueue.forEach(error => this.sendToSentry(error));
+      this.errorQueue.forEach((error) => this.sendToSentry(error));
       this.errorQueue = [];
     }
   }
-  
+
   logToLocalStorage(errorInfo) {
     try {
       const errors = JSON.parse(localStorage.getItem('app_errors') || '[]');
       errors.push({
         message: errorInfo.message,
         timestamp: errorInfo.timestamp,
-        url: errorInfo.url
+        url: errorInfo.url,
       });
-      
+
       // Keep only last 20 errors
       if (errors.length > 20) {
         errors.shift();
       }
-      
+
       localStorage.setItem('app_errors', JSON.stringify(errors));
     } catch (e) {
       // Silently fail if localStorage is full or unavailable
     }
   }
-  
+
   logError(message, context = {}) {
     this.handleError({
       message,
       context,
-      type: 'manual'
+      type: 'manual',
     });
   }
-  
+
   logWarning(message, context = {}) {
     if (this.config.isDevelopment()) {
-      console.warn(message, context);
+
     }
-    
+
     if (window.Sentry) {
       window.Sentry.captureMessage(message, 'warning');
     }
   }
-  
+
   clearLocalErrors() {
     localStorage.removeItem('app_errors');
   }
-  
+
   getLocalErrors() {
     try {
       return JSON.parse(localStorage.getItem('app_errors') || '[]');

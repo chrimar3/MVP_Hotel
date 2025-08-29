@@ -8,41 +8,43 @@ class FreeAnalytics {
     this.GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // Replace with your GA4 ID
     this.isInitialized = false;
     this.eventQueue = [];
-    
+
     // Initialize GA4
     this.initializeGA4();
-    
+
     // Initialize custom metrics collection
     this.initializeCustomMetrics();
   }
-  
+
   initializeGA4() {
     // Only initialize in production
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log('Analytics disabled in development');
+
       return;
     }
-    
+
     // Add GA4 script
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${this.GA_MEASUREMENT_ID}`;
     script.onload = () => {
       window.dataLayer = window.dataLayer || [];
-      window.gtag = function() { dataLayer.push(arguments); };
+      window.gtag = function () {
+        dataLayer.push(arguments);
+      };
       window.gtag('js', new Date());
       window.gtag('config', this.GA_MEASUREMENT_ID, {
         send_page_view: true,
         anonymize_ip: true, // GDPR compliance
-        cookie_flags: 'SameSite=None;Secure'
+        cookie_flags: 'SameSite=None;Secure',
       });
-      
+
       this.isInitialized = true;
       this.flushEventQueue();
     };
     document.head.appendChild(script);
   }
-  
+
   initializeCustomMetrics() {
     // Track Core Web Vitals
     if ('PerformanceObserver' in window) {
@@ -55,30 +57,34 @@ class FreeAnalytics {
         });
         lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
       } catch (e) {}
-      
+
       // First Input Delay
       try {
         const fidObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          entries.forEach(entry => {
-            this.trackEvent('Core Web Vitals', 'FID', Math.round(entry.processingStart - entry.startTime));
+          entries.forEach((entry) => {
+            this.trackEvent(
+              'Core Web Vitals',
+              'FID',
+              Math.round(entry.processingStart - entry.startTime)
+            );
           });
         });
         fidObserver.observe({ type: 'first-input', buffered: true });
       } catch (e) {}
-      
+
       // Cumulative Layout Shift
       try {
         let cls = 0;
         const clsObserver = new PerformanceObserver((list) => {
-          list.getEntries().forEach(entry => {
+          list.getEntries().forEach((entry) => {
             if (!entry.hadRecentInput) {
               cls += entry.value;
             }
           });
         });
         clsObserver.observe({ type: 'layout-shift', buffered: true });
-        
+
         // Report CLS when page is hidden
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) {
@@ -87,7 +93,7 @@ class FreeAnalytics {
         });
       } catch (e) {}
     }
-    
+
     // Track page performance
     window.addEventListener('load', () => {
       setTimeout(() => {
@@ -95,11 +101,11 @@ class FreeAnalytics {
         const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
         const domReadyTime = timing.domContentLoadedEventEnd - timing.navigationStart;
         const timeToFirstByte = timing.responseStart - timing.navigationStart;
-        
+
         this.trackEvent('Performance', 'Page Load Time', pageLoadTime);
         this.trackEvent('Performance', 'DOM Ready Time', domReadyTime);
         this.trackEvent('Performance', 'Time to First Byte', timeToFirstByte);
-        
+
         // Track memory usage if available
         if (performance.memory) {
           const memoryUsage = Math.round(performance.memory.usedJSHeapSize / 1048576);
@@ -107,37 +113,37 @@ class FreeAnalytics {
         }
       }, 0);
     });
-    
+
     // Track errors
     window.addEventListener('error', (event) => {
       this.trackEvent('JavaScript Error', event.message, {
         source: event.filename,
         line: event.lineno,
-        column: event.colno
+        column: event.colno,
       });
     });
-    
+
     // Track user engagement
     this.trackEngagement();
   }
-  
+
   trackEngagement() {
     let startTime = Date.now();
     let timeOnPage = 0;
     let isActive = true;
-    
+
     // Track time on page
     setInterval(() => {
       if (isActive) {
         timeOnPage = Math.round((Date.now() - startTime) / 1000);
       }
     }, 30000); // Every 30 seconds
-    
+
     // Track when user leaves
     window.addEventListener('beforeunload', () => {
       this.trackEvent('Engagement', 'Time on Page', timeOnPage);
     });
-    
+
     // Track if user is active
     let inactivityTimer;
     const resetTimer = () => {
@@ -147,15 +153,17 @@ class FreeAnalytics {
         isActive = false;
       }, 30000); // 30 seconds of inactivity
     };
-    
-    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+
+    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach((event) => {
       document.addEventListener(event, resetTimer, true);
     });
-    
+
     // Track scroll depth
     let maxScroll = 0;
     window.addEventListener('scroll', () => {
-      const scrollPercentage = Math.round((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100);
+      const scrollPercentage = Math.round(
+        ((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight) * 100
+      );
       if (scrollPercentage > maxScroll) {
         maxScroll = scrollPercentage;
         if (maxScroll === 25 || maxScroll === 50 || maxScroll === 75 || maxScroll === 100) {
@@ -164,7 +172,7 @@ class FreeAnalytics {
       }
     });
   }
-  
+
   trackEvent(category, action, label = null, value = null) {
     const event = {
       event: 'custom_event',
@@ -172,57 +180,57 @@ class FreeAnalytics {
       action,
       label,
       value,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     if (this.isInitialized && window.gtag) {
       window.gtag('event', action, {
         event_category: category,
         event_label: label,
-        value: value
+        value: value,
       });
     } else {
       // Queue events until GA4 is ready
       this.eventQueue.push(event);
     }
-    
+
     // Also save to localStorage for custom dashboard
     this.saveToLocalStorage(event);
   }
-  
+
   flushEventQueue() {
     if (this.isInitialized && window.gtag) {
-      this.eventQueue.forEach(event => {
+      this.eventQueue.forEach((event) => {
         window.gtag('event', event.action, {
           event_category: event.category,
           event_label: event.label,
-          value: event.value
+          value: event.value,
         });
       });
       this.eventQueue = [];
     }
   }
-  
+
   saveToLocalStorage(event) {
     try {
       const events = JSON.parse(localStorage.getItem('analytics_events') || '[]');
       events.push(event);
-      
+
       // Keep only last 100 events
       if (events.length > 100) {
         events.shift();
       }
-      
+
       localStorage.setItem('analytics_events', JSON.stringify(events));
     } catch (e) {
       // Silently fail if localStorage is full
     }
   }
-  
+
   // Track specific hotel review actions
   trackReviewAction(action, details = {}) {
     this.trackEvent('Review Actions', action, JSON.stringify(details));
-    
+
     // Track conversion funnel
     switch (action) {
       case 'form_started':
@@ -242,12 +250,12 @@ class FreeAnalytics {
         break;
     }
   }
-  
+
   // Get analytics summary for dashboard
   getAnalyticsSummary() {
     try {
       const events = JSON.parse(localStorage.getItem('analytics_events') || '[]');
-      
+
       const summary = {
         totalEvents: events.length,
         eventsByCategory: {},
@@ -257,17 +265,17 @@ class FreeAnalytics {
           ratingSelected: 0,
           reviewGenerated: 0,
           reviewCopied: 0,
-          platformRedirected: 0
-        }
+          platformRedirected: 0,
+        },
       };
-      
-      events.forEach(event => {
+
+      events.forEach((event) => {
         // Count by category
         if (!summary.eventsByCategory[event.category]) {
           summary.eventsByCategory[event.category] = 0;
         }
         summary.eventsByCategory[event.category]++;
-        
+
         // Track funnel
         if (event.category === 'Conversion Funnel') {
           if (event.action.includes('Step 1')) summary.conversionFunnel.started++;
@@ -277,13 +285,13 @@ class FreeAnalytics {
           if (event.action.includes('Step 5')) summary.conversionFunnel.platformRedirected++;
         }
       });
-      
+
       return summary;
     } catch (e) {
       return null;
     }
   }
-  
+
   // GDPR compliant consent check
   checkConsent() {
     const consent = localStorage.getItem('analytics_consent');
@@ -294,7 +302,7 @@ class FreeAnalytics {
     }
     return consent === 'granted';
   }
-  
+
   showConsentBanner() {
     const banner = document.createElement('div');
     banner.id = 'consent-banner';
@@ -310,7 +318,7 @@ class FreeAnalytics {
       z-index: 10000;
       font-family: system-ui, -apple-system, sans-serif;
     `;
-    
+
     banner.innerHTML = `
       <p style="margin: 0 0 15px 0;">
         We use cookies and analytics to improve your experience. 
@@ -337,15 +345,15 @@ class FreeAnalytics {
         font-size: 16px;
       ">Reject</button>
     `;
-    
+
     document.body.appendChild(banner);
-    
+
     document.getElementById('accept-analytics').addEventListener('click', () => {
       localStorage.setItem('analytics_consent', 'granted');
       banner.remove();
       this.initializeGA4();
     });
-    
+
     document.getElementById('reject-analytics').addEventListener('click', () => {
       localStorage.setItem('analytics_consent', 'denied');
       banner.remove();
