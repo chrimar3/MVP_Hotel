@@ -1,22 +1,116 @@
-name: Deploy to GitHub Pages
+name: Production Deploy
 
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  packages: write
+  security-events: write
 
 concurrency:
-  group: "pages"
+  group: "deploy-${{ github.ref }}"
   cancel-in-progress: false
 
 jobs:
-  test:
+  security-scan:
+    name: Security Scan
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
+
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 21]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Lint code
+        run: npm run lint
+      
+      - name: Format check
+        run: npm run format:check
+      
+      - name: Run unit tests
+        run: npm run test:ci
+      
+      - name: Run integration tests
+        run: npm run test:integration
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: matrix.node-version == 20
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true
+      
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-node-${{ matrix.node-version }}
+          path: |
+            coverage/
+            test-results/
+
+  build:
+    name: Build Application
+    needs: [test, security-scan]
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,54 +118,92 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --only=production
       
-      - name: Run tests
-        run: npm test -- --coverage --watchAll=false
+      - name: Build application
+        run: |
+          # Create production build directory
+          mkdir -p dist
+          
+          # Copy public files
+          cp -r public/* dist/
+          
+          # Optimize assets
+          npm install -g terser html-minifier-terser cssnano-cli
+          
+          # Minify JavaScript files
+          find dist -name "*.js" -not -name "*.min.js" -exec terser {} -o {}.min -c -m \;
+          find dist -name "*.js.min" -exec bash -c 'mv "$1" "${1%.js.min}.min.js"' _ {} \;
+          
+          # Minify CSS files
+          find dist -name "*.css" -not -name "*.min.css" -exec cssnano {} {}.min \;
+          find dist -name "*.css.min" -exec bash -c 'mv "$1" "${1%.css.min}.min.css"' _ {} \;
+          
+          # Minify HTML files
+          find dist -name "*.html" -exec html-minifier-terser --collapse-whitespace --remove-comments --minify-css --minify-js {} -o {} \;
+          
+          # Create build info
+          echo '{"version":"'$GITHUB_SHA'","buildTime":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}'  > dist/build-info.json
       
-      - name: Upload coverage reports
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-,format=short
+      
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Output image
+        id: image
+        run: |
+          echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+      
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
-          path: coverage/
+          name: production-build
+          path: dist/
+          retention-days: 30
 
-  build-and-deploy:
-    needs: test
+  deploy-github-pages:
+    name: Deploy to GitHub Pages
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Optimize assets
-        run: |
-          # Install optimization tools
-          npm install -g terser html-minifier-terser
-          
-          # Minify JavaScript files if they exist
-          if [ -f "src/hotelReviewGenerator.js" ]; then
-            terser src/hotelReviewGenerator.js -o src/hotelReviewGenerator.min.js -c -m || true
-          fi
-          
-          # Create optimized version of main HTML
-          if [ -f "src/ultimate-ux-enhanced-v3.html" ]; then
-            cp src/ultimate-ux-enhanced-v3.html src/ultimate-ux-enhanced-v3-optimized.html
-          fi
+          name: production-build
+          path: dist/
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -79,13 +211,57 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'dist/'
       
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
       
-      - name: Verify deployment
+      - name: Health check
         run: |
-          echo "✅ Deployed to: ${{ steps.deployment.outputs.page_url }}"
-          echo "📊 Check deployment at: ${{ steps.deployment.outputs.page_url }}/health.html"
+          sleep 30
+          curl -f ${{ steps.deployment.outputs.page_url }}/health.html || exit 1
+          echo "✅ Deployed successfully to: ${{ steps.deployment.outputs.page_url }}"
+
+  deploy-production:
+    name: Deploy to Production
+    needs: build
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: https://mvp-hotel.example.com
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "🚀 Production deployment would happen here"
+          echo "Image: ${{ needs.build.outputs.image }}"
+          echo "Digest: ${{ needs.build.outputs.digest }}"
+          # Production deployment logic would go here
+          
+      - name: Health check production
+        run: |
+          echo "🔍 Health check would verify production deployment"
+          # curl -f https://mvp-hotel.example.com/health || exit 1
+
+  notify:
+    name: Deployment Notification
+    needs: [deploy-github-pages, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [[ "${{ needs.deploy-github-pages.result }}" == "success" ]]; then
+            echo "✅ GitHub Pages deployment successful"
+          else
+            echo "❌ GitHub Pages deployment failed"
+          fi
+          
+          if [[ "${{ needs.deploy-production.result }}" == "success" ]]; then
+            echo "✅ Production deployment successful"
+          elif [[ "${{ needs.deploy-production.result }}" == "skipped" ]]; then
+            echo "⏭️ Production deployment skipped"
+          else
+            echo "❌ Production deployment failed"
+          fi

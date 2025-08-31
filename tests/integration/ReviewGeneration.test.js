@@ -16,7 +16,7 @@ describe('Review Generation Integration', () => {
     beforeEach(async () => {
         // Load the HTML file
         const html = fs.readFileSync(
-            path.resolve(__dirname, '../../guest-feedback-portal-v7-modular.html'),
+            path.resolve(__dirname, '../../review-generator.html'),
             'utf8'
         );
 

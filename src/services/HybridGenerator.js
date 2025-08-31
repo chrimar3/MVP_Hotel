@@ -803,10 +803,10 @@ class TemplateGenerator {
     const templates = {
       5: [
         `My ${nights}-night stay at ${hotelName} was absolutely wonderful! ${this.highlightsToText(highlights)} The ${tripType} trip exceeded all my expectations. I would definitely recommend this hotel to anyone looking for an exceptional experience.`,
-        `${hotelName} provided an outstanding experience! ${this.highlightsToText(highlights)} Perfect for ${tripType} travelers. The attention to detail and quality of service made this truly memorable. Will definitely return!`,
+        `${hotelName} provided an outstanding ${nights}-night experience! ${this.highlightsToText(highlights)} Perfect for ${tripType} travelers. The attention to detail and quality of service made this truly memorable. Will definitely return!`,
       ],
       4: [
-        `I had a great stay at ${hotelName}. ${this.highlightsToText(highlights)} While there were minor areas for improvement, overall it was a very good ${tripType} experience. Would recommend.`,
+        `I had a great ${nights}-night stay at ${hotelName}. ${this.highlightsToText(highlights)} While there were minor areas for improvement, overall it was a very good ${tripType} experience. Would recommend.`,
         `${hotelName} was really good for my ${nights}-night ${tripType} trip. ${this.highlightsToText(highlights)} Most aspects met or exceeded expectations.`,
       ],
       3: [

@@ -12,7 +12,9 @@ module.exports = {
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   collectCoverageFrom: [
-    'src/hotelReviewGenerator.js'
+    'src/**/*.js',
+    '!src/**/*.test.js',
+    '!src/__mocks__/**/*.js'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html', 'text-summary'],

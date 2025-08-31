@@ -1,48 +1,189 @@
-# Netlify Configuration for Production Deployment
+# Netlify Configuration for Production Deployment with Enhanced Security
 
 [build]
   publish = "/"
 
+# Comprehensive Security Headers Configuration
 [[headers]]
   for = "/*"
   [headers.values]
+    # HSTS - Enforce HTTPS with preload
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    
+    # Prevent clickjacking attacks
     X-Frame-Options = "DENY"
+    
+    # Prevent MIME type sniffing
     X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
+    
+    # XSS Protection (disabled in modern browsers, CSP is better)
+    X-XSS-Protection = "0"
+    
+    # Control referrer information
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    
+    # Permissions Policy (formerly Feature Policy)
+    Permissions-Policy = """
+      accelerometer=(),
+      ambient-light-sensor=(),
+      autoplay=(),
+      battery=(),
+      camera=(),
+      cross-origin-isolated=(),
+      display-capture=(),
+      document-domain=(),
+      encrypted-media=(),
+      execution-while-not-rendered=(),
+      execution-while-out-of-viewport=(),
+      fullscreen=(self),
+      geolocation=(),
+      gyroscope=(),
+      keyboard-map=(),
+      magnetometer=(),
+      microphone=(),
+      midi=(),
+      navigation-override=(),
+      payment=(),
+      picture-in-picture=(),
+      publickey-credentials-get=(),
+      screen-wake-lock=(),
+      sync-xhr=(),
+      usb=(),
+      web-share=(),
+      xr-spatial-tracking=()
+    """
+    
+    # Cross-Origin policies
+    Cross-Origin-Embedder-Policy = "require-corp"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+    
+    # Content Security Policy - Comprehensive protection
     Content-Security-Policy = """
       default-src 'self';
-      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://cdn.jsdelivr.net https://browser.sentry-cdn.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://browser.sentry-cdn.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com;
+      font-src 'self' data: https://fonts.gstatic.com;
       img-src 'self' data: https: blob:;
-      connect-src 'self' https://www.google-analytics.com https://*.sentry.io;
+      media-src 'self';
+      object-src 'none';
+      child-src 'self';
+      frame-src 'none';
+      worker-src 'self' blob:;
+      connect-src 'self' https://api.openai.com https://api.groq.com https://*.pipedream.net https://www.google-analytics.com https://*.sentry.io wss://*.sentry.io;
+      form-action 'self';
       frame-ancestors 'none';
       base-uri 'self';
-      form-action 'self'
+      manifest-src 'self';
+      prefetch-src 'self';
+      upgrade-insecure-requests;
+      block-all-mixed-content
     """
+    
+    # Expect-CT for Certificate Transparency
+    Expect-CT = "max-age=86400, enforce"
 
+# Cache control for static assets
 [[headers]]
   for = "/*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.css"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
 
+# Security headers for images
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.gif"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# Security headers for fonts
+[[headers]]
+  for = "/*.woff"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.ttf"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.eot"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# Security.txt file
+[[headers]]
+  for = "/.well-known/security.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/security.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    X-Content-Type-Options = "nosniff"
+
+# Redirects for security and functionality
 [[redirects]]
   from = "/health"
   to = "/health.html"
@@ -50,10 +191,108 @@
 
 [[redirects]]
   from = "/demo"
-  to = "/src/ultimate-ux-enhanced-v3.html"
+  to = "/review-generator.html"
   status = 200
 
 [[redirects]]
   from = "/analytics"
   to = "/src/analytics-dashboard.html"
   status = 200
+
+# Security.txt redirect
+[[redirects]]
+  from = "/.well-known/security.txt"
+  to = "/security.txt"
+  status = 200
+
+# Force HTTPS
+[[redirects]]
+  from = "http://mvp-hotel.netlify.app/*"
+  to = "https://mvp-hotel.netlify.app/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.mvp-hotel.netlify.app/*"
+  to = "https://mvp-hotel.netlify.app/:splat"
+  status = 301
+  force = true
+
+# Block access to sensitive files
+[[redirects]]
+  from = "/.git/*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/.env"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/.env.*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/node_modules/*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/*.bak"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/*.backup"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/*.old"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/*.orig"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/*.save"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/*.swp"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/*~"
+  to = "/404.html"
+  status = 404
+
+# Rate limiting rules (Netlify Pro feature)
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
+
+# Environment variables (use Netlify UI to set actual values)
+[build.environment]
+  NODE_VERSION = "18"
+  NODE_ENV = "production"

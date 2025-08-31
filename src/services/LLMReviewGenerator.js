@@ -243,9 +243,9 @@ class LLMReviewGenerator {
     // Add voice instruction
     const voiceMap = {
       professional: 'Use a professional, businesslike tone.',
-      friendly: 'Use a warm, conversational tone.',
-      enthusiastic: 'Use an excited, energetic tone.',
-      detailed: 'Be thorough and analytical.',
+      friendly: 'Use a friendly, warm, conversational tone.',
+      enthusiastic: 'Use an enthusiastic, excited, energetic tone.',
+      detailed: 'Be detailed, thorough and analytical.',
     };
     prompt += voiceMap[voice] || voiceMap.friendly;
 

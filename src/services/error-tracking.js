@@ -148,11 +148,26 @@ class ErrorTracking {
   }
 
   captureError(error) {
+    // Handle malformed error objects gracefully
+    if (!error || typeof error !== 'object') {
+      error = {
+        type: 'unknown',
+        message: 'Malformed error object',
+        original: error,
+        timestamp: new Date().toISOString()
+      };
+    }
+
     // Add context
     error.environment = this.environment;
     error.viewport = `${window.innerWidth}x${window.innerHeight}`;
     error.screen = `${screen.width}x${screen.height}`;
     error.referrer = document.referrer;
+    
+    // Ensure stack property exists (set to null if missing)
+    if (!error.hasOwnProperty('stack') || error.stack === undefined) {
+      error.stack = null;
+    }
 
     // Store error
     this.errors.push(error);

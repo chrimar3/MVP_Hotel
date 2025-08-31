@@ -41,7 +41,14 @@ class ReviewModel {
    * Notify observers of state changes
    */
   notify(changeType, data) {
-    this.observers.forEach((callback) => callback(changeType, data));
+    this.observers.forEach((callback) => {
+      try {
+        callback(changeType, data);
+      } catch (error) {
+        // Handle observer errors gracefully - continue notifying other observers
+        console.error('Observer error:', error);
+      }
+    });
   }
 
   /**

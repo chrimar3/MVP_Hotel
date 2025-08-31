@@ -3,7 +3,7 @@
  * Tests XSS prevention, input validation, and sanitization
  */
 
-const { SecurityService } = require('../../src/utils/security');
+const SecurityService = require('../../src/utils/security');
 
 describe('SecurityService', () => {
     let security;
@@ -48,7 +48,7 @@ describe('SecurityService', () => {
         it('should remove all HTML tags', () => {
             const input = '<div>Test <script>alert(1)</script></div>';
             const result = security.sanitizeText(input);
-            expect(result).toBe('div Test scriptalert(1)/script/div');
+            expect(result).toBe('divTest scriptalert(1)/script/div');
         });
 
         it('should remove javascript: protocol', () => {

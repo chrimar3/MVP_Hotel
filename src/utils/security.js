@@ -59,8 +59,15 @@ class SecurityService {
      * @returns {string|null} - Valid email or null
      */
     validateEmail(email) {
+        if (!email || typeof email !== 'string') return null;
+        
+        // Reject emails that originally contained dangerous characters
+        if (/<|>|script|javascript:/i.test(email)) {
+            return null;
+        }
+        
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const sanitized = this.sanitizeText(email).toLowerCase();
+        const sanitized = this.sanitizeText(email).toLowerCase().trim();
         
         return emailRegex.test(sanitized) ? sanitized : null;
     }
@@ -248,4 +255,6 @@ class SecurityService {
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SecurityService;
+} else if (typeof window !== 'undefined') {
+    window.SecurityService = SecurityService;
 }

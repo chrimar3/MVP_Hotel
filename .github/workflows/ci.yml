@@ -1,99 +1,274 @@
-name: CI
+name: Continuous Integration
 
 on:
+  pull_request:
+    branches: [ main, develop ]
   push:
     branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  schedule:
+    # Run nightly builds at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '20'
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  checks: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate-html:
+  lint-and-format:
+    name: Code Quality
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Validate HTML
-      uses: Cyb3r-Jak3/html5validator-action@v7.2.0
-      with:
-        root: src/
-        css: true
-        
-  browser-tests:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check Prettier formatting
+        run: npm run format:check
+
+      - name: Validate HTML
+        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+        with:
+          root: public/
+          css: true
+        continue-on-error: true
+
+  security:
+    name: Security Analysis
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install Puppeteer and Dependencies
-      run: |
-        # Create package.json if it doesn't exist
-        npm init -y || true
-        # Install Puppeteer
-        npm install puppeteer@24.0.0 --no-save
-        # Install Chrome dependencies for GitHub Actions
-        sudo apt-get update
-        sudo apt-get install -y \
-          libnss3 \
-          libatk-bridge2.0-0 \
-          libdrm2 \
-          libxkbcommon0 \
-          libxcomposite1 \
-          libxdamage1 \
-          libxrandr2 \
-          libgbm1 \
-          libgtk-3-0
-    
-    - name: Run Visual Tests
-      run: node .claude/browser-tests/visual-test.js
-      continue-on-error: true
-    
-    - name: Run Accessibility Tests
-      run: node .claude/browser-tests/accessibility-test.js
-    
-    - name: Run Performance Tests
-      run: node .claude/browser-tests/performance-test.js
-      continue-on-error: true
-    
-    - name: Upload Screenshots
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: test-screenshots
-        path: |
-          *.png
-          mobile-*.png
-    
-  security-check:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level high
+        continue-on-error: true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Security headers check
+        run: |
+          echo "Checking for security best practices..."
+          grep -q "Content-Security-Policy" public/*.html || echo "Warning: No CSP found"
+          grep -q "X-Frame-Options" public/*.html || echo "Warning: Consider X-Frame-Options"
+
+  test:
+    name: Test Suite
     runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        node-version: [18, 20, 21]
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run Security Headers Check
-      run: |
-        echo "Checking for security best practices..."
-        grep -q "Content-Security-Policy" src/*.html || echo "Warning: No CSP found"
-        grep -q "X-Frame-Options" src/*.html || echo "Warning: Consider X-Frame-Options"
-    
-  lighthouse:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:ci
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: matrix.node-version == 20
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.node-version }}
+          path: |
+            coverage/
+            test-results/
+
+  e2e-tests:
+    name: End-to-End Tests
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Run Lighthouse CI
-      run: |
-        npm install -g @lhci/cli
-        lhci autorun --collect.staticDistDir=./src || echo "Lighthouse run completed"
-      continue-on-error: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+
+      - name: Start application
+        run: |
+          npm run dev &
+          sleep 10
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            playwright-report/
+
+  accessibility:
+    name: Accessibility Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start application
+        run: |
+          npm run dev &
+          sleep 10
+
+      - name: Run accessibility tests
+        run: |
+          npm install -g @axe-core/cli
+          axe http://localhost:3000 --exit
+        continue-on-error: true
+
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Start application
+        run: |
+          npm run dev &
+          sleep 10
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun --collect.staticDistDir=./public || true
+        continue-on-error: true
+
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, security, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Verify build artifacts
+        run: |
+          echo "Build completed successfully"
+          ls -la dist/ || ls -la public/ || echo "No dist or public directory found"
+
+  notify:
+    name: Test Results Summary
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, security, test, e2e-tests, accessibility, performance, build]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality | ${{ needs.lint-and-format.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Accessibility | ${{ needs.accessibility.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance | ${{ needs.performance.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY

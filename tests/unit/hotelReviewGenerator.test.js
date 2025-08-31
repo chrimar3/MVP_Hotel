@@ -371,7 +371,13 @@ describe('HotelReviewGenerator', () => {
     });
 
     describe('Debounce Function', () => {
-        jest.useFakeTimers();
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
+        afterEach(() => {
+            jest.useRealTimers();
+        });
 
         test('debounces function calls', () => {
             const mockFn = jest.fn();
@@ -401,8 +407,6 @@ describe('HotelReviewGenerator', () => {
             jest.advanceTimersByTime(1);
             expect(mockFn).toHaveBeenCalledWith('test');
         });
-
-        jest.useRealTimers();
     });
 });
 
