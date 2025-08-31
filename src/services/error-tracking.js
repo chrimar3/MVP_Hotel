@@ -104,7 +104,11 @@ class ErrorTracking {
           });
         });
         resourceObserver.observe({ entryTypes: ['resource'] });
-      } catch (e) {}
+      } catch (e) {
+        console.error('[ErrorTracking] Failed to track error:', e);
+        // Fallback: store error locally
+        this.queuedErrors.push({ error: e, timestamp: Date.now() });
+      }
 
       // Track long tasks (blocking main thread)
       try {
@@ -124,7 +128,11 @@ class ErrorTracking {
           });
         });
         taskObserver.observe({ entryTypes: ['longtask'] });
-      } catch (e) {}
+      } catch (e) {
+        console.error('[ErrorTracking] Failed to track error:', e);
+        // Fallback: store error locally
+        this.queuedErrors.push({ error: e, timestamp: Date.now() });
+      }
     }
 
     // Track memory issues

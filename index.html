@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hotel Review Generator - Demo Hub</title>
-    <link rel="manifest" href="/manifest.json">
+    <meta name="description" content="Professional hotel review generator with AI-powered text generation, multi-language support, and direct platform integration. Create authentic reviews for TripAdvisor, Google, and Booking.com.">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <link rel="icon" type="image/x-icon" href="/MVP_Hotel/favicon.ico">
+    <link rel="manifest" href="/MVP_Hotel/manifest.json">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -89,20 +95,21 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: 700; /* Increased font weight for better contrast */
         }
         .recommended {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             border: 2px solid #f59e0b;
         }
         .recommended .badge {
-            background: #f59e0b;
+            background: #d97706; /* Darker orange for better contrast */
             color: white;
         }
         .live-badge {
-            background: #10b981;
+            background: #059669; /* Darker green for better contrast (4.5:1 ratio) */
             color: white;
             margin-left: 8px;
+            font-weight: 700;
         }
         .stats {
             display: flex;
@@ -164,7 +171,7 @@
                             Complete implementation with URL detection, platform routing, analytics, and link generation. 
                             Test all 8 scenarios covering 100% of business requirements.
                         </div>
-                        <span class="badge" style="background: #10b981; color: white;">100% COVERAGE</span>
+                        <span class="badge" style="background: #059669; color: white; font-weight: 700;">100% COVERAGE</span>
                         <span class="badge live-badge">LIVE NOW</span>
                     </a>
                     
@@ -175,7 +182,7 @@
                             Full-featured generator with guest source detection, automatic platform routing, 7 languages, 
                             analytics tracking, and email/SMS link generation.
                         </div>
-                        <span class="badge" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">PRODUCTION READY</span>
+                        <span class="badge" style="background: #5b21b6; color: white; font-weight: 700;">PRODUCTION READY</span>
                         <span class="badge live-badge">LIVE</span>
                     </a>
                 </div>

@@ -56,7 +56,9 @@ class FreeAnalytics {
           this.trackEvent('Core Web Vitals', 'LCP', Math.round(lastEntry.startTime));
         });
         lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Analytics] Performance observer not supported:', e.message);
+      }
 
       // First Input Delay
       try {
@@ -71,7 +73,9 @@ class FreeAnalytics {
           });
         });
         fidObserver.observe({ type: 'first-input', buffered: true });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Analytics] Performance observer not supported:', e.message);
+      }
 
       // Cumulative Layout Shift
       try {
@@ -91,7 +95,9 @@ class FreeAnalytics {
             this.trackEvent('Core Web Vitals', 'CLS', Math.round(cls * 1000));
           }
         });
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Analytics] Performance observer not supported:', e.message);
+      }
     }
 
     // Track page performance
