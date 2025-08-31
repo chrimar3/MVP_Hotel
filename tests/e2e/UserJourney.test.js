@@ -9,7 +9,7 @@ const path = require('path');
 describe('Hotel Review Generator E2E Tests', () => {
   let browser;
   let page;
-  const baseURL = `file://${path.join(__dirname, '../../index.html')}`;
+  const baseURL = `file://${path.join(__dirname, '../../review-generator.html')}`;
 
   beforeAll(async () => {
     browser = await puppeteer.launch({

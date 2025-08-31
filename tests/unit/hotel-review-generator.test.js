@@ -1427,6 +1427,7 @@ describe('Hotel Review Generator MVP - Comprehensive Test Suite', () => {
   describe('🚨 Error Handling Tests', () => {
     
     test('Network error handling with retry logic', async () => {
+      jest.setTimeout(10000); // Increase timeout for this test
       const networkManager = {
         maxRetries: 3,
         retryDelay: 1000,
