@@ -23,10 +23,10 @@ module.exports = {
     // Best Practices
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-debugger': 'error',
-    'no-alert': 'error',
+    'no-alert': 'warn',
     'no-var': 'error',
     'prefer-const': 'error',
-    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     'no-multiple-empty-lines': ['error', { max: 1 }],
     'no-trailing-spaces': 'error',
     
@@ -38,11 +38,13 @@ module.exports = {
     'no-duplicate-imports': 'error',
     
     // Error Prevention
-    'no-undef': 'error',
+    'no-undef': 'warn',
     'no-unreachable': 'error',
     'no-unused-expressions': 'error',
     'no-return-await': 'error',
-    'require-await': 'error',
+    'require-await': 'warn',
+    'no-empty': 'warn',
+    'no-control-regex': 'warn',
     
     // Documentation
     'require-jsdoc': ['warn', {

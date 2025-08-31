@@ -406,15 +406,9 @@ class PWAManager {
 
   async init() {
     if ('serviceWorker' in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        this.serviceWorkerRegistration = registration;
-
-        return registration;
-      } catch (error) {
-        // Production: console.error('ServiceWorker registration failed:', error);
-        throw error;
-      }
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      this.serviceWorkerRegistration = registration;
+      return registration;
     }
     return null;
   }

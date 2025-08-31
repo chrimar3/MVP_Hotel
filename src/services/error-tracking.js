@@ -173,7 +173,7 @@ class ErrorTracking {
     error.referrer = document.referrer;
 
     // Ensure stack property exists (set to null if missing)
-    if (!error.hasOwnProperty('stack') || error.stack === undefined) {
+    if (!Object.prototype.hasOwnProperty.call(error, 'stack') || error.stack === undefined) {
       error.stack = null;
     }
 

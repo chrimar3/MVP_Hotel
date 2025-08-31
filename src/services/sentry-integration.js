@@ -27,7 +27,7 @@ class SentryIntegration {
     return 'production';
   }
 
-  async initialize() {
+  initialize() {
     try {
       // Dynamically load Sentry SDK
       const script = document.createElement('script');
@@ -63,7 +63,7 @@ class SentryIntegration {
             release: 'hotel-review-generator@2.0.0',
 
             // User context
-            beforeSend: (event, hint) => {
+            beforeSend: (event, _hint) => {
               // Add user context
               if (event.user) {
                 event.user = {

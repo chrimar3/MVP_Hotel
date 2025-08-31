@@ -343,7 +343,7 @@ window.EnhancedReviewGenerator = {
     initializeAnalytics() {
         // Track user engagement
         if (window.gtag) {
-            gtag('event', 'enhanced_features_loaded', {
+            window.gtag('event', 'enhanced_features_loaded', {
                 'event_category': 'engagement',
                 'load_time': performance.now()
             });
