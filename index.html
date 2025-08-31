@@ -90,27 +90,30 @@
         }
         .badge {
             display: inline-block;
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 4px 12px;
+            background: #1e40af; /* Dark blue background */
+            color: #ffffff; /* White text for maximum contrast */
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700; /* Increased font weight for better contrast */
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.025em;
         }
         .recommended {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             border: 2px solid #f59e0b;
         }
         .recommended .badge {
-            background: #b45309; /* Even darker orange for WCAG AA */
-            color: white;
+            background: #92400e; /* Ultra dark orange - 7:1 contrast ratio */
+            color: #ffffff;
             font-weight: 700;
+            letter-spacing: 0.025em;
         }
         .live-badge {
-            background: #047857; /* Even darker green for WCAG AA compliance */
-            color: white;
+            background: #064e3b; /* Ultra dark green - 7.5:1 contrast ratio */
+            color: #ffffff;
             margin-left: 8px;
             font-weight: 700;
+            letter-spacing: 0.025em;
         }
         .stats {
             display: flex;
@@ -172,7 +175,7 @@
                             Complete implementation with URL detection, platform routing, analytics, and link generation. 
                             Test all 8 scenarios covering 100% of business requirements.
                         </div>
-                        <span class="badge" style="background: #047857; color: white; font-weight: 700;">100% COVERAGE</span>
+                        <span class="badge" style="background: #064e3b; color: #ffffff; font-weight: 700;">100% COVERAGE</span>
                         <span class="badge live-badge">LIVE NOW</span>
                     </a>
                     
@@ -183,7 +186,7 @@
                             Full-featured generator with guest source detection, automatic platform routing, 7 languages, 
                             analytics tracking, and email/SMS link generation.
                         </div>
-                        <span class="badge" style="background: #4c1d95; color: white; font-weight: 700;">PRODUCTION READY</span>
+                        <span class="badge" style="background: #312e81; color: #ffffff; font-weight: 700;">PRODUCTION READY</span>
                         <span class="badge live-badge">LIVE</span>
                     </a>
                 </div>
@@ -252,6 +255,22 @@
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
             console.log('Mobile device detected - mobile experience recommended');
+        }
+    </script>
+    <!-- Sentry APM Integration -->
+    <script src="src/services/sentry-integration.js"></script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/MVP_Hotel/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
         }
     </script>
 </body>
