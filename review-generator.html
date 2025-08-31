@@ -417,6 +417,9 @@
             }
         }
     </style>
+    <!-- Load the actual review generation services -->
+    <script src="src/services/HybridGenerator.js"></script>
+    <script src="src/services/LLMReviewGenerator.js"></script>
 </head>
 <body>
     <div class="container">
@@ -994,7 +997,7 @@ ${hotelName} Team`;
                 document.getElementById('progressBar').style.width = `${this.progress}%`;
             }
             
-            generateReview() {
+            async generateReview() {
                 const hotelName = document.getElementById('hotelName').value;
                 const staffName = document.getElementById('staffName').value;
                 const comments = document.getElementById('comments').value;
@@ -1004,27 +1007,74 @@ ${hotelName} Team`;
                     return;
                 }
                 
-                const t = translations[this.currentLang];
-                let review = `${t.opening} ${hotelName}. `;
+                // Show loading state
+                const generateBtn = document.querySelector('.generate-btn');
+                const originalText = generateBtn.textContent;
+                generateBtn.textContent = 'Generating...';
+                generateBtn.disabled = true;
                 
-                if (this.selectedAspects.length > 0) {
-                    const aspectsText = this.selectedAspects.map(a => t[a]).join(', ');
-                    review += `${t.enjoyed} ${aspectsText}. `;
+                try {
+                    // Try to use HybridGenerator if available
+                    if (typeof HybridGenerator !== 'undefined') {
+                        const generator = new HybridGenerator({
+                            // No API keys configured - will fall back to templates
+                            enableAB: false
+                        });
+                        
+                        const result = await generator.generate({
+                            hotelName: hotelName,
+                            rating: this.rating || 5,
+                            tripType: 'leisure',
+                            highlights: this.selectedAspects,
+                            nights: 3,
+                            language: this.currentLang,
+                            additionalContext: {
+                                staffName: staffName,
+                                comments: comments
+                            }
+                        });
+                        
+                        if (result && result.review) {
+                            document.getElementById('reviewText').textContent = result.review;
+                            document.getElementById('reviewOutput').style.display = 'block';
+                            return;
+                        }
+                    }
+                    
+                    // Fallback to basic template if HybridGenerator not available
+                    const t = translations[this.currentLang];
+                    let review = `${t.opening} ${hotelName}. `;
+                    
+                    if (this.selectedAspects.length > 0) {
+                        const aspectsText = this.selectedAspects.map(a => t[a]).join(', ');
+                        review += `${t.enjoyed} ${aspectsText}. `;
+                    }
+                    
+                    if (staffName) {
+                        review += `${t.staff} ${staffName}. `;
+                    }
+                    
+                    if (comments) {
+                        review += `${comments} `;
+                    }
+                    
+                    review += `${t.recommend}. ${t.closing}`;
+                    
+                    // Display review
+                    document.getElementById('reviewText').textContent = review;
+                    document.getElementById('reviewOutput').style.display = 'block';
+                } catch (error) {
+                    console.error('Review generation error:', error);
+                    // Use fallback on error
+                    const t = translations[this.currentLang];
+                    const review = `${t.opening} ${hotelName}. ${t.recommend}. ${t.closing}`;
+                    document.getElementById('reviewText').textContent = review;
+                    document.getElementById('reviewOutput').style.display = 'block';
+                } finally {
+                    // Restore button state
+                    generateBtn.textContent = originalText;
+                    generateBtn.disabled = false;
                 }
-                
-                if (staffName) {
-                    review += `${t.staff} ${staffName}. `;
-                }
-                
-                if (comments) {
-                    review += `${comments} `;
-                }
-                
-                review += `${t.recommend}. ${t.closing}`;
-                
-                // Display review
-                document.getElementById('reviewText').textContent = review;
-                document.getElementById('reviewOutput').style.display = 'block';
                 
                 // Track generation
                 this.analytics.track('review_generated', {
