@@ -10,10 +10,10 @@ window.EnhancedReviewGenerator = {
     platform: 'booking',
     language: 'en',
     staffName: '',
-    
+
     // Translations loaded on demand
     translations: null,
-    
+
     init(hotelName) {
         this.hotelName = hotelName;
         this.renderFullForm();
@@ -77,13 +77,13 @@ window.EnhancedReviewGenerator = {
 
         // Apply enhanced styles
         this.injectEnhancedStyles();
-        
+
         // Attach event listeners
         this.attachEventListeners();
-        
+
         // Show content
         deferredContent.style.display = 'block';
-        
+
         // Animate entrance
         deferredContent.style.opacity = '0';
         setTimeout(() => {
@@ -147,10 +147,10 @@ window.EnhancedReviewGenerator = {
         } else {
             this.selectedAspects.push(aspect);
             btn.classList.add('selected');
-            
+
             // Award points
             window.GameSystem.addPoints(points, `selecting ${aspect}`);
-            
+
             // Celebrate with confetti for milestones
             if (this.selectedAspects.length === 3) {
                 this.triggerConfetti();
@@ -166,7 +166,7 @@ window.EnhancedReviewGenerator = {
 
     selectPlatform(platform) {
         this.platform = platform;
-        
+
         // Update UI
         document.querySelectorAll('.platform-btn').forEach(btn => {
             btn.classList.remove('selected');
@@ -176,15 +176,15 @@ window.EnhancedReviewGenerator = {
 
     generateReview() {
         const staffName = document.getElementById('staffName')?.value.trim();
-        
+
         // Build review based on selections
         const templates = this.getReviewTemplates();
         const template = templates[Math.floor(Math.random() * templates.length)];
-        
+
         let review = template
             .replace('{hotel}', this.hotelName)
             .replace('{aspects}', this.formatAspects());
-            
+
         if (staffName) {
             review += ` Special thanks to ${staffName} for making our stay memorable!`;
             window.GameSystem.addPoints(20, 'recognizing staff');
@@ -192,7 +192,7 @@ window.EnhancedReviewGenerator = {
 
         this.reviewText = review;
         this.displayReview(review);
-        
+
         // Big celebration
         window.GameSystem.addPoints(25, 'completing your review!');
         this.triggerBigCelebration();
@@ -227,7 +227,7 @@ window.EnhancedReviewGenerator = {
     displayReview(review) {
         const output = document.getElementById('reviewOutput');
         const textElement = document.getElementById('reviewText');
-        
+
         if (output && textElement) {
             textElement.textContent = review;
             output.style.display = 'block';
@@ -328,7 +328,7 @@ window.EnhancedReviewGenerator = {
     loadTranslations() {
         // Detect user language
         const userLang = navigator.language.substring(0, 2);
-        
+
         if (userLang !== 'en') {
             // Dynamically load translation module
             import(`./translations/${userLang}.js`).then(module => {

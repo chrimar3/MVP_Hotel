@@ -54,7 +54,7 @@ class RatingSelector {
   }
 
   attachEvents() {
-    this.buttons.forEach((button, index) => {
+    this.buttons.forEach((button) => {
       // Click handler
       button.addEventListener('click', () => {
         this.setRating(parseInt(button.dataset.rating));

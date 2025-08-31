@@ -32,27 +32,27 @@ class ReviewView {
             highlightButtons: document.querySelectorAll('.highlight-btn'),
             languageSelect: document.getElementById('language'),
             voiceButtons: document.querySelectorAll('.voice-btn'),
-            
+
             // Display areas
             previewSection: document.getElementById('preview-section'),
             reviewDisplay: document.getElementById('review-display'),
             reviewText: document.getElementById('review-text'),
-            
+
             // Action buttons
             generateBtn: document.getElementById('generate-btn'),
             copyBtn: document.getElementById('copy-btn'),
             shareBtn: document.getElementById('share-btn'),
             resetBtn: document.getElementById('reset-btn'),
-            
+
             // Feedback elements
             loadingSpinner: document.getElementById('loading-spinner'),
             errorMessage: document.getElementById('error-message'),
             successMessage: document.getElementById('success-message'),
-            
+
             // Stats
             statsContainer: document.getElementById('stats-container'),
             progressBar: document.getElementById('progress-bar'),
-            
+
             // Modal
             modal: document.getElementById('review-modal'),
             modalContent: document.getElementById('modal-review-content'),
@@ -113,7 +113,7 @@ class ReviewView {
         this.elements.ratingButtons.forEach(btn => {
             const btnRating = parseInt(btn.dataset.rating);
             btn.classList.toggle('active', btnRating <= rating);
-            
+
             // Update stars
             const stars = btn.querySelector('.stars');
             if (stars) {
@@ -149,7 +149,7 @@ class ReviewView {
             this.elements.loadingSpinner.style.display = 'block';
             this.elements.loadingSpinner.textContent = message;
         }
-        
+
         if (this.elements.generateBtn) {
             this.elements.generateBtn.disabled = true;
             this.elements.generateBtn.classList.add('pulse');
@@ -163,7 +163,7 @@ class ReviewView {
         if (this.elements.loadingSpinner) {
             this.elements.loadingSpinner.style.display = 'none';
         }
-        
+
         if (this.elements.generateBtn) {
             this.elements.generateBtn.disabled = false;
             this.elements.generateBtn.classList.remove('pulse');
@@ -175,23 +175,23 @@ class ReviewView {
      */
     displayReview(review) {
         if (!review) return;
-        
+
         // Show preview section
         if (this.elements.previewSection) {
             this.elements.previewSection.style.display = 'block';
             this.elements.previewSection.classList.add('fade-in');
         }
-        
+
         // Display review text
         if (this.elements.reviewText) {
             this.elements.reviewText.textContent = this.security.sanitizeText(review.text);
         }
-        
+
         // Show metadata
         if (review.source) {
             this.addMetadata(review);
         }
-        
+
         // Enable action buttons
         if (this.elements.copyBtn) {
             this.elements.copyBtn.disabled = false;
@@ -213,7 +213,7 @@ class ReviewView {
             ${review.latency ? `<span class="meta-latency">Generated in: ${review.latency}ms</span>` : ''}
             ${review.cost ? `<span class="meta-cost">Cost: $${review.cost.toFixed(6)}</span>` : ''}
         `;
-        
+
         if (this.elements.reviewDisplay) {
             const existing = this.elements.reviewDisplay.querySelector('.review-metadata');
             if (existing) existing.remove();
@@ -229,7 +229,7 @@ class ReviewView {
             this.elements.errorMessage.textContent = message;
             this.elements.errorMessage.style.display = 'block';
             this.elements.errorMessage.classList.add('shake');
-            
+
             setTimeout(() => {
                 this.elements.errorMessage.style.display = 'none';
                 this.elements.errorMessage.classList.remove('shake');
@@ -245,7 +245,7 @@ class ReviewView {
             this.elements.successMessage.textContent = message;
             this.elements.successMessage.style.display = 'block';
             this.elements.successMessage.classList.add('fade-in');
-            
+
             setTimeout(() => {
                 this.elements.successMessage.style.display = 'none';
             }, 3000);
@@ -268,7 +268,7 @@ class ReviewView {
      */
     updateStats(stats) {
         if (!this.elements.statsContainer) return;
-        
+
         this.elements.statsContainer.innerHTML = `
             <div class="stat-item">
                 <span class="stat-label">Total Reviews:</span>
@@ -314,11 +314,11 @@ class ReviewView {
         if (this.elements.hotelNameInput) {
             this.elements.hotelNameInput.value = '';
         }
-        
+
         this.updateRating(5);
         this.updateTripType('leisure');
         this.updateHighlights([]);
-        
+
         if (this.elements.previewSection) {
             this.elements.previewSection.style.display = 'none';
         }
@@ -340,13 +340,13 @@ class ReviewView {
                     </div>
                 </div>
             `,
-            
+
             errorAlert: (message) => `
                 <div class="alert alert-error">
                     <strong>Error:</strong> ${message}
                 </div>
             `,
-            
+
             successAlert: (message) => `
                 <div class="alert alert-success">
                     <strong>Success:</strong> ${message}
@@ -363,7 +363,7 @@ class ReviewView {
         Object.keys(this.eventHandlers).forEach(key => {
             delete this.eventHandlers[key];
         });
-        
+
         // Clear cached elements
         this.elements = {};
     }

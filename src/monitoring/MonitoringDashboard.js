@@ -10,7 +10,7 @@ class MonitoringDashboard {
         this.isVisible = false;
         this.refreshInterval = null;
         this.alertHistory = [];
-        
+
         this.thresholds = {
             LCP: { good: 2500, poor: 4000 },
             FID: { good: 100, poor: 300 },
@@ -32,7 +32,7 @@ class MonitoringDashboard {
         const isDev = process.env.NODE_ENV !== 'production';
         const isDebugMode = localStorage.getItem('perf-debug') === 'true';
         const hasQueryParam = window.location.search.includes('perf-debug');
-        
+
         return isDev || isDebugMode || hasQueryParam;
     }
 
@@ -43,7 +43,7 @@ class MonitoringDashboard {
         this.createDashboardHTML();
         this.attachEventListeners();
         this.startMonitoring();
-        
+
         console.log('🚀 Performance Monitoring Dashboard initialized');
         console.log('Toggle with Ctrl+Shift+P or click the floating button');
     }
@@ -74,11 +74,11 @@ class MonitoringDashboard {
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
         `;
-        
+
         toggleButton.addEventListener('mouseenter', () => {
             toggleButton.style.transform = 'scale(1.1)';
         });
-        
+
         toggleButton.addEventListener('mouseleave', () => {
             toggleButton.style.transform = 'scale(1)';
         });
@@ -272,9 +272,9 @@ class MonitoringDashboard {
      */
     refresh() {
         if (!window.performanceMonitor) return;
-        
+
         const metrics = window.performanceMonitor.getMetrics();
-        
+
         this.updateCoreWebVitals(metrics.coreWebVitals);
         this.updatePerformanceScore(metrics.performance);
         this.updateResourceTiming(metrics.resourceTiming);
@@ -295,7 +295,7 @@ class MonitoringDashboard {
             .map(([key, value]) => {
                 const status = this.getMetricStatus(key, value);
                 const statusClass = `status-${status}`;
-                
+
                 return `
                     <div class="metric-item">
                         <span>${key}</span>
@@ -317,7 +317,7 @@ class MonitoringDashboard {
         if (!container || !performance) return;
 
         const scoreColor = this.getScoreColor(performance.score);
-        
+
         container.innerHTML = `
             <div style="text-align: center;">
                 <div style="font-size: 48px; font-weight: bold; color: ${scoreColor}; margin-bottom: 10px;">
@@ -344,7 +344,7 @@ class MonitoringDashboard {
         if (!container || !resources) return;
 
         const summary = this.getResourceSummary(resources);
-        
+
         container.innerHTML = `
             <div class="metric-item">
                 <span>Total Resources</span>
@@ -362,7 +362,7 @@ class MonitoringDashboard {
             </div>
             <div style="margin-top: 15px;">
                 <strong>By Type:</strong>
-                ${Object.entries(summary.types).map(([type, count]) => 
+                ${Object.entries(summary.types).map(([type, count]) =>
                     `<div style="display: flex; justify-content: space-between; padding: 2px 0;">
                         <span>${type}:</span> <span>${count}</span>
                     </div>`
@@ -421,7 +421,7 @@ class MonitoringDashboard {
         }
 
         const recentAlerts = this.alertHistory.slice(-5).reverse();
-        
+
         container.innerHTML = recentAlerts.map(alert => `
             <div style="background: #2d1b1b; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0; border-radius: 4px;">
                 <div style="font-weight: bold; color: #dc3545;">
@@ -445,7 +445,7 @@ class MonitoringDashboard {
         if (!container) return;
 
         const customMetrics = metrics.customMetrics || {};
-        
+
         container.innerHTML = `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 ${Object.entries(customMetrics).map(([key, value]) => `
@@ -507,7 +507,7 @@ class MonitoringDashboard {
         if (typeof value === 'object') {
             return JSON.stringify(value, null, 2);
         } else if (typeof value === 'number') {
-            return key.includes('Time') || key.includes('Duration') ? 
+            return key.includes('Time') || key.includes('Duration') ?
                 `${Math.round(value)}ms` : value.toString();
         } else {
             return value.toString();
@@ -544,7 +544,7 @@ class MonitoringDashboard {
             if (resource.cached) summary.cached++;
         });
 
-        summary.cacheHitRate = summary.total > 0 ? 
+        summary.cacheHitRate = summary.total > 0 ?
             Math.round((summary.cached / summary.total) * 100) : 0;
 
         return summary;
@@ -575,7 +575,7 @@ class MonitoringDashboard {
 
         const dashboard = document.getElementById(this.containerId);
         const toggle = document.getElementById('perf-monitor-toggle');
-        
+
         if (dashboard) dashboard.remove();
         if (toggle) toggle.remove();
     }

@@ -17,7 +17,7 @@ class SecurityService {
      */
     sanitizeHTML(dirty) {
         if (!dirty) return '';
-        
+
         // Basic HTML sanitization
         let clean = String(dirty)
             .replace(/</g, '&lt;')
@@ -25,7 +25,7 @@ class SecurityService {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#x27;')
             .replace(/\//g, '&#x2F;');
-        
+
         // Allow specific safe tags
         this.allowedTags.forEach(tag => {
             const regex = new RegExp(`&lt;(${tag})&gt;`, 'gi');
@@ -33,7 +33,7 @@ class SecurityService {
             const closeRegex = new RegExp(`&lt;\\/(${tag})&gt;`, 'gi');
             clean = clean.replace(closeRegex, '</$1>');
         });
-        
+
         return clean;
     }
 
@@ -44,7 +44,7 @@ class SecurityService {
      */
     sanitizeText(text) {
         if (!text) return '';
-        
+
         return String(text)
             .replace(/[<>]/g, '')
             .replace(/javascript:/gi, '')
@@ -60,15 +60,15 @@ class SecurityService {
      */
     validateEmail(email) {
         if (!email || typeof email !== 'string') return null;
-        
+
         // Reject emails that originally contained dangerous characters
         if (/<|>|script|javascript:/i.test(email)) {
             return null;
         }
-        
+
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         const sanitized = this.sanitizeText(email).toLowerCase().trim();
-        
+
         return emailRegex.test(sanitized) ? sanitized : null;
     }
 
@@ -79,7 +79,7 @@ class SecurityService {
      */
     validateHotelName(name) {
         if (!name) return 'Hotel';
-        
+
         return this.sanitizeText(name)
             .replace(/[^a-zA-Z0-9\s\-'&]/g, '')
             .substring(0, 100);
@@ -106,7 +106,7 @@ class SecurityService {
     validateTripType(tripType) {
         const validTypes = ['business', 'leisure', 'family', 'romance', 'vacation'];
         const sanitized = this.sanitizeText(tripType).toLowerCase();
-        
+
         return validTypes.includes(sanitized) ? sanitized : 'leisure';
     }
 
@@ -133,13 +133,13 @@ class SecurityService {
      */
     validateURLParams(params) {
         const safe = {};
-        
+
         safe.source = this.sanitizeText(params.get('source') || 'direct');
         safe.tripType = this.validateTripType(params.get('tripType') || 'leisure');
         safe.nights = this.validateNumber(params.get('nights'), 1, 365, 3);
         safe.guests = this.validateNumber(params.get('guests'), 1, 20, 2);
         safe.hotel = this.validateHotelName(params.get('hotel') || 'Grand Hotel');
-        
+
         return safe;
     }
 
@@ -152,12 +152,12 @@ class SecurityService {
      */
     createElement(tag, text = '', attributes = {}) {
         const element = document.createElement(tag);
-        
+
         // Set text content safely
         if (text) {
             element.textContent = text;
         }
-        
+
         // Set safe attributes
         const safeAttributes = ['class', 'id', 'data-rating', 'data-id', 'href', 'type', 'name'];
         Object.entries(attributes).forEach(([key, value]) => {
@@ -165,7 +165,7 @@ class SecurityService {
                 element.setAttribute(key, this.sanitizeText(value));
             }
         });
-        
+
         return element;
     }
 
@@ -179,11 +179,11 @@ class SecurityService {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         }
-        
+
         // Create safe content
         const temp = document.createElement('div');
         temp.textContent = content; // This automatically escapes HTML
-        
+
         // Move safe content to target
         while (temp.firstChild) {
             element.appendChild(temp.firstChild);
@@ -201,16 +201,16 @@ class SecurityService {
         const now = Date.now();
         const key = `rateLimit_${action}`;
         const data = JSON.parse(localStorage.getItem(key) || '{"count":0,"reset":0}');
-        
+
         if (now > data.reset) {
             data.count = 0;
             data.reset = now + window;
         }
-        
+
         if (data.count >= limit) {
             return false;
         }
-        
+
         data.count++;
         localStorage.setItem(key, JSON.stringify(data));
         return true;
@@ -246,7 +246,7 @@ class SecurityService {
             frame-ancestors 'none';
             upgrade-insecure-requests;
         `.replace(/\s+/g, ' ').trim();
-        
+
         document.head.appendChild(csp);
         return nonce;
     }

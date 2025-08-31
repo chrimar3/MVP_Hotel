@@ -53,8 +53,8 @@ class ConfigManager {
       // Production configuration
       this.config = {
         ...this.config,
-        GA_MEASUREMENT_ID: 'G-YOUR_PRODUCTION_ID', 
-        SENTRY_DSN: 'https://your-sentry-dsn@sentry.io/project', 
+        GA_MEASUREMENT_ID: 'G-YOUR_PRODUCTION_ID',
+        SENTRY_DSN: 'https://your-sentry-dsn@sentry.io/project',
         SENTRY_ENVIRONMENT: 'production',
         ENABLE_ERROR_TRACKING: true,
         ALLOWED_ORIGINS: [window.location.origin],

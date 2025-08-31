@@ -8,7 +8,7 @@ class HybridGenerator {
     // API Configuration
     this.config = {
       openai: {
-        key: config.openaiKey || process.env.OPENAI_API_KEY,
+        key: config.openaiKey || (typeof process !== 'undefined' && process.env ? process.env.OPENAI_API_KEY : null),
         endpoint: 'https://api.openai.com/v1/chat/completions',
         model: 'gpt-4o-mini',
         timeout: 3000,
@@ -16,7 +16,7 @@ class HybridGenerator {
         costPer1kTokens: 0.00015,
       },
       groq: {
-        key: config.groqKey || process.env.GROQ_API_KEY,
+        key: config.groqKey || (typeof process !== 'undefined' && process.env ? process.env.GROQ_API_KEY : null),
         endpoint: 'https://api.groq.com/openai/v1/chat/completions',
         model: 'mixtral-8x7b-32768',
         timeout: 1000,
@@ -864,4 +864,10 @@ class TemplateGenerator {
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { HybridGenerator, TemplateGenerator };
+}
+
+// Export to global window object for browser use
+if (typeof window !== 'undefined') {
+  window.HybridGenerator = HybridGenerator;
+  window.TemplateGenerator = TemplateGenerator;
 }

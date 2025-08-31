@@ -399,7 +399,7 @@ class HumanLikeNLGEngine {
 
     highlights.forEach((highlight, index) => {
       // Select unique transition
-      let transition = this.selectUniqueTransition(index, highlights.length, usedTransitions);
+      const transition = this.selectUniqueTransition(index, highlights.length, usedTransitions);
       usedTransitions.push(transition);
 
       // Create point with varying sentence structure

@@ -67,12 +67,12 @@ class SecurityManager {
 
         const userRole = user?.role || 'guest';
         const requiredPermission = `${action}:${resource}`;
-        
+
         const hasPermission = permissions[userRole]?.some(perm => {
             if (perm.includes('all')) {
                 return perm.split(':')[0] === action;
             }
-            return perm === requiredPermission || 
+            return perm === requiredPermission ||
                    (perm === `${action}:own` && resource === user?.id);
         });
 
@@ -91,10 +91,10 @@ class SecurityManager {
         try {
             const encoder = new TextEncoder();
             const dataBuffer = encoder.encode(JSON.stringify(data));
-            
+
             // Generate IV
             const iv = crypto.getRandomValues(new Uint8Array(12));
-            
+
             // Import key
             const cryptoKey = await crypto.subtle.importKey(
                 'raw',
@@ -103,19 +103,19 @@ class SecurityManager {
                 false,
                 ['encrypt']
             );
-            
+
             // Encrypt
             const encrypted = await crypto.subtle.encrypt(
                 { name: 'AES-GCM', iv },
                 cryptoKey,
                 dataBuffer
             );
-            
+
             // Combine IV and encrypted data
             const combined = new Uint8Array(iv.length + encrypted.byteLength);
             combined.set(iv);
             combined.set(new Uint8Array(encrypted), iv.length);
-            
+
             return btoa(String.fromCharCode(...combined));
         } catch (error) {
             this.logSecurityEvent('ENCRYPTION_ERROR', { error: error.message });
@@ -128,9 +128,9 @@ class SecurityManager {
      */
     sanitizeInput(input, type = 'text') {
         if (!input) return '';
-        
+
         let sanitized = String(input);
-        
+
         switch (type) {
             case 'sql':
                 // SQL injection prevention
@@ -144,7 +144,7 @@ class SecurityManager {
                     .replace(/insert\s+into/gi, '')
                     .replace(/select\s+.*\s+from/gi, '');
                 break;
-                
+
             case 'html':
                 // XSS prevention
                 sanitized = sanitized
@@ -155,7 +155,7 @@ class SecurityManager {
                     .replace(/'/g, '&#x27;')
                     .replace(/\//g, '&#x2F;');
                 break;
-                
+
             case 'javascript':
                 // JavaScript injection prevention
                 sanitized = sanitized
@@ -165,28 +165,28 @@ class SecurityManager {
                     .replace(/eval\s*\(/gi, '')
                     .replace(/new\s+Function/gi, '');
                 break;
-                
+
             case 'ldap':
                 // LDAP injection prevention
                 sanitized = sanitized
                     .replace(/[*()\\,]/g, '')
                     .replace(/\x00/g, '');
                 break;
-                
+
             case 'xpath':
                 // XPath injection prevention
                 sanitized = sanitized
                     .replace(/['"]/g, '')
                     .replace(/[()]/g, '');
                 break;
-                
+
             case 'command':
                 // Command injection prevention
                 sanitized = sanitized
                     .replace(/[;&|`$()\\<>]/g, '')
                     .replace(/\n|\r/g, '');
                 break;
-                
+
             default:
                 // Generic text sanitization
                 sanitized = sanitized
@@ -194,7 +194,7 @@ class SecurityManager {
                     .replace(/javascript:/gi, '')
                     .replace(/on\w+\s*=/gi, '');
         }
-        
+
         // Length limitation
         return sanitized.substring(0, this.config.maxFieldSize);
     }
@@ -204,12 +204,12 @@ class SecurityManager {
      */
     validateInput(input, schema) {
         const errors = [];
-        
+
         // Type validation
         if (schema.type && typeof input !== schema.type) {
             errors.push(`Invalid type: expected ${schema.type}`);
         }
-        
+
         // Length validation
         if (schema.minLength && input.length < schema.minLength) {
             errors.push(`Minimum length is ${schema.minLength}`);
@@ -217,12 +217,12 @@ class SecurityManager {
         if (schema.maxLength && input.length > schema.maxLength) {
             errors.push(`Maximum length is ${schema.maxLength}`);
         }
-        
+
         // Pattern validation
         if (schema.pattern && !schema.pattern.test(input)) {
             errors.push('Invalid format');
         }
-        
+
         // Range validation for numbers
         if (schema.type === 'number') {
             if (schema.min !== undefined && input < schema.min) {
@@ -232,17 +232,17 @@ class SecurityManager {
                 errors.push(`Maximum value is ${schema.max}`);
             }
         }
-        
+
         // Enum validation
         if (schema.enum && !schema.enum.includes(input)) {
             errors.push(`Must be one of: ${schema.enum.join(', ')}`);
         }
-        
+
         if (errors.length > 0) {
             this.logSecurityEvent('VALIDATION_FAILED', { input: input.substring(0, 50), errors });
             return { valid: false, errors };
         }
-        
+
         return { valid: true, sanitized: this.sanitizeInput(input, schema.sanitize) };
     }
 
@@ -259,19 +259,19 @@ class SecurityManager {
                 document.head.appendChild(meta);
             }
         });
-        
+
         // Disable debug mode in production
         if (window.location.hostname !== 'localhost') {
             console.log = () => {};
             console.debug = () => {};
             console.info = () => {};
         }
-        
+
         // Remove sensitive information from errors
         window.addEventListener('error', (event) => {
             if (window.location.hostname !== 'localhost') {
                 event.preventDefault();
-                this.logSecurityEvent('CLIENT_ERROR', { 
+                this.logSecurityEvent('CLIENT_ERROR', {
                     message: 'An error occurred',
                     url: event.filename,
                     line: event.lineno
@@ -285,7 +285,7 @@ class SecurityManager {
      */
     generateCSP() {
         const nonce = this.generateNonce();
-        
+
         return `
             default-src 'self';
             script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net;
@@ -309,7 +309,7 @@ class SecurityManager {
     checkDependencies() {
         // In a real application, this would check package versions
         const vulnerabilities = [];
-        
+
         // Check for known vulnerable versions (example)
         if (typeof DOMPurify !== 'undefined' && DOMPurify.version < '2.4.0') {
             vulnerabilities.push({
@@ -318,11 +318,11 @@ class SecurityManager {
                 recommendation: 'Update to version 2.4.0 or higher'
             });
         }
-        
+
         if (vulnerabilities.length > 0) {
             this.logSecurityEvent('VULNERABLE_DEPENDENCIES', vulnerabilities);
         }
-        
+
         return vulnerabilities;
     }
 
@@ -332,23 +332,23 @@ class SecurityManager {
     validateAuthentication(credentials) {
         // Check rate limiting
         if (!this.checkRateLimit('login', this.config.maxLoginAttempts)) {
-            this.logSecurityEvent('LOGIN_RATE_LIMIT_EXCEEDED', { 
-                username: credentials.username 
+            this.logSecurityEvent('LOGIN_RATE_LIMIT_EXCEEDED', {
+                username: credentials.username
             });
-            return { 
-                success: false, 
-                error: 'Too many login attempts. Please try again later.' 
+            return {
+                success: false,
+                error: 'Too many login attempts. Please try again later.'
             };
         }
-        
+
         // Validate password strength
         if (!this.validatePasswordStrength(credentials.password)) {
-            return { 
-                success: false, 
-                error: 'Password does not meet security requirements' 
+            return {
+                success: false,
+                error: 'Password does not meet security requirements'
             };
         }
-        
+
         // In a real app, this would check against a secure database
         // with properly hashed passwords (bcrypt, argon2, etc.)
         return { success: true };
@@ -361,19 +361,19 @@ class SecurityManager {
         if (!password || password.length < this.config.passwordMinLength) {
             return false;
         }
-        
+
         if (this.config.requireStrongPassword) {
             const hasUpperCase = /[A-Z]/.test(password);
             const hasLowerCase = /[a-z]/.test(password);
             const hasNumbers = /\d/.test(password);
             const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-            
+
             const strength = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar]
                 .filter(Boolean).length;
-            
+
             return strength >= 3;
         }
-        
+
         return true;
     }
 
@@ -392,19 +392,19 @@ class SecurityManager {
     async computeHMAC(data) {
         const encoder = new TextEncoder();
         const dataBuffer = encoder.encode(JSON.stringify(data));
-        
+
         const key = await crypto.subtle.generateKey(
             { name: 'HMAC', hash: 'SHA-256' },
             true,
             ['sign', 'verify']
         );
-        
+
         const signature = await crypto.subtle.sign(
             'HMAC',
             key,
             dataBuffer
         );
-        
+
         return btoa(String.fromCharCode(...new Uint8Array(signature)));
     }
 
@@ -414,7 +414,7 @@ class SecurityManager {
     setupSecurityLogging() {
         this.securityLog = [];
         this.maxLogEntries = 10000;
-        
+
         // Log security-relevant events
         this.securityEventTypes = [
             'LOGIN_ATTEMPT',
@@ -447,19 +447,19 @@ class SecurityManager {
             referrer: document.referrer,
             sessionId: this.getSessionId()
         };
-        
+
         this.securityLog.push(event);
-        
+
         // Rotate logs if needed
         if (this.securityLog.length > this.maxLogEntries) {
             this.securityLog = this.securityLog.slice(-this.maxLogEntries);
         }
-        
+
         // Send critical events to server (in production)
         if (this.isCriticalEvent(eventType)) {
             this.sendToSecurityMonitoring(event);
         }
-        
+
         // Store in localStorage for persistence
         try {
             localStorage.setItem('securityLog', JSON.stringify(
@@ -513,7 +513,7 @@ class SecurityManager {
     validateURL(url) {
         try {
             const parsed = new URL(url);
-            
+
             // Block private IP ranges
             const privateIPRanges = [
                 /^127\./,
@@ -525,31 +525,31 @@ class SecurityManager {
                 /^fe80::/,
                 /^fc00::/
             ];
-            
+
             const hostname = parsed.hostname;
             const isPrivate = privateIPRanges.some(range => range.test(hostname));
-            
+
             if (isPrivate) {
                 this.logSecurityEvent('SSRF_ATTEMPT', { url });
                 return false;
             }
-            
+
             // Only allow HTTPS in production
             if (window.location.hostname !== 'localhost' && parsed.protocol !== 'https:') {
                 return false;
             }
-            
+
             // Check against allowlist
             const allowedDomains = [
                 'api.openai.com',
                 'api.groq.com',
                 'mvp-hotel.netlify.app'
             ];
-            
-            const isAllowed = allowedDomains.some(domain => 
+
+            const isAllowed = allowedDomains.some(domain =>
                 hostname === domain || hostname.endsWith(`.${domain}`)
             );
-            
+
             return isAllowed;
         } catch (error) {
             return false;
@@ -562,10 +562,10 @@ class SecurityManager {
     setupCSRFProtection() {
         // Generate CSRF token
         this.csrfToken = this.generateToken();
-        
+
         // Store in session
         sessionStorage.setItem('csrfToken', this.csrfToken);
-        
+
         // Add to all forms
         document.addEventListener('DOMContentLoaded', () => {
             const forms = document.querySelectorAll('form');
@@ -577,16 +577,16 @@ class SecurityManager {
                 form.appendChild(input);
             });
         });
-        
+
         // Validate on form submission
         document.addEventListener('submit', (e) => {
             const form = e.target;
             const token = form.querySelector('input[name="csrf_token"]')?.value;
-            
+
             if (!this.validateCSRFToken(token)) {
                 e.preventDefault();
-                this.logSecurityEvent('CSRF_ATTEMPT', { 
-                    form: form.id || 'unknown' 
+                this.logSecurityEvent('CSRF_ATTEMPT', {
+                    form: form.id || 'unknown'
                 });
                 alert('Security validation failed. Please refresh and try again.');
             }
@@ -621,26 +621,26 @@ class SecurityManager {
     checkRateLimit(action, limit = 10, window = 60000) {
         const now = Date.now();
         const key = `${action}_${this.getClientIdentifier()}`;
-        
+
         if (!this.rateLimits.has(key)) {
             this.rateLimits.set(key, {
                 count: 0,
                 resetTime: now + window
             });
         }
-        
+
         const limit_data = this.rateLimits.get(key);
-        
+
         if (now > limit_data.resetTime) {
             limit_data.count = 0;
             limit_data.resetTime = now + window;
         }
-        
+
         if (limit_data.count >= limit) {
             this.logSecurityEvent('RATE_LIMIT_EXCEEDED', { action, limit });
             return false;
         }
-        
+
         limit_data.count++;
         return true;
     }
@@ -696,14 +696,14 @@ class SecurityManager {
             sessionStorage.setItem('sessionStart', Date.now().toString());
             return true;
         }
-        
+
         const elapsed = Date.now() - parseInt(sessionStart);
         if (elapsed > this.config.sessionTimeout) {
             this.clearSession();
             this.logSecurityEvent('SESSION_EXPIRED');
             return false;
         }
-        
+
         return true;
     }
 
@@ -722,23 +722,23 @@ class SecurityManager {
     initialize() {
         // Apply security headers
         this.applySecurityHeaders();
-        
+
         // Check session validity
         this.validateSession();
-        
+
         // Check for vulnerable dependencies
         this.checkDependencies();
-        
+
         // Set up automatic session validation
         setInterval(() => {
             if (!this.validateSession()) {
                 window.location.reload();
             }
         }, 60000); // Check every minute
-        
+
         // Monitor for suspicious activity
         this.monitorSuspiciousActivity();
-        
+
         console.info('Security Manager initialized');
     }
 
@@ -748,15 +748,15 @@ class SecurityManager {
     monitorSuspiciousActivity() {
         let rapidClickCount = 0;
         let lastClickTime = 0;
-        
+
         // Detect rapid clicking (potential automation)
         document.addEventListener('click', () => {
             const now = Date.now();
             if (now - lastClickTime < 100) {
                 rapidClickCount++;
                 if (rapidClickCount > 10) {
-                    this.logSecurityEvent('SUSPICIOUS_ACTIVITY', { 
-                        type: 'rapid_clicking' 
+                    this.logSecurityEvent('SUSPICIOUS_ACTIVITY', {
+                        type: 'rapid_clicking'
                     });
                     rapidClickCount = 0;
                 }
@@ -765,18 +765,18 @@ class SecurityManager {
             }
             lastClickTime = now;
         });
-        
+
         // Detect console usage (potential debugging attempt)
         const devtools = { open: false };
         const threshold = 160;
-        
+
         setInterval(() => {
-            if (window.outerHeight - window.innerHeight > threshold || 
+            if (window.outerHeight - window.innerHeight > threshold ||
                 window.outerWidth - window.innerWidth > threshold) {
                 if (!devtools.open) {
                     devtools.open = true;
-                    this.logSecurityEvent('SUSPICIOUS_ACTIVITY', { 
-                        type: 'devtools_opened' 
+                    this.logSecurityEvent('SUSPICIOUS_ACTIVITY', {
+                        type: 'devtools_opened'
                     });
                 }
             } else {
@@ -794,7 +794,7 @@ class SecurityManager {
             sessionId: this.getSessionId(),
             events: this.securityLog
         };
-        
+
         return JSON.stringify(logs, null, 2);
     }
 }

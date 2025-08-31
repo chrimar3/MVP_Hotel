@@ -171,7 +171,7 @@ class ErrorTracking {
     error.viewport = `${window.innerWidth}x${window.innerHeight}`;
     error.screen = `${screen.width}x${screen.height}`;
     error.referrer = document.referrer;
-    
+
     // Ensure stack property exists (set to null if missing)
     if (!error.hasOwnProperty('stack') || error.stack === undefined) {
       error.stack = null;

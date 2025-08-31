@@ -134,7 +134,7 @@ class FreeAnalytics {
   }
 
   trackEngagement() {
-    let startTime = Date.now();
+    const startTime = Date.now();
     let timeOnPage = 0;
     let isActive = true;
 

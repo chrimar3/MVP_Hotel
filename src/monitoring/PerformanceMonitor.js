@@ -9,7 +9,7 @@ class PerformanceMonitor {
         this.metrics = {
             coreWebVitals: {
                 LCP: null,    // Largest Contentful Paint
-                FID: null,    // First Input Delay  
+                FID: null,    // First Input Delay
                 CLS: null,    // Cumulative Layout Shift
                 FCP: null,    // First Contentful Paint
                 TTI: null,    // Time to Interactive
@@ -20,7 +20,7 @@ class PerformanceMonitor {
             resourceTiming: [],
             navigationTiming: {}
         };
-        
+
         this.thresholds = {
             LCP: 2500,    // Good: <2.5s
             FID: 100,     // Good: <100ms
@@ -33,7 +33,7 @@ class PerformanceMonitor {
         this.observers = new Map();
         this.startTime = performance.now();
         this.isProduction = process.env.NODE_ENV === 'production';
-        
+
         this.initialize();
     }
 
@@ -191,7 +191,7 @@ class PerformanceMonitor {
             const observer = new PerformanceObserver((list) => {
                 list.getEntries().forEach(callback);
             });
-            
+
             observer.observe({ type, buffered: true });
             this.observers.set(type, observer);
         } catch (error) {
@@ -213,7 +213,7 @@ class PerformanceMonitor {
                     navEntry.domContentLoadedEventEnd,
                     navEntry.loadEventEnd
                 );
-                
+
                 this.metrics.coreWebVitals.TTI = Math.round(tti);
                 this.evaluateMetric('TTI', tti);
             }
@@ -224,12 +224,12 @@ class PerformanceMonitor {
      * Estimate bundle size from resource timing
      */
     estimateBundleSize() {
-        const jsResources = this.metrics.resourceTiming.filter(r => 
+        const jsResources = this.metrics.resourceTiming.filter(r =>
             r.type === 'script' && r.name.includes(window.location.origin)
         );
-        
+
         const totalSize = jsResources.reduce((sum, resource) => sum + resource.size, 0);
-        
+
         this.metrics.customMetrics.bundleSize = {
             totalBytes: totalSize,
             totalKB: Math.round(totalSize / 1024),
@@ -246,7 +246,7 @@ class PerformanceMonitor {
         if (!threshold) return;
 
         const status = this.getMetricStatus(metricName, value);
-        
+
         this.logMetric(`${metricName}_MEASURED`, {
             value: Math.round(value),
             threshold,
@@ -265,7 +265,7 @@ class PerformanceMonitor {
      */
     getMetricStatus(metricName, value) {
         const threshold = this.thresholds[metricName];
-        
+
         // Different scales for different metrics
         if (metricName === 'CLS') {
             if (value <= 0.1) return 'good';
@@ -283,13 +283,13 @@ class PerformanceMonitor {
      */
     getResourceType(entry) {
         if (entry.initiatorType) return entry.initiatorType;
-        
+
         const url = entry.name;
         if (url.match(/\.(js|mjs)$/)) return 'script';
         if (url.match(/\.(css)$/)) return 'stylesheet';
         if (url.match(/\.(png|jpg|jpeg|gif|svg|webp)$/)) return 'image';
         if (url.match(/\.(woff|woff2|ttf|eot)$/)) return 'font';
-        
+
         return 'other';
     }
 
@@ -382,7 +382,7 @@ class PerformanceMonitor {
             if (resource.cached) summary.cached++;
         });
 
-        summary.cacheHitRate = summary.total > 0 ? 
+        summary.cacheHitRate = summary.total > 0 ?
             Math.round((summary.cached / summary.total) * 100) : 0;
 
         return summary;
@@ -402,7 +402,7 @@ class PerformanceMonitor {
             if (value !== null) {
                 validMetrics++;
                 const status = this.getMetricStatus(metric, value);
-                
+
                 if (status === 'poor') score -= 20;
                 else if (status === 'needs-improvement') score -= 10;
             }
@@ -486,7 +486,7 @@ class PerformanceMonitor {
             timestamp: Date.now(),
             data
         };
-        
+
         this.metrics.performanceEntries.push(entry);
 
         // Keep only last 100 entries

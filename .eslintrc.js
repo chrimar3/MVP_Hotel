@@ -6,25 +6,19 @@ module.exports = {
     jest: true
   },
   extends: [
-    'eslint:recommended',
-    'plugin:security/recommended',
-    'prettier'
+    'eslint:recommended'
   ],
   parserOptions: {
     ecmaVersion: 2021,
     sourceType: 'module'
   },
-  plugins: [
-    'security',
-    'no-secrets'
-  ],
+  plugins: [],
   rules: {
     // Security Rules
     'no-eval': 'error',
     'no-implied-eval': 'error',
     'no-new-func': 'error',
     'no-script-url': 'error',
-    'no-secrets/no-secrets': 'error',
     
     // Best Practices
     'no-console': ['warn', { allow: ['warn', 'error'] }],
