@@ -21,6 +21,9 @@ describe('Load Testing', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
+    // Reset fetch mock
+    global.fetch = jest.fn();
+    
     // Setup generators
     hybridGenerator = new HybridGenerator({
       openaiKey: 'test-key',
@@ -34,7 +37,7 @@ describe('Load Testing', () => {
     });
 
     // Mock consistent API responses
-    fetch.mockImplementation(() => Promise.resolve({
+    global.fetch.mockImplementation(() => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
         choices: [{ message: { content: 'Load test review response' } }],
@@ -44,8 +47,20 @@ describe('Load Testing', () => {
   });
 
   afterEach(() => {
-    if (hybridGenerator) {
-      hybridGenerator.destroy();
+    jest.clearAllMocks();
+    if (hybridGenerator && typeof hybridGenerator.destroy === 'function') {
+      try {
+        hybridGenerator.destroy();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    }
+    if (llmGenerator && typeof llmGenerator.destroy === 'function') {
+      try {
+        llmGenerator.destroy();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
     }
   });
 

@@ -102,8 +102,24 @@ describe('Hotel Review Generator MVP - Comprehensive Test Suite', () => {
   });
 
   afterEach(() => {
-    document.body.innerHTML = '';
-    global.localStorage.clear();
+    try {
+      // Clear DOM safely
+      while (document.body.firstChild) {
+        document.body.removeChild(document.body.firstChild);
+      }
+    } catch (error) {
+      // If DOM manipulation fails, just reset innerHTML
+      try {
+        document.body.innerHTML = '';
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    }
+    
+    // Clear localStorage
+    if (global.localStorage && global.localStorage.clear) {
+      global.localStorage.clear();
+    }
   });
 
   // ========================================
@@ -284,10 +300,18 @@ describe('Hotel Review Generator MVP - Comprehensive Test Suite', () => {
       });
 
       test('should register service worker successfully', async () => {
+        // Ensure navigator.serviceWorker exists
+        if (!global.navigator.serviceWorker) {
+          global.navigator.serviceWorker = {
+            register: jest.fn().mockResolvedValue({
+              addEventListener: jest.fn()
+            })
+          };
+        }
 
         const registerServiceWorker = async () => {
           try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
+            const registration = await global.navigator.serviceWorker.register('/sw.js');
             return { success: true, registration };
           } catch (error) {
             return { success: false, error };
@@ -296,7 +320,7 @@ describe('Hotel Review Generator MVP - Comprehensive Test Suite', () => {
 
         const result = await registerServiceWorker();
         expect(result.success).toBe(true);
-        expect(navigator.serviceWorker.register).toHaveBeenCalledWith('/sw.js');
+        expect(global.navigator.serviceWorker.register).toHaveBeenCalledWith('/sw.js');
       });
 
       test('should show install button when installable', () => {

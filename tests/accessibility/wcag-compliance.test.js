@@ -8,7 +8,7 @@ const { injectAxe, checkA11y } = require('axe-playwright');
 
 test.describe('WCAG 2.1 AAA Compliance', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('/guest-feedback-portal-v8-accessible.html');
+        await page.goto('/review-generator.html');
         await injectAxe(page);
     });
 
