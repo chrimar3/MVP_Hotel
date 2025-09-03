@@ -1,8 +1,20 @@
 /**
  * Main application entry point with lazy loading and performance optimizations
+ * Provides the core application framework with modular loading and performance monitoring
+ * @author Hotel Review Generator Team
+ * @since 2.0.0
  */
 
-// Critical CSS inlining function
+import { createLogger } from '../utils/logger.js';
+import { confirmModal } from '../utils/modal.js';
+
+const logger = createLogger('Main');
+
+/**
+ * Inlines critical CSS for immediate rendering
+ * Improves perceived performance by styling above-the-fold content immediately
+ * @returns {void}
+ */
 function inlineCriticalCSS() {
   const criticalCSS = `
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,14 +44,24 @@ function inlineCriticalCSS() {
   document.head.appendChild(style);
 }
 
-// Performance monitoring
+/**
+ * Performance monitoring utility class
+ * Tracks application performance metrics and identifies slow operations
+ */
 class PerformanceMonitor {
+  /**
+   * Creates a new PerformanceMonitor instance
+   */
   constructor() {
     this.metrics = {};
     this.observer = null;
     this.initializeObserver();
   }
 
+  /**
+   * Initializes the PerformanceObserver for tracking metrics
+   * @returns {void}
+   */
   initializeObserver() {
     if ('PerformanceObserver' in window) {
       this.observer = new PerformanceObserver((list) => {
@@ -48,7 +70,7 @@ class PerformanceMonitor {
 
           // Log slow operations
           if (entry.duration > 100) {
-            console.warn(`Slow operation detected: ${entry.name} took ${entry.duration}ms`);
+            logger.warn(`Slow operation detected: ${entry.name} took ${entry.duration}ms`);
           }
         }
       });
@@ -56,27 +78,43 @@ class PerformanceMonitor {
       try {
         this.observer.observe({ entryTypes: ['measure', 'navigation', 'paint'] });
       } catch (e) {
-        console.warn('Performance observer not supported for all entry types');
+        logger.warn('Performance observer not supported for all entry types');
       }
     }
   }
 
+  /**
+   * Creates a performance mark
+   * @param {string} name - The name of the mark
+   * @returns {void}
+   */
   mark(name) {
     if ('performance' in window && 'mark' in performance) {
       performance.mark(name);
     }
   }
 
+  /**
+   * Creates a performance measure between two marks
+   * @param {string} name - The name of the measure
+   * @param {string} startMark - The start mark name
+   * @param {string} endMark - The end mark name
+   * @returns {void}
+   */
   measure(name, startMark, endMark) {
     if ('performance' in window && 'measure' in performance) {
       try {
         performance.measure(name, startMark, endMark);
       } catch (e) {
-        console.warn(`Could not measure ${name}:`, e.message);
+        logger.warn(`Could not measure ${name}:`, e.message);
       }
     }
   }
 
+  /**
+   * Gets all collected performance metrics
+   * @returns {Object} Object containing all metrics, memory info, and timing data
+   */
   getMetrics() {
     return {
       ...this.metrics,
@@ -86,13 +124,24 @@ class PerformanceMonitor {
   }
 }
 
-// Lazy loading utility
+/**
+ * Lazy loading utility for dynamic module imports
+ * Manages module loading state and prevents duplicate loads
+ */
 class LazyLoader {
+  /**
+   * Creates a new LazyLoader instance
+   */
   constructor() {
     this.loadedModules = new Set();
     this.loadingPromises = new Map();
   }
 
+  /**
+   * Loads a module dynamically with caching and error handling
+   * @param {string} moduleName - The name of the module to load
+   * @returns {Promise<Object>} The loaded module
+   */
   async loadModule(moduleName) {
     // Prevent duplicate loading
     if (this.loadedModules.has(moduleName)) {
@@ -114,11 +163,16 @@ class LazyLoader {
       return result;
     } catch (error) {
       this.loadingPromises.delete(moduleName);
-      console.error(`Failed to load module ${moduleName}:`, error);
+      logger.error(`Failed to load module ${moduleName}:`, error);
       throw error;
     }
   }
 
+  /**
+   * Performs the actual dynamic import with performance tracking
+   * @param {string} moduleName - The name of the module to import
+   * @returns {Promise<Object>} The imported module
+   */
   async dynamicImport(moduleName) {
     const performanceMonitor = window.performanceMonitor;
     performanceMonitor.mark(`${moduleName}-load-start`);
@@ -177,8 +231,14 @@ class LazyLoader {
   }
 }
 
-// Application core
+/**
+ * Main application class that orchestrates all functionality
+ * Handles routing, module loading, performance monitoring, and core app lifecycle
+ */
 class HotelReviewApp {
+  /**
+   * Creates a new HotelReviewApp instance
+   */
   constructor() {
     this.performanceMonitor = new PerformanceMonitor();
     this.lazyLoader = new LazyLoader();
@@ -190,6 +250,11 @@ class HotelReviewApp {
     this.init();
   }
 
+  /**
+   * Initializes the application
+   * Sets up performance monitoring, service worker, CSS loading, and core functionality
+   * @returns {Promise<void>}
+   */
   async init() {
     this.performanceMonitor.mark('app-init-start');
 
@@ -214,10 +279,14 @@ class HotelReviewApp {
     this.performanceMonitor.measure('app-init-time', 'app-init-start', 'app-init-end');
   }
 
+  /**
+   * Registers the service worker for offline functionality and caching
+   * @returns {Promise<void>}
+   */
   async registerServiceWorker() {
     try {
       const registration = await navigator.serviceWorker.register('/service-worker.js');
-      console.log('ServiceWorker registered successfully:', registration.scope);
+      logger.info('ServiceWorker registered successfully:', registration.scope);
 
       // Listen for service worker updates
       registration.addEventListener('updatefound', () => {
@@ -225,17 +294,27 @@ class HotelReviewApp {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             // New content is available, refresh the page
-            if (confirm('New version available. Refresh to update?')) {
-              window.location.reload();
-            }
+            confirmModal('New version available. Refresh to update?', {
+              title: 'Update Available',
+              confirmText: 'Refresh',
+              cancelText: 'Later'
+            }).then((confirmed) => {
+              if (confirmed) {
+                window.location.reload();
+              }
+            });
           }
         });
       });
     } catch (error) {
-      console.log('ServiceWorker registration failed:', error);
+      logger.error('ServiceWorker registration failed:', error);
     }
   }
 
+  /**
+   * Loads non-critical CSS asynchronously to avoid blocking rendering
+   * @returns {void}
+   */
   loadNonCriticalCSS() {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -247,6 +326,11 @@ class HotelReviewApp {
     document.head.appendChild(link);
   }
 
+  /**
+   * Initializes core application functionality
+   * Sets up routing, event listeners, and intersection observers
+   * @returns {void}
+   */
   initializeCore() {
     // Initialize router
     this.initializeRouter();
@@ -258,6 +342,10 @@ class HotelReviewApp {
     this.initializeIntersectionObserver();
   }
 
+  /**
+   * Initializes the hash-based router
+   * @returns {void}
+   */
   initializeRouter() {
     // Simple hash-based routing
     const route = window.location.hash.slice(1) || 'home';
@@ -269,6 +357,11 @@ class HotelReviewApp {
     });
   }
 
+  /**
+   * Handles route changes and loads appropriate page content
+   * @param {string} route - The route to handle
+   * @returns {Promise<void>}
+   */
   async handleRoute(route) {
     this.performanceMonitor.mark(`route-${route}-start`);
 
@@ -291,6 +384,10 @@ class HotelReviewApp {
     );
   }
 
+  /**
+   * Loads and displays the home page
+   * @returns {Promise<void>}
+   */
   async loadHomePage() {
     // Home page is already loaded, just show it
     const homeElement = document.getElementById('home-page');
@@ -299,6 +396,10 @@ class HotelReviewApp {
     }
   }
 
+  /**
+   * Loads the review generator page with required modules
+   * @returns {Promise<void>}
+   */
   async loadGeneratorPage() {
     // Load the review generator with lazy-loaded modules
     try {
@@ -318,17 +419,25 @@ class HotelReviewApp {
       this.initializeReviewGenerator();
 
     } catch (error) {
-      console.error('Failed to load generator page:', error);
+      logger.error('Failed to load generator page:', error);
       this.showError('Failed to load review generator. Please refresh the page.');
     }
   }
 
+  /**
+   * Determines if security modules are required
+   * @returns {boolean} True if security modules should be loaded
+   */
   requiresSecurity() {
     // Check if we need security modules (e.g., user is logged in, handling sensitive data)
     return window.location.search.includes('auth=true') ||
            localStorage.getItem('user-authenticated') === 'true';
   }
 
+  /**
+   * Preloads critical modules during idle time
+   * @returns {Promise<void>}
+   */
   async preloadCriticalModules() {
     // Preload modules that are likely to be needed soon
     const criticalModules = ['hybrid-generator'];
@@ -341,26 +450,35 @@ class HotelReviewApp {
     }
   }
 
+  /**
+   * Preloads an array of modules
+   * @param {string[]} modules - Array of module names to preload
+   * @returns {Promise<void>}
+   */
   async preloadModules(modules) {
     for (const moduleName of modules) {
       try {
         await this.lazyLoader.loadModule(moduleName);
       } catch (error) {
-        console.warn(`Failed to preload ${moduleName}:`, error);
+        logger.warn(`Failed to preload ${moduleName}:`, error);
       }
     }
   }
 
+  /**
+   * Initializes global event listeners for error handling and page visibility
+   * @returns {void}
+   */
   initializeEventListeners() {
     // Global error handling
     window.addEventListener('error', (event) => {
-      console.error('Global error:', event.error);
+      logger.error('Global error:', event.error);
       this.reportError(event.error);
     });
 
     // Unhandled promise rejection handling
     window.addEventListener('unhandledrejection', (event) => {
-      console.error('Unhandled promise rejection:', event.reason);
+      logger.error('Unhandled promise rejection:', event.reason);
       this.reportError(event.reason);
     });
 
@@ -374,6 +492,10 @@ class HotelReviewApp {
     });
   }
 
+  /**
+   * Initializes intersection observer for lazy loading images
+   * @returns {void}
+   */
   initializeIntersectionObserver() {
     if ('IntersectionObserver' in window) {
       this.imageObserver = new IntersectionObserver((entries) => {
@@ -396,6 +518,10 @@ class HotelReviewApp {
     }
   }
 
+  /**
+   * Initializes the review generator with loaded modules
+   * @returns {void}
+   */
   initializeReviewGenerator() {
     // Initialize the main review generator functionality
     if (this.modules.hybridGenerator && this.modules.hybridGenerator.ReviewGenerator) {
@@ -403,16 +529,29 @@ class HotelReviewApp {
     }
   }
 
+  /**
+   * Pauses non-critical operations when page is hidden
+   * @returns {void}
+   */
   pauseOperations() {
     // Pause non-critical operations when page is hidden
-    console.log('Page hidden - pausing operations');
+    logger.debug('Page hidden - pausing operations');
   }
 
+  /**
+   * Resumes operations when page becomes visible again
+   * @returns {void}
+   */
   resumeOperations() {
     // Resume operations when page is visible again
-    console.log('Page visible - resuming operations');
+    logger.debug('Page visible - resuming operations');
   }
 
+  /**
+   * Reports errors to the monitoring service
+   * @param {Error} error - The error to report
+   * @returns {void}
+   */
   reportError(error) {
     // Report errors to monitoring service
     if (this.modules.monitoring && this.modules.monitoring.reportError) {
@@ -420,6 +559,11 @@ class HotelReviewApp {
     }
   }
 
+  /**
+   * Displays a user-friendly error message
+   * @param {string} message - The error message to display
+   * @returns {void}
+   */
   showError(message) {
     // Show user-friendly error message
     const errorContainer = document.getElementById('error-container');
@@ -434,12 +578,19 @@ class HotelReviewApp {
     }
   }
 
-  // Public API for accessing loaded modules
+  /**
+   * Gets a loaded module by name
+   * @param {string} name - The module name
+   * @returns {Object|undefined} The loaded module or undefined if not loaded
+   */
   getModule(name) {
     return this.modules[name];
   }
 
-  // Performance reporting
+  /**
+   * Gets a comprehensive performance report
+   * @returns {Object} Object containing metrics, loaded modules, and timestamp
+   */
   getPerformanceReport() {
     return {
       metrics: this.performanceMonitor.getMetrics(),

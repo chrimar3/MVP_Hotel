@@ -1,6 +1,8 @@
 /**
  * Human-Like Natural Language Generation Engine
  * Main orchestrator that combines all NLG components for authentic review generation
+ * @author Hotel Review Generator Team
+ * @since 2.0.0
  */
 
 // Import NLG modules
@@ -8,7 +10,15 @@ const VocabularyManager = typeof require !== 'undefined' ? require('./Vocabulary
 const TransitionManager = typeof require !== 'undefined' ? require('./TransitionManager') : window.TransitionManager;
 const NarrativeBuilder = typeof require !== 'undefined' ? require('./NarrativeBuilder') : window.NarrativeBuilder;
 
+/**
+ * Human-Like Natural Language Generation Engine
+ * Orchestrates all NLG components to generate authentic, human-like hotel reviews
+ */
 class HumanLikeNLGEngine {
+  /**
+   * Creates a new HumanLikeNLGEngine instance
+   * Initializes all core NLG components and voice profiles
+   */
   constructor() {
     // Initialize core components
     this.vocabularyManager = new VocabularyManager();
@@ -20,7 +30,8 @@ class HumanLikeNLGEngine {
   }
 
   /**
-   * Initialize different voice personalities
+   * Initialize different voice personalities with their characteristics
+   * @returns {void}
    */
   initializeVoiceProfiles() {
     this.voiceProfiles = {
@@ -57,6 +68,15 @@ class HumanLikeNLGEngine {
 
   /**
    * Main generation method - produces human-like review
+   * @param {Object} params - Generation parameters
+   * @param {string} params.hotelName - Name of the hotel
+   * @param {number} params.rating - Review rating (1-5)
+   * @param {string} params.tripType - Type of trip (leisure, business, etc.)
+   * @param {Array} params.highlights - Key highlights to include
+   * @param {number} params.nights - Number of nights stayed
+   * @param {string} params.voice - Voice personality to use
+   * @param {string} params.language - Language for the review
+   * @returns {Promise<Object>} Generated review with metadata
    */
   async generateHumanLikeReview(params) {
     const {
@@ -66,7 +86,7 @@ class HumanLikeNLGEngine {
       highlights = [],
       nights = 3,
       voice = 'friendly',
-      language = 'en',
+      // language parameter removed since it's unused
     } = params;
 
     try {
@@ -114,6 +134,12 @@ class HumanLikeNLGEngine {
   /**
    * Validate input parameters
    */
+  /**
+   * Validates the input parameters for review generation
+   * @param {Object} params - Parameters to validate
+   * @throws {Error} If parameters are invalid
+   * @returns {void}
+   */
   validateParameters(params) {
     const { rating, voice } = params;
 
@@ -128,6 +154,11 @@ class HumanLikeNLGEngine {
 
   /**
    * Process highlights into structured format
+   */
+  /**
+   * Processes highlight inputs into structured format
+   * @param {Array} highlights - Array of highlight strings or objects
+   * @returns {Array} Processed highlights with categories
    */
   processHighlights(highlights) {
     if (!Array.isArray(highlights)) {
@@ -153,6 +184,11 @@ class HumanLikeNLGEngine {
 
   /**
    * Infer category from highlight text
+   */
+  /**
+   * Infers the category of a highlight from its text content
+   * @param {string} text - The highlight text
+   * @returns {string} The inferred category
    */
   inferCategory(text) {
     const categoryKeywords = {
@@ -180,6 +216,13 @@ class HumanLikeNLGEngine {
   /**
    * Apply final enhancements to the review
    */
+  /**
+   * Applies final enhancements to the generated review
+   * @param {string} review - The base review text
+   * @param {string} voice - The voice personality
+   * @param {number} rating - The review rating
+   * @returns {string} The enhanced review
+   */
   applyFinalEnhancements(review, voice, rating) {
     let enhanced = review;
 
@@ -200,6 +243,12 @@ class HumanLikeNLGEngine {
 
   /**
    * Apply voice-specific enhancements
+   */
+  /**
+   * Applies voice-specific enhancements to the text
+   * @param {string} text - The text to enhance
+   * @param {string} voice - The voice personality
+   * @returns {string} The voice-enhanced text
    */
   applyVoiceEnhancements(text, voice) {
     const profile = this.voiceProfiles[voice];
@@ -238,6 +287,12 @@ class HumanLikeNLGEngine {
   /**
    * Add emotional nuances based on rating
    */
+  /**
+   * Adds emotional nuances based on the rating
+   * @param {string} text - The text to enhance
+   * @param {number} rating - The review rating
+   * @returns {string} Text with emotional nuances
+   */
   addEmotionalNuances(text, rating) {
     // Add subtle emotional indicators based on rating
     if (rating >= 4) {
@@ -257,6 +312,11 @@ class HumanLikeNLGEngine {
   /**
    * Optimize paragraph breaks for readability
    */
+  /**
+   * Optimizes paragraph breaks for better readability
+   * @param {string} text - The text to optimize
+   * @returns {string} Text with optimized paragraph breaks
+   */
   optimizeParagraphBreaks(text) {
     // Ensure proper spacing around paragraph breaks
     return text.replace(/\n\n+/g, '\n\n')
@@ -266,6 +326,11 @@ class HumanLikeNLGEngine {
 
   /**
    * Final polish for natural flow
+   */
+  /**
+   * Applies final polish and cleanup to the text
+   * @param {string} text - The text to polish
+   * @returns {string} The polished text
    */
   finalPolish(text) {
     return text
@@ -283,6 +348,11 @@ class HumanLikeNLGEngine {
   /**
    * Add detailed descriptions for detailed voice
    */
+  /**
+   * Adds more detailed descriptions to enhance the text
+   * @param {string} text - The text to enhance
+   * @returns {string} Text with added descriptions
+   */
   addDetailedDescriptions(text) {
     // This is a simplified implementation
     return text.replace(/\broom\b/g, 'accommodation')
@@ -292,6 +362,11 @@ class HumanLikeNLGEngine {
 
   /**
    * Calculate readability score (simplified Flesch Reading Ease)
+   */
+  /**
+   * Calculates a readability score using Flesch Reading Ease formula
+   * @param {string} text - The text to analyze
+   * @returns {number} Readability score (0-100, higher is more readable)
    */
   calculateReadabilityScore(text) {
     const sentences = text.split(/[.!?]+/).length - 1;
@@ -310,6 +385,11 @@ class HumanLikeNLGEngine {
   /**
    * Count syllables in text (approximation)
    */
+  /**
+   * Counts syllables in a text (approximation)
+   * @param {string} text - The text to analyze
+   * @returns {number} Approximate syllable count
+   */
   countSyllables(text) {
     const words = text.toLowerCase().match(/\b[a-z]+\b/g) || [];
     return words.reduce((count, word) => {
@@ -320,6 +400,11 @@ class HumanLikeNLGEngine {
 
   /**
    * Calculate authenticity score based on human-like features
+   */
+  /**
+   * Calculates an authenticity score based on various linguistic features
+   * @param {string} text - The text to analyze
+   * @returns {Object} Authenticity score and breakdown
    */
   calculateAuthenticityScore(text) {
     let score = 0;
@@ -369,6 +454,12 @@ class HumanLikeNLGEngine {
   /**
    * Handle generation errors gracefully
    */
+  /**
+   * Handles errors during review generation
+   * @param {Error} error - The error that occurred
+   * @param {Object} params - The original generation parameters
+   * @returns {Object} Fallback review or error response
+   */
   handleGenerationError(error, params) {
     console.error('NLG Engine Error:', error);
 
@@ -385,6 +476,11 @@ class HumanLikeNLGEngine {
 
   /**
    * Create fallback review when main generation fails
+   */
+  /**
+   * Creates a simple fallback review when generation fails
+   * @param {Object} params - Generation parameters
+   * @returns {Object} Simple fallback review
    */
   createFallbackReview(params) {
     const { hotelName = 'this hotel', rating = 3, tripType = 'leisure' } = params;
@@ -403,6 +499,10 @@ class HumanLikeNLGEngine {
   /**
    * Get engine statistics and capabilities
    */
+  /**
+   * Gets statistics about the NLG engine
+   * @returns {Object} Engine statistics
+   */
   getEngineStats() {
     return {
       vocabulary: this.vocabularyManager.getVocabularyStats(),
@@ -416,12 +516,22 @@ class HumanLikeNLGEngine {
   /**
    * Get available voice profiles
    */
+  /**
+   * Gets all available voice profiles
+   * @returns {Object} Dictionary of voice profiles
+   */
   getVoiceProfiles() {
     return this.voiceProfiles;
   }
 
   /**
    * Add custom voice profile
+   */
+  /**
+   * Adds a new voice profile to the engine
+   * @param {string} name - The name of the voice profile
+   * @param {Object} profile - The voice profile configuration
+   * @returns {void}
    */
   addVoiceProfile(name, profile) {
     this.voiceProfiles[name] = profile;

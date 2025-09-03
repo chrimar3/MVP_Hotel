@@ -1,9 +1,20 @@
 /**
  * Narrative Builder for Human-Like NLG Engine
  * Handles story arcs, emotional flow, and narrative structure
+ * @author Hotel Review Generator Team
+ * @since 2.0.0
  */
 
+/**
+ * Narrative Builder class
+ * Creates natural flow and structure for hotel reviews with emotional arcs
+ */
 class NarrativeBuilder {
+  /**
+   * Creates a new NarrativeBuilder instance
+   * @param {Object} vocabularyManager - The vocabulary manager instance
+   * @param {Object} transitionManager - The transition manager instance
+   */
   constructor(vocabularyManager, transitionManager) {
     this.vocabularyManager = vocabularyManager;
     this.transitionManager = transitionManager;
@@ -12,6 +23,8 @@ class NarrativeBuilder {
 
   /**
    * Initialize storytelling and emotional arc components
+   * Sets up narrative arcs, hooks, and story templates
+   * @returns {void}
    */
   initializeNarrativeElements() {
     // Narrative arc templates based on rating

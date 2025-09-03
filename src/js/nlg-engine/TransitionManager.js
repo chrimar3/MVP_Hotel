@@ -1,15 +1,26 @@
 /**
  * Transition Manager for Human-Like NLG Engine
  * Manages natural transitions and flow between sentences and paragraphs
+ * @author Hotel Review Generator Team
+ * @since 2.0.0
  */
 
+/**
+ * Transition Manager class
+ * Handles natural transitions and flow between review sections
+ */
 class TransitionManager {
+  /**
+   * Creates a new TransitionManager instance
+   */
   constructor() {
     this.initializeTransitions();
   }
 
   /**
    * Natural transitional phrases for coherent flow
+   * Initializes transition categories and phrases
+   * @returns {void}
    */
   initializeTransitions() {
     this.transitions = {

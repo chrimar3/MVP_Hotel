@@ -31,6 +31,10 @@
  * });
  */
 
+/**
+ * Review Display Component Class
+ * Handles the display and interaction of generated hotel reviews
+ */
 class ReviewDisplay {
   /**
    * Initialize the ReviewDisplay component
@@ -292,6 +296,7 @@ class ReviewDisplay {
    * Copy review text to clipboard using Clipboard API
    *
    * @async
+   * @returns {Promise<void>}
    * @returns {Promise<void>}
    * @since 1.0.0
    *

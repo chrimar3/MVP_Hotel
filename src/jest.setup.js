@@ -35,28 +35,64 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock IntersectionObserver
+/**
+ * Mock IntersectionObserver for testing
+ */
 global.IntersectionObserver = class IntersectionObserver {
+  /**
+   * Mock constructor
+   */
   constructor() {}
+  /**
+   * Mock observe method
+   * @returns {null} Always returns null
+   */
   observe() {
     return null;
   }
+  /**
+   * Mock disconnect method
+   * @returns {null} Always returns null
+   */
   disconnect() {
     return null;
   }
+  /**
+   * Mock unobserve method
+   * @returns {null} Always returns null
+   */
   unobserve() {
     return null;
   }
 };
 
 // Mock ResizeObserver
+/**
+ * Mock ResizeObserver for testing
+ */
 global.ResizeObserver = class ResizeObserver {
+  /**
+   * Mock constructor
+   */
   constructor() {}
+  /**
+   * Mock observe method
+   * @returns {null} Always returns null
+   */
   observe() {
     return null;
   }
+  /**
+   * Mock disconnect method
+   * @returns {null} Always returns null
+   */
   disconnect() {
     return null;
   }
+  /**
+   * Mock unobserve method
+   * @returns {null} Always returns null
+   */
   unobserve() {
     return null;
   }

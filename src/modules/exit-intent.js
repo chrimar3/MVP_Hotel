@@ -1,8 +1,16 @@
 /**
  * Exit Intent Prevention Module
  * Reduces bounce rate by showing special offers when users try to leave
+ * @author Hotel Review Generator Team
+ * @since 2.0.0
  */
 
+import { safeGtag } from '../utils/analytics-helper.js';
+
+/**
+ * Shows exit offer modal to prevent user from leaving
+ * @returns {void}
+ */
 export function showExitOffer() {
   // Check if offer was already shown
   if (sessionStorage.getItem('exitOfferShown')) {
@@ -273,7 +281,7 @@ export function showExitOffer() {
 
   // Track event
   if (window.gtag) {
-    gtag('event', 'exit_intent_shown', {
+    safeGtag('event', 'exit_intent_shown', {
       event_category: 'engagement',
     });
   }
@@ -296,7 +304,7 @@ window.stayAndComplete = function () {
 
   // Track event
   if (window.gtag) {
-    gtag('event', 'exit_intent_stayed', {
+    safeGtag('event', 'exit_intent_stayed', {
       event_category: 'engagement',
     });
   }
