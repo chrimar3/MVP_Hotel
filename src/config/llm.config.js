@@ -48,21 +48,21 @@ const LLM_CONFIG = {
    */
   apis: {
     openai: {
-      key: process.env.OPENAI_API_KEY || '',
-      endpoint: 'https://api.openai.com/v1/chat/completions',
+      key: '', // API keys are handled server-side only for security
+      endpoint: '/api/llm-proxy/openai', // Use server-side proxy
       model: 'gpt-4o-mini',
       enabled: true,
     },
     groq: {
-      key: process.env.GROQ_API_KEY || '',
-      endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+      key: '', // API keys are handled server-side only for security
+      endpoint: '/api/llm-proxy/groq', // Use server-side proxy
       model: 'mixtral-8x7b-32768',
       enabled: true,
     },
     proxy: {
-      // Use a CORS proxy for client-side calls
-      url: 'https://your-proxy.pipedream.net/llm',
-      enabled: false,
+      // Server-side proxy for secure API key handling
+      url: '/api/llm-proxy',
+      enabled: true, // Always use proxy for security
     },
   },
 
@@ -223,23 +223,18 @@ const LLM_CONFIG = {
  * console.log('Cache TTL:', config.cache.ttl);
  */
 function initializeConfig() {
-  // Try to load from environment variables (Node.js)
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.OPENAI_API_KEY) {
-      LLM_CONFIG.apis.openai.key = process.env.OPENAI_API_KEY;
-    }
-    if (process.env.GROQ_API_KEY) {
-      LLM_CONFIG.apis.groq.key = process.env.GROQ_API_KEY;
-    }
-  }
+  // Security Note: API keys are never loaded on client-side for security
+  // All API calls go through the secure server-side proxy at /api/llm-proxy
 
-  // Try to load from localStorage (Browser)
+  // Load non-sensitive configuration from localStorage (Browser)
   if (typeof window !== 'undefined' && window.localStorage) {
     const stored = localStorage.getItem('llm_config');
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        Object.assign(LLM_CONFIG, parsed);
+        // Only merge non-sensitive configuration (exclude API keys)
+        const { apis, ...safeConfig } = parsed;
+        Object.assign(LLM_CONFIG, safeConfig);
       } catch (e) {
         console.warn('Failed to parse stored LLM config:', e);
       }
@@ -303,46 +298,40 @@ async function validateAPIKeys() {
     groq: false,
   };
 
-  // Test OpenAI
-  if (LLM_CONFIG.apis.openai.key && LLM_CONFIG.apis.openai.key !== '') {
-    try {
-      const response = await fetch(LLM_CONFIG.apis.openai.endpoint, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${LLM_CONFIG.apis.openai.key}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: 'test' }],
-          max_tokens: 5,
-        }),
-      });
-      results.openai = response.ok;
-    } catch (e) {
-      console.warn('OpenAI validation failed:', e);
-    }
+  // Test OpenAI via secure proxy
+  try {
+    const response = await fetch(LLM_CONFIG.apis.openai.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: 'test' }],
+        max_tokens: 5,
+      }),
+    });
+    results.openai = response.ok;
+  } catch (e) {
+    console.warn('OpenAI proxy validation failed:', e);
   }
 
-  // Test Groq
-  if (LLM_CONFIG.apis.groq.key && LLM_CONFIG.apis.groq.key !== '') {
-    try {
-      const response = await fetch(LLM_CONFIG.apis.groq.endpoint, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${LLM_CONFIG.apis.groq.key}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'mixtral-8x7b-32768',
-          messages: [{ role: 'user', content: 'test' }],
-          max_tokens: 5,
-        }),
-      });
-      results.groq = response.ok;
-    } catch (e) {
-      console.warn('Groq validation failed:', e);
-    }
+  // Test Groq via secure proxy
+  try {
+    const response = await fetch(LLM_CONFIG.apis.groq.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'mixtral-8x7b-32768',
+        messages: [{ role: 'user', content: 'test' }],
+        max_tokens: 5,
+      }),
+    });
+    results.groq = response.ok;
+  } catch (e) {
+    console.warn('Groq proxy validation failed:', e);
   }
 
   return results;

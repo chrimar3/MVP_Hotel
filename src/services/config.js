@@ -35,9 +35,9 @@ class ConfigManager {
       PRODUCTION_URL: window.location.origin,
       SUPPORT_EMAIL: 'support@example.com',
 
-      // API (for future use)
-      API_BASE_URL: null,
-      OPENAI_API_KEY: null,
+      // API Configuration (server-side only)
+      API_BASE_URL: '/api/llm-proxy', // Always use secure proxy
+      // Security: API keys are never stored client-side
     };
 
     // Load environment-specific config

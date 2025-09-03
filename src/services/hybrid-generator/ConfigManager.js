@@ -15,24 +15,24 @@ class ConfigManager {
   buildConfig(config) {
     return {
       openai: {
-        key: config.openaiKey || (typeof process !== 'undefined' && process.env ? process.env.OPENAI_API_KEY : null),
-        endpoint: 'https://api.openai.com/v1/chat/completions',
+        key: '', // API keys are handled server-side only for security
+        endpoint: '/api/llm-proxy', // Always use secure server-side proxy
         model: 'gpt-4o-mini',
         timeout: 3000,
         maxRetries: 2,
         costPer1kTokens: 0.00015,
       },
       groq: {
-        key: config.groqKey || (typeof process !== 'undefined' && process.env ? process.env.GROQ_API_KEY : null),
-        endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+        key: '', // API keys are handled server-side only for security
+        endpoint: '/api/llm-proxy', // Always use secure server-side proxy
         model: 'mixtral-8x7b-32768',
         timeout: 1000,
         maxRetries: 1,
         costPer1kTokens: 0, // Free tier
       },
       proxy: {
-        url: config.proxyUrl || '/api/llm-proxy',
-        enabled: config.useProxy !== false,
+        url: '/api/llm-proxy',
+        enabled: true, // Always enabled for security
       },
       cache: {
         enabled: true,
@@ -57,7 +57,7 @@ class ConfigManager {
   }
 
   /**
-   * Check API availability
+   * Check API availability via secure proxy
    */
   async checkAvailability() {
     const availability = {
@@ -66,29 +66,31 @@ class ConfigManager {
       template: true,
     };
 
-    // Check OpenAI
-    if (this.config.openai.key && this.config.openai.key !== '') {
-      try {
-        // Quick validation without actual API call
-        availability.openai = true;
-      } catch (error) {
-        // Silent failure for availability check - this is expected
-        if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
-          console.debug('OpenAI availability check failed:', error);
-        }
+    // Check OpenAI via proxy health endpoint
+    try {
+      const response = await fetch('/api/llm-proxy/health?provider=openai', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      availability.openai = response.ok;
+    } catch (error) {
+      // Silent failure for availability check - fallback will handle this
+      if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+        console.debug('OpenAI availability check failed:', error);
       }
     }
 
-    // Check Groq
-    if (this.config.groq.key && this.config.groq.key !== '') {
-      try {
-        // Quick validation without actual API call
-        availability.groq = true;
-      } catch (error) {
-        // Silent failure for availability check - this is expected
-        if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
-          console.debug('Groq availability check failed:', error);
-        }
+    // Check Groq via proxy health endpoint
+    try {
+      const response = await fetch('/api/llm-proxy/health?provider=groq', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      availability.groq = response.ok;
+    } catch (error) {
+      // Silent failure for availability check - fallback will handle this
+      if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+        console.debug('Groq availability check failed:', error);
       }
     }
 

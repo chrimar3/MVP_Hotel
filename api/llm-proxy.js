@@ -8,14 +8,24 @@
 
 // For Vercel/Netlify Functions
 export default async function handler(req, res) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    // Enhanced CORS headers with security
+    const allowedOrigins = process.env.ALLOWED_ORIGINS ? 
+        process.env.ALLOWED_ORIGINS.split(',') : 
+        ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    } else {
+        res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
+    }
+    
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
 
     // Handle preflight
     if (req.method === 'OPTIONS') {
@@ -23,7 +33,12 @@ export default async function handler(req, res) {
         return;
     }
 
-    // Only allow POST
+    // Handle health checks
+    if (req.method === 'GET' && req.url.includes('/health')) {
+        return handleHealthCheck(req, res);
+    }
+
+    // Only allow POST for LLM requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -225,6 +240,47 @@ function trackDailyCost(cost) {
         console.error(`Daily cost limit exceeded: $${(currentCost + cost).toFixed(2)}`);
         // In production, send alert to admin
     }
+}
+
+/**
+ * Handle health check requests
+ */
+async function handleHealthCheck(req, res) {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const provider = url.searchParams.get('provider');
+    
+    const health = {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        proxy: 'operational'
+    };
+
+    // Check specific provider if requested
+    if (provider === 'openai') {
+        health.openai = {
+            configured: !!process.env.OPENAI_API_KEY,
+            status: process.env.OPENAI_API_KEY ? 'available' : 'not_configured'
+        };
+    } else if (provider === 'groq') {
+        health.groq = {
+            configured: !!process.env.GROQ_API_KEY,
+            status: process.env.GROQ_API_KEY ? 'available' : 'not_configured'
+        };
+    } else {
+        // General health check
+        health.providers = {
+            openai: {
+                configured: !!process.env.OPENAI_API_KEY,
+                status: process.env.OPENAI_API_KEY ? 'available' : 'not_configured'
+            },
+            groq: {
+                configured: !!process.env.GROQ_API_KEY,
+                status: process.env.GROQ_API_KEY ? 'available' : 'not_configured'
+            }
+        };
+    }
+
+    res.status(200).json(health);
 }
 
 // Express.js version (if not using serverless)

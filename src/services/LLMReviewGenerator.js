@@ -16,9 +16,7 @@
  *
  * @example
  * const generator = new LLMReviewGenerator({
- *   openaiKey: 'sk-...',
- *   groqKey: 'gsk_...',
- *   proxyUrl: 'https://api.example.com/proxy'
+ *   proxyUrl: '/api/llm-proxy' // Secure server-side proxy
  * });
  *
  * const result = await generator.generateReview({
@@ -46,24 +44,24 @@ class LLMReviewGenerator {
    * @since 1.0.0
    */
   constructor(config = {}) {
-    // API Configuration
-    this.openaiKey = config.openaiKey || null;
-    this.groqKey = config.groqKey || null;
-    this.proxyUrl = config.proxyUrl || 'https://api.pipedream.com/v1/proxy'; // CORS proxy
+    // Security: API keys are handled server-side only via proxy
+    this.openaiKey = null; // Never store API keys client-side
+    this.groqKey = null; // Never store API keys client-side
+    this.proxyUrl = config.proxyUrl || '/api/llm-proxy'; // Secure server-side proxy
 
-    // Model settings
+    // Model settings (all requests go through secure proxy)
     this.models = {
       primary: {
         provider: 'openai',
         model: 'gpt-4o-mini',
-        url: 'https://api.openai.com/v1/chat/completions',
+        url: '/api/llm-proxy', // Use secure server-side proxy
         timeout: 3000,
         costPerRequest: 0.000045,
       },
       fallback: {
         provider: 'groq',
         model: 'mixtral-8x7b-32768',
-        url: 'https://api.groq.com/openai/v1/chat/completions',
+        url: '/api/llm-proxy', // Use secure server-side proxy
         timeout: 1000,
         costPerRequest: 0,
       },
@@ -211,10 +209,6 @@ class LLMReviewGenerator {
    * @since 1.0.0
    */
   async generateWithOpenAI(params) {
-    if (!this.openaiKey) {
-      throw new Error('OpenAI API key not configured');
-    }
-
     const prompt = this.buildPrompt(params);
 
     const response = await this.fetchWithTimeout(
@@ -223,9 +217,10 @@ class LLMReviewGenerator {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.openaiKey}`,
+          // Security: No Authorization header - proxy handles API keys server-side
         },
         body: JSON.stringify({
+          provider: 'openai', // Tell proxy which provider to use
           model: this.models.primary.model,
           messages: [
             {
@@ -251,7 +246,7 @@ class LLMReviewGenerator {
     );
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`OpenAI proxy error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -269,10 +264,6 @@ class LLMReviewGenerator {
    * @since 1.0.0
    */
   async generateWithGroq(params) {
-    if (!this.groqKey) {
-      throw new Error('Groq API key not configured');
-    }
-
     const prompt = this.buildPrompt(params);
 
     const response = await this.fetchWithTimeout(
@@ -281,9 +272,10 @@ class LLMReviewGenerator {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.groqKey}`,
+          // Security: No Authorization header - proxy handles API keys server-side
         },
         body: JSON.stringify({
+          provider: 'groq', // Tell proxy which provider to use
           model: this.models.fallback.model,
           messages: [
             {
@@ -300,7 +292,7 @@ class LLMReviewGenerator {
     );
 
     if (!response.ok) {
-      throw new Error(`Groq API error: ${response.status}`);
+      throw new Error(`Groq proxy error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -517,14 +509,16 @@ class LLMReviewGenerator {
    *
    * @example
    * generator.configure({
-   *   openaiKey: 'sk-new-key...',
-   *   groqKey: 'gsk-new-key...'
+   *   proxyUrl: '/api/llm-proxy'
    * });
    */
   configure(config) {
-    if (config.openaiKey) this.openaiKey = config.openaiKey;
-    if (config.groqKey) this.groqKey = config.groqKey;
+    // Security: Never store API keys client-side - they're handled server-side via proxy
     if (config.proxyUrl) this.proxyUrl = config.proxyUrl;
+
+    // Update model URLs to use secure proxy
+    this.models.primary.url = this.proxyUrl;
+    this.models.fallback.url = this.proxyUrl;
   }
 }
 

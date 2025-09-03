@@ -9,18 +9,15 @@ class LLMProvider {
   }
 
   /**
-   * Call OpenAI API (with proxy support)
+   * Call OpenAI API via secure proxy
    */
   async callOpenAI(params) {
     const prompt = this.buildPrompt(params);
     const config = this.configManager.getProviderConfig('openai');
     const proxyConfig = this.configManager.getProxyConfig();
 
-    const endpoint = proxyConfig.enabled
-      ? `${proxyConfig.url}/openai`
-      : config.endpoint;
-
     const requestBody = {
+      provider: 'openai',
       model: config.model,
       messages: [
         {
@@ -39,7 +36,7 @@ class LLMProvider {
     };
 
     const response = await this.fetchWithRetry(
-      endpoint,
+      proxyConfig.url,
       {
         method: 'POST',
         headers: this.getHeaders('openai'),
@@ -59,18 +56,15 @@ class LLMProvider {
   }
 
   /**
-   * Call Groq API (with proxy support)
+   * Call Groq API via secure proxy
    */
   async callGroq(params) {
     const prompt = this.buildPrompt(params);
     const config = this.configManager.getProviderConfig('groq');
     const proxyConfig = this.configManager.getProxyConfig();
 
-    const endpoint = proxyConfig.enabled
-      ? `${proxyConfig.url}/groq`
-      : config.endpoint;
-
     const requestBody = {
+      provider: 'groq',
       model: config.model,
       messages: [
         {
@@ -84,7 +78,7 @@ class LLMProvider {
     };
 
     const response = await this.fetchWithRetry(
-      endpoint,
+      proxyConfig.url,
       {
         method: 'POST',
         headers: this.getHeaders('groq'),
@@ -194,25 +188,16 @@ class LLMProvider {
   }
 
   /**
-   * Get headers for API calls
+   * Get headers for API calls (secure proxy mode)
    */
   getHeaders(provider) {
+    // All requests go through secure proxy - no auth headers needed client-side
     const headers = {
       'Content-Type': 'application/json',
     };
 
-    const proxyConfig = this.configManager.getProxyConfig();
-    if (!proxyConfig.enabled) {
-      // Direct API calls need auth headers
-      if (provider === 'openai') {
-        const config = this.configManager.getProviderConfig('openai');
-        headers['Authorization'] = `Bearer ${config.key}`;
-      } else if (provider === 'groq') {
-        const config = this.configManager.getProviderConfig('groq');
-        headers['Authorization'] = `Bearer ${config.key}`;
-      }
-    }
-    // Proxy handles auth on server side
+    // Security: Never include Authorization headers on client side
+    // The server-side proxy handles all API authentication securely
 
     return headers;
   }

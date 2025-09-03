@@ -17,8 +17,7 @@
  * @example
  * // Initialize with configuration
  * const generator = new HybridGenerator({
- *   openai: { apiKey: 'sk-...' },
- *   groq: { apiKey: 'gsk_...' },
+ *   proxy: { url: '/api/llm-proxy' },
  *   cache: { ttl: 3600 },
  *   monitoring: { enabled: true }
  * });
@@ -353,7 +352,7 @@ class HybridGenerator {
    *
    * @example
    * generator.updateConfig({
-   *   openai: { apiKey: 'new-key' },
+   *   proxy: { url: '/api/llm-proxy' },
    *   cache: { ttl: 7200 }
    * });
    */
