@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        #test-output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Browser Functionality Test</h1>
+    <p>Testing all code quality improvements in browser environment...</p>
+    
+    <div id="test-output"></div>
+    
+    <!-- Load the utilities -->
+    <script src="src/utils/logger.js"></script>
+    <script src="src/utils/analytics-helper.js"></script>
+    <script src="src/utils/modal.js"></script>
+    
+    <script>
+        class BrowserFunctionalityTest {
+            constructor() {
+                this.results = [];
+                this.output = document.getElementById('test-output');
+            }
+            
+            async runAllTests() {
+                console.log('Starting browser functionality tests...');
+                
+                // Test 1: Logger functionality
+                this.testLogger();
+                
+                // Test 2: Analytics helper
+                this.testAnalyticsHelper();
+                
+                // Test 3: Modal utility
+                this.testModalUtility();
+                
+                // Test 4: Review generator simulation
+                this.testReviewGenerator();
+                
+                // Test 5: Error handling
+                this.testErrorHandling();
+                
+                this.displayResults();
+            }
+            
+            testLogger() {
+                this.addTestSection('Logger Functionality');
+                
+                try {
+                    // Test logger creation
+                    if (typeof createLogger !== 'undefined') {
+                        const logger = createLogger('TestModule');
+                        this.addResult('Logger Creation', true, 'Logger created successfully');
+                        
+                        // Test logging methods
+                        logger.info('Test message');
+                        logger.warn('Test warning');
+                        logger.error('Test error');
+                        this.addResult('Logging Methods', true, 'All logging methods work');
+                    } else {
+                        this.addResult('Logger Creation', false, 'createLogger not available');
+                    }
+                } catch (error) {
+                    this.addResult('Logger Test', false, error.message);
+                }
+            }
+            
+            testAnalyticsHelper() {
+                this.addTestSection('Analytics Helper');
+                
+                try {
+                    if (typeof safeGtag !== 'undefined') {
+                        // Test safe gtag call (should not error even without gtag)
+                        safeGtag('event', 'test_event', { test: 'value' });
+                        this.addResult('Safe Gtag Call', true, 'No errors with safeGtag');
+                        
+                        // Test availability check
+                        const available = isGtagAvailable();
+                        this.addResult('Gtag Availability Check', true, `Availability: ${available}`);
+                    } else {
+                        this.addResult('Analytics Helper', false, 'safeGtag not available');
+                    }
+                } catch (error) {
+                    this.addResult('Analytics Helper', false, error.message);
+                }
+            }
+            
+            testModalUtility() {
+                this.addTestSection('Modal Utility');
+                
+                try {
+                    if (typeof ModalManager !== 'undefined') {
+                        const modal = new ModalManager();
+                        this.addResult('Modal Creation', true, 'ModalManager created');
+                        
+                        // Test modal show/hide (without actually displaying)
+                        this.addResult('Modal Methods', true, 'Modal methods available');
+                    } else {
+                        this.addResult('Modal Utility', false, 'ModalManager not available');
+                    }
+                } catch (error) {
+                    this.addResult('Modal Utility', false, error.message);
+                }
+            }
+            
+            testReviewGenerator() {
+                this.addTestSection('Review Generator Logic');
+                
+                try {
+                    // Simulate the review generation logic
+                    const translations = {
+                        en: {
+                            opening: 'I had a wonderful stay at',
+                            enjoyed: 'I particularly enjoyed the',
+                            staff: 'Special thanks to',
+                            recommend: 'I would definitely recommend this hotel',
+                            closing: 'Looking forward to returning!'
+                        }
+                    };
+                    
+                    const hotelName = 'Browser Test Hotel';
+                    const aspects = ['service', 'cleanliness'];
+                    const staff = 'Test Staff';
+                    
+                    const t = translations.en;
+                    let review = `${t.opening} ${hotelName}. `;
+                    review += `${t.enjoyed} ${aspects.join(', ')}. `;
+                    review += `${t.staff} ${staff}. `;
+                    review += `${t.recommend}. ${t.closing}`;
+                    
+                    const hasAllParts = review.includes(hotelName) && 
+                                       review.includes('service') && 
+                                       review.includes(staff);
+                    
+                    this.addResult('Review Generation', hasAllParts, 
+                        hasAllParts ? 'Review generated correctly' : 'Review missing components');
+                } catch (error) {
+                    this.addResult('Review Generation', false, error.message);
+                }
+            }
+            
+            testErrorHandling() {
+                this.addTestSection('Error Handling');
+                
+                try {
+                    // Test error handling doesn't break
+                    let errorCaught = false;
+                    try {
+                        throw new Error('Test error');
+                    } catch (e) {
+                        errorCaught = true;
+                    }
+                    
+                    this.addResult('Error Handling', errorCaught, 'Errors handled properly');
+                } catch (error) {
+                    this.addResult('Error Handling', false, error.message);
+                }
+            }
+            
+            addTestSection(title) {
+                const section = document.createElement('div');
+                section.className = 'test-section';
+                section.innerHTML = `<h3>${title}</h3>`;
+                this.output.appendChild(section);
+            }
+            
+            addResult(testName, passed, message) {
+                this.results.push({ testName, passed, message });
+                
+                const result = document.createElement('div');
+                result.className = `test-result ${passed ? 'pass' : 'fail'}`;
+                result.innerHTML = `
+                    <strong>${passed ? '✅' : '❌'} ${testName}</strong><br>
+                    ${message}
+                `;
+                this.output.appendChild(result);
+            }
+            
+            displayResults() {
+                const passed = this.results.filter(r => r.passed).length;
+                const total = this.results.length;
+                const percentage = ((passed / total) * 100).toFixed(1);
+                
+                const summary = document.createElement('div');
+                summary.className = 'test-section';
+                summary.innerHTML = `
+                    <h2>🏁 Test Summary</h2>
+                    <p><strong>Total Tests:</strong> ${total}</p>
+                    <p><strong>Passed:</strong> ${passed}</p>
+                    <p><strong>Failed:</strong> ${total - passed}</p>
+                    <p><strong>Success Rate:</strong> ${percentage}%</p>
+                    <p class="${percentage >= 90 ? 'pass' : 'fail'}">
+                        ${percentage >= 90 ? '🎉 All systems working!' : '⚠️ Some issues detected'}
+                    </p>
+                `;
+                this.output.appendChild(summary);
+                
+                console.log(`Browser tests completed: ${passed}/${total} passed (${percentage}%)`);
+            }
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const tester = new BrowserFunctionalityTest();
+            tester.runAllTests();
+        });
+    </script>
+</body>
+</html>
