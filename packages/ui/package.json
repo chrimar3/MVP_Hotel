@@ -1,0 +1,71 @@
+{
+  "name": "@hotel-reviews/ui",
+  "version": "3.0.0",
+  "description": "Reusable UI components for hotel review applications",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm && npm run build:types && npm run build:styles",
+    "build:cjs": "babel src --out-dir dist --extensions .js,.ts,.tsx",
+    "build:esm": "babel src --out-dir dist --extensions .js,.ts,.tsx --config-file ./babel.esm.config.js --out-file-extension .esm.js",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
+    "build:styles": "postcss src/**/*.css --dir dist",
+    "test": "jest --config ../../tools/config/jest.config.js --testPathPattern=packages/ui",
+    "test:watch": "npm run test -- --watch",
+    "test:coverage": "npm run test -- --coverage",
+    "lint": "eslint 'src/**/*.{js,ts,tsx}' --config ../../tools/config/.eslintrc.js",
+    "lint:fix": "npm run lint -- --fix",
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build",
+    "clean": "rm -rf dist storybook-static"
+  },
+  "keywords": [
+    "react-components",
+    "ui-library",
+    "hotel-reviews",
+    "design-system"
+  ],
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@hotel-reviews/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-react": "^7.23.0",
+    "@babel/preset-typescript": "^7.23.0",
+    "@storybook/addon-essentials": "^7.6.0",
+    "@storybook/addon-interactions": "^7.6.0",
+    "@storybook/addon-links": "^7.6.0",
+    "@storybook/blocks": "^7.6.0",
+    "@storybook/react": "^7.6.0",
+    "@storybook/react-webpack5": "^7.6.0",
+    "@storybook/test": "^7.6.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "postcss": "^8.4.0",
+    "postcss-cli": "^10.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "storybook": "^7.6.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}

@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: CI/CD Pipeline
 
 on:
   pull_request:
@@ -8,10 +8,13 @@ on:
   schedule:
     # Run nightly builds at 2 AM UTC
     - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggers
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '18'
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 permissions:
   contents: read

@@ -1,0 +1,12 @@
+# Robots.txt for Hotel Review Generator
+# https://chrimar3.github.io/MVP_Hotel/
+
+User-agent: *
+Allow: /
+Disallow: /archive/
+Disallow: /documentation-archive/
+Disallow: /.github/
+Disallow: /.claude/
+
+# Sitemap location
+Sitemap: https://chrimar3.github.io/MVP_Hotel/sitemap.xml

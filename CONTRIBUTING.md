@@ -1,6 +1,6 @@
-# Contributing to Hotel Review Generator
+# Contributing to Hotel Reviews AI
 
-Welcome! We're thrilled that you're interested in contributing to the Hotel Review Generator project. This document provides comprehensive guidelines to help you contribute effectively.
+Welcome to Hotel Reviews AI! We're excited that you're interested in contributing. This guide will help you get started and ensure your contributions align with our enterprise-grade standards.
 
 ## Table of Contents
 
