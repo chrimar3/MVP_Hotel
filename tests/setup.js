@@ -298,7 +298,56 @@ beforeEach(() => {
     }
 });
 
+// Track active timers and intervals
+global.activeTimers = new Set();
+global.activeIntervals = new Set();
+
+// Override setTimeout to track timers
+const originalSetTimeout = global.setTimeout;
+global.setTimeout = (fn, delay, ...args) => {
+    const timer = originalSetTimeout(fn, delay, ...args);
+    global.activeTimers.add(timer);
+    return timer;
+};
+
+// Override clearTimeout to track cleanup
+const originalClearTimeout = global.clearTimeout;
+global.clearTimeout = (timer) => {
+    global.activeTimers.delete(timer);
+    return originalClearTimeout(timer);
+};
+
+// Override setInterval to track intervals
+const originalSetInterval = global.setInterval;
+global.setInterval = (fn, delay, ...args) => {
+    const interval = originalSetInterval(fn, delay, ...args);
+    global.activeIntervals.add(interval);
+    return interval;
+};
+
+// Override clearInterval to track cleanup
+const originalClearInterval = global.clearInterval;
+global.clearInterval = (interval) => {
+    global.activeIntervals.delete(interval);
+    return originalClearInterval(interval);
+};
+
+// Clean up after each test
+afterEach(() => {
+    // Clear all active timers
+    global.activeTimers.forEach(timer => originalClearTimeout(timer));
+    global.activeTimers.clear();
+    
+    // Clear all active intervals
+    global.activeIntervals.forEach(interval => originalClearInterval(interval));
+    global.activeIntervals.clear();
+});
+
 // Clean up after all tests
 afterAll(() => {
+    // Final cleanup of any remaining timers
+    global.activeTimers.forEach(timer => originalClearTimeout(timer));
+    global.activeIntervals.forEach(interval => originalClearInterval(interval));
+    
     jest.restoreAllMocks();
 });

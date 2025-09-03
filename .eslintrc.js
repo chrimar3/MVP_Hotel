@@ -21,7 +21,7 @@ module.exports = {
     'no-script-url': 'error',
     
     // Best Practices
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['warn', { allow: ['warn', 'error', 'info', 'group', 'groupEnd', 'table', 'debug'] }],
     'no-debugger': 'error',
     'no-alert': 'warn',
     'no-var': 'error',

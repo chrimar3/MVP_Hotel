@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for performance and SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="Generate authentic hotel reviews instantly with AI-powered technology. Multi-platform support for TripAdvisor, Google, Booking.com, and more.">
+    <meta name="keywords" content="hotel review generator, AI reviews, TripAdvisor, Google reviews, hotel marketing">
+    <meta name="author" content="Hotel Review Generator">
+    
+    <title>Review Generator - Create Authentic Hotel Reviews</title>
+    
+    <!-- Critical Resource Hints for Review Generator -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- DNS Prefetch for review platform APIs -->
+    <link rel="dns-prefetch" href="//www.tripadvisor.com">
+    <link rel="dns-prefetch" href="//www.google.com">
+    <link rel="dns-prefetch" href="//www.booking.com">
+    <link rel="dns-prefetch" href="//www.expedia.com">
+    
+    <!-- Preload critical resources for review generation -->
+    <link rel="preload" href="/js/main.js" as="script" crossorigin>
+    <link rel="preload" href="/css/critical.css" as="style">
+    <link rel="preload" href="/js/hybrid-generator.js" as="script" crossorigin>
+    
+    <!-- Module Preload for NLG engine -->
+    <link rel="modulepreload" href="/js/nlg-engine/index.js">
+    <link rel="modulepreload" href="/js/nlg-engine/HumanLikeNLGEngine.js">
+    
+    <!-- Critical CSS - Inlined -->
+    <style>
+        /* Critical CSS for review generator interface */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .form-container { padding: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .review-output {
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 150px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .hidden { display: none; }
+    </style>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    
+    <!-- Performance monitoring for review generation -->
+    <script>
+        window.reviewMetrics = {
+            pageLoadStart: performance.now(),
+            generationTimes: [],
+            errors: []
+        };
+        
+        // Track generation performance
+        window.trackGeneration = function(startTime, endTime) {
+            const duration = endTime - startTime;
+            window.reviewMetrics.generationTimes.push(duration);
+            
+            // Alert if generation is slow
+            if (duration > 3000) {
+                console.warn(`Slow review generation: ${duration}ms`);
+            }
+        };
+    </script>
+</head>
+<body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
+    
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏨 Hotel Review Generator</h1>
+            <p>Create authentic reviews in seconds with AI technology</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div id="main-content" class="form-container">
+            <!-- Review Generation Form -->
+            <div id="review-form">
+                <div class="form-group">
+                    <label for="hotelName" class="form-label">Hotel Name *</label>
+                    <input type="text" 
+                           id="hotelName" 
+                           class="form-input"
+                           placeholder="e.g., Grand Hotel Paradise"
+                           required
+                           autocomplete="organization">
+                </div>
+                
+                <div class="form-group">
+                    <label for="rating" class="form-label">Rating *</label>
+                    <select id="rating" class="form-select" required>
+                        <option value="">Select rating</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent (5 stars)</option>
+                        <option value="4">⭐⭐⭐⭐ Very Good (4 stars)</option>
+                        <option value="3">⭐⭐⭐ Good (3 stars)</option>
+                        <option value="2">⭐⭐ Fair (2 stars)</option>
+                        <option value="1">⭐ Poor (1 star)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="platform" class="form-label">Target Platform</label>
+                    <select id="platform" class="form-select">
+                        <option value="tripadvisor">TripAdvisor</option>
+                        <option value="google">Google Reviews</option>
+                        <option value="booking">Booking.com</option>
+                        <option value="expedia">Expedia</option>
+                        <option value="general">General</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="language" class="form-label">Language</label>
+                    <select id="language" class="form-select">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="zh">Chinese</option>
+                        <option value="el">Greek</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="guestType" class="form-label">Guest Type</label>
+                    <select id="guestType" class="form-select">
+                        <option value="business">Business Traveler</option>
+                        <option value="leisure">Leisure/Vacation</option>
+                        <option value="family">Family with Children</option>
+                        <option value="couple">Couple/Romantic</option>
+                        <option value="solo">Solo Traveler</option>
+                        <option value="group">Group Travel</option>
+                    </select>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button id="generateBtn" class="btn btn-primary" type="button">
+                        Generate Review
+                    </button>
+                    
+                    <button id="copyBtn" class="btn btn-secondary hidden" type="button">
+                        Copy to Clipboard
+                    </button>
+                    
+                    <button id="shareBtn" class="btn btn-tertiary hidden" type="button">
+                        Share Review
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Review Output -->
+            <div id="review-output" class="review-output">
+                <div class="placeholder-text" style="text-align: center; color: #9ca3af; font-style: italic;">
+                    Your generated review will appear here...
+                </div>
+            </div>
+            
+            <!-- Generation Status -->
+            <div id="generation-status" class="hidden">
+                <div class="loading-spinner"></div>
+                <p style="text-align: center; margin-top: 10px;">Generating your review...</p>
+            </div>
+            
+            <!-- Error Display -->
+            <div id="error-display" class="hidden" style="background-color: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <!-- Error messages will be displayed here -->
+            </div>
+            
+            <!-- Success Message -->
+            <div id="success-message" class="hidden" style="background-color: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <!-- Success messages will be displayed here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance tracking -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.reviewMetrics.domReady = performance.now() - window.reviewMetrics.pageLoadStart;
+        });
+        
+        window.addEventListener('load', function() {
+            window.reviewMetrics.pageLoadComplete = performance.now() - window.reviewMetrics.pageLoadStart;
+            
+            // Log performance metrics
+            console.log('Review Generator Performance:', window.reviewMetrics);
+        });
+    </script>
+    
+    <!-- Load main application -->
+    <script type="module">
+        // Import and initialize the review generator
+        import { HotelReviewApp } from '/js/main.js';
+        
+        // Initialize the application when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+        
+        async function initializeApp() {
+            try {
+                window.hotelReviewApp = new HotelReviewApp();
+                
+                // Navigate to generator page
+                if (window.hotelReviewApp.handleRoute) {
+                    await window.hotelReviewApp.handleRoute('generator');
+                }
+                
+                // Setup review generation handlers
+                setupReviewGenerator();
+                
+            } catch (error) {
+                console.error('Failed to initialize review generator:', error);
+                showError('Failed to load the review generator. Please refresh the page.');
+            }
+        }
+        
+        function setupReviewGenerator() {
+            const generateBtn = document.getElementById('generateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            const reviewOutput = document.getElementById('review-output');
+            const generationStatus = document.getElementById('generation-status');
+            const errorDisplay = document.getElementById('error-display');
+            const successMessage = document.getElementById('success-message');
+            
+            if (!generateBtn) return;
+            
+            generateBtn.addEventListener('click', async function() {
+                const startTime = performance.now();
+                
+                try {
+                    // Show loading state
+                    showLoading();
+                    
+                    // Get form data
+                    const formData = getFormData();
+                    
+                    // Validate required fields
+                    if (!validateForm(formData)) {
+                        hideLoading();
+                        return;
+                    }
+                    
+                    // Generate review using lazy-loaded modules
+                    const review = await generateReview(formData);
+                    
+                    // Display the review
+                    displayReview(review);
+                    
+                    // Track performance
+                    const endTime = performance.now();
+                    window.trackGeneration(startTime, endTime);
+                    
+                    // Show success state
+                    showSuccess(`Review generated successfully in ${Math.round(endTime - startTime)}ms`);
+                    
+                } catch (error) {
+                    console.error('Review generation failed:', error);
+                    showError('Failed to generate review. Please try again.');
+                    window.reviewMetrics.errors.push(error.message);
+                } finally {
+                    hideLoading();
+                }
+            });
+            
+            // Copy to clipboard functionality
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    const reviewText = reviewOutput.textContent;
+                    navigator.clipboard.writeText(reviewText).then(function() {
+                        showSuccess('Review copied to clipboard!');
+                    }).catch(function() {
+                        showError('Failed to copy review to clipboard.');
+                    });
+                });
+            }
+            
+            // Share functionality
+            if (shareBtn && navigator.share) {
+                shareBtn.addEventListener('click', function() {
+                    const reviewText = reviewOutput.textContent;
+                    navigator.share({
+                        title: 'Generated Hotel Review',
+                        text: reviewText
+                    }).catch(function(error) {
+                        console.error('Share failed:', error);
+                    });
+                });
+            } else if (shareBtn) {
+                shareBtn.style.display = 'none'; // Hide if not supported
+            }
+        }
+        
+        function getFormData() {
+            return {
+                hotelName: document.getElementById('hotelName').value,
+                rating: document.getElementById('rating').value,
+                platform: document.getElementById('platform').value,
+                language: document.getElementById('language').value,
+                guestType: document.getElementById('guestType').value
+            };
+        }
+        
+        function validateForm(data) {
+            if (!data.hotelName.trim()) {
+                showError('Please enter a hotel name.');
+                return false;
+            }
+            if (!data.rating) {
+                showError('Please select a rating.');
+                return false;
+            }
+            return true;
+        }
+        
+        async function generateReview(formData) {
+            // Load the hybrid generator module
+            const hybridGeneratorModule = await window.hotelReviewApp.lazyLoader.loadModule('hybrid-generator');
+            
+            // Create generator instance
+            const generator = new hybridGeneratorModule.ReviewGenerator();
+            await generator.initialize();
+            
+            // Generate the review
+            return await generator.generateReview(formData);
+        }
+        
+        function displayReview(review) {
+            const reviewOutput = document.getElementById('review-output');
+            const copyBtn = document.getElementById('copyBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            
+            if (review && review.content) {
+                reviewOutput.textContent = review.content;
+                reviewOutput.style.backgroundColor = 'white';
+                reviewOutput.style.borderColor = '#3b82f6';
+                reviewOutput.style.borderStyle = 'solid';
+                
+                // Show action buttons
+                copyBtn.classList.remove('hidden');
+                if (navigator.share) {
+                    shareBtn.classList.remove('hidden');
+                }
+            }
+        }
+        
+        function showLoading() {
+            document.getElementById('generation-status').classList.remove('hidden');
+            document.getElementById('generateBtn').disabled = true;
+            hideMessages();
+        }
+        
+        function hideLoading() {
+            document.getElementById('generation-status').classList.add('hidden');
+            document.getElementById('generateBtn').disabled = false;
+        }
+        
+        function showError(message) {
+            const errorDisplay = document.getElementById('error-display');
+            errorDisplay.textContent = message;
+            errorDisplay.classList.remove('hidden');
+            hideSuccess();
+        }
+        
+        function showSuccess(message) {
+            const successMessage = document.getElementById('success-message');
+            successMessage.textContent = message;
+            successMessage.classList.remove('hidden');
+            hideError();
+        }
+        
+        function hideError() {
+            document.getElementById('error-display').classList.add('hidden');
+        }
+        
+        function hideSuccess() {
+            document.getElementById('success-message').classList.add('hidden');
+        }
+        
+        function hideMessages() {
+            hideError();
+            hideSuccess();
+        }
+    </script>
+    
+    <!-- Non-critical CSS -->
+    <link rel="stylesheet" href="/css/main.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/css/main.css"></noscript>
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator && location.protocol === 'https:') {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('SW registered for review generator');
+                    })
+                    .catch(function(error) {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

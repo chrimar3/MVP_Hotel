@@ -142,9 +142,9 @@ class ErrorMonitor {
     });
   }
 
-  logWarning(message, context = {}) {
+  logWarning(message, _context = {}) {
     if (this.config.isDevelopment()) {
-
+      console.warn('Warning tracked:', message, _context);
     }
 
     if (window.Sentry) {

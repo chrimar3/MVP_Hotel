@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for performance and SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="Advanced hotel review generator with AI-powered content creation, multi-platform support, and performance optimization.">
+    <meta name="keywords" content="hotel review, generator, AI, travel, hospitality, reviews">
+    <meta name="author" content="Hotel Review Generator">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://hotelreviewgenerator.com/">
+    <meta property="og:title" content="Hotel Review Generator - AI-Powered Review Creation">
+    <meta property="og:description" content="Generate authentic hotel reviews in seconds with our advanced AI system.">
+    <meta property="og:image" content="/images/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://hotelreviewgenerator.com/">
+    <meta property="twitter:title" content="Hotel Review Generator - AI-Powered Review Creation">
+    <meta property="twitter:description" content="Generate authentic hotel reviews in seconds with our advanced AI system.">
+    <meta property="twitter:image" content="/images/twitter-card.jpg">
+    
+    <title>Hotel Review Generator - AI-Powered Review Creation</title>
+    
+    <!-- Critical Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- DNS Prefetch for external resources -->
+    <link rel="dns-prefetch" href="//www.google-analytics.com">
+    <link rel="dns-prefetch" href="//www.googletagmanager.com">
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/js/main.js" as="script" crossorigin>
+    <link rel="preload" href="/css/critical.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" crossorigin>
+    
+    <!-- Prefetch likely-to-be-needed resources -->
+    <link rel="prefetch" href="/js/hybrid-generator.js">
+    <link rel="prefetch" href="/js/nlg-engine.js">
+    <link rel="prefetch" href="/images/hero-bg.webp">
+    
+    <!-- Module Preload for critical chunks -->
+    <link rel="modulepreload" href="/js/main.js">
+    <link rel="modulepreload" href="/js/hybrid-generator.js">
+    
+    <!-- Critical CSS - Inlined for performance -->
+    <style>
+        /* Critical CSS will be inlined here by the build process */
+        <%= htmlWebpackPlugin.tags.headTags.filter(tag => tag.tagName === 'style').map(tag => tag.innerHTML).join('\n') %>
+    </style>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#3b82f6">
+    
+    <!-- iOS PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Hotel Review Generator">
+    
+    <!-- Performance Monitoring - Critical errors only -->
+    <script>
+        // Capture critical performance metrics
+        window.performanceMetrics = {
+            navigationStart: performance.timing.navigationStart,
+            firstPaint: 0,
+            firstContentfulPaint: 0,
+            domContentLoaded: 0,
+            loadComplete: 0,
+            errors: []
+        };
+        
+        // Capture paint timings
+        if ('PerformanceObserver' in window) {
+            try {
+                const paintObserver = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (entry.name === 'first-paint') {
+                            window.performanceMetrics.firstPaint = entry.startTime;
+                        } else if (entry.name === 'first-contentful-paint') {
+                            window.performanceMetrics.firstContentfulPaint = entry.startTime;
+                        }
+                    }
+                });
+                paintObserver.observe({ entryTypes: ['paint'] });
+            } catch (e) {
+                console.warn('Paint observer not supported');
+            }
+        }
+        
+        // Global error handling for critical issues
+        window.addEventListener('error', function(e) {
+            window.performanceMetrics.errors.push({
+                type: 'javascript',
+                message: e.message,
+                filename: e.filename,
+                lineno: e.lineno,
+                timestamp: Date.now()
+            });
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            window.performanceMetrics.errors.push({
+                type: 'promise',
+                message: e.reason ? e.reason.message : 'Unhandled promise rejection',
+                timestamp: Date.now()
+            });
+        });
+        
+        // DOMContentLoaded timing
+        document.addEventListener('DOMContentLoaded', function() {
+            window.performanceMetrics.domContentLoaded = Date.now() - window.performanceMetrics.navigationStart;
+        });
+        
+        // Load complete timing
+        window.addEventListener('load', function() {
+            window.performanceMetrics.loadComplete = Date.now() - window.performanceMetrics.navigationStart;
+        });
+    </script>
+</head>
+<body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Loading Screen -->
+    <div id="loading-container" class="loading-container">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading Hotel Review Generator...</div>
+        </div>
+    </div>
+    
+    <!-- App Container -->
+    <div id="app" class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>Hotel Review Generator</h1>
+                <p class="subtitle">AI-Powered Review Creation for the Hospitality Industry</p>
+            </div>
+        </header>
+        
+        <!-- Navigation -->
+        <nav class="nav" role="navigation" aria-label="Main navigation">
+            <div class="nav-container">
+                <a href="#home" class="nav-link active" data-page="home">Home</a>
+                <a href="#generator" class="nav-link" data-page="generator">Review Generator</a>
+                <a href="#features" class="nav-link" data-page="features">Features</a>
+                <a href="#about" class="nav-link" data-page="about">About</a>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main id="main-content" class="main" role="main">
+            <!-- Home Page -->
+            <section id="home-page" class="page active">
+                <div class="hero-section">
+                    <h2>Generate Professional Hotel Reviews in Seconds</h2>
+                    <p>Our advanced AI system creates authentic, engaging hotel reviews that help boost your property's online presence across all major platforms.</p>
+                    <div class="hero-actions">
+                        <a href="#generator" class="btn btn-primary" data-page="generator">Start Generating Reviews</a>
+                        <a href="#features" class="btn btn-secondary" data-page="features">Learn More</a>
+                    </div>
+                </div>
+                
+                <div class="features-grid card-grid">
+                    <div class="feature-card">
+                        <div class="card-icon">🤖</div>
+                        <h3 class="card-title">AI-Powered Generation</h3>
+                        <p class="card-description">Advanced natural language processing creates human-like reviews that feel authentic and engaging.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="card-icon">🌍</div>
+                        <h3 class="card-title">Multi-Platform Support</h3>
+                        <p class="card-description">Generate reviews optimized for TripAdvisor, Google, Booking.com, Expedia, and more.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="card-icon">🚀</div>
+                        <h3 class="card-title">Lightning Fast</h3>
+                        <p class="card-description">Generate high-quality reviews in under 2 seconds with our optimized generation engine.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="card-icon">🔒</div>
+                        <h3 class="card-title">Privacy Focused</h3>
+                        <p class="card-description">Your data stays secure with enterprise-grade security and no personal information storage.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Review Generator Page -->
+            <section id="generator-page" class="page" style="display: none;">
+                <div class="review-generator">
+                    <h2>Generate Your Review</h2>
+                    <div class="generator-content">
+                        <div id="generator-form-container">
+                            <!-- Review form will be loaded here -->
+                            <div class="loading-placeholder">
+                                <div class="loading-spinner"></div>
+                                <p>Loading review generator...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Features Page -->
+            <section id="features-page" class="page" style="display: none;">
+                <h2>Powerful Features</h2>
+                <div class="features-detailed">
+                    <!-- Features content will be loaded lazily -->
+                </div>
+            </section>
+            
+            <!-- About Page -->
+            <section id="about-page" class="page" style="display: none;">
+                <h2>About Hotel Review Generator</h2>
+                <div class="about-content">
+                    <!-- About content will be loaded lazily -->
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Error Container -->
+    <div id="error-container" class="error-container hidden" role="alert" aria-live="assertive">
+        <!-- Error messages will be displayed here -->
+    </div>
+    
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container" aria-live="polite">
+        <!-- Notifications will be displayed here -->
+    </div>
+    
+    <!-- Modal Container -->
+    <div id="modal-container">
+        <!-- Modals will be rendered here -->
+    </div>
+    
+    <!-- Performance Budget Warning (Development Only) -->
+    <script>
+        if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+            // Performance budget warnings in development
+            window.addEventListener('load', function() {
+                const loadTime = window.performanceMetrics.loadComplete;
+                if (loadTime > 2000) {
+                    console.warn(`⚡ Performance Warning: Page loaded in ${loadTime}ms (target: <2000ms)`);
+                }
+                
+                if (window.performanceMetrics.firstContentfulPaint > 1000) {
+                    console.warn(`⚡ Performance Warning: FCP at ${window.performanceMetrics.firstContentfulPaint}ms (target: <1000ms)`);
+                }
+            });
+        }
+    </script>
+    
+    <!-- Non-critical CSS - Loaded asynchronously -->
+    <link rel="stylesheet" href="/css/main.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/css/main.css"></noscript>
+    
+    <!-- Load critical JavaScript -->
+    <script type="module" src="/js/main.js"></script>
+    
+    <!-- Fallback for browsers without module support -->
+    <script nomodule src="/js/main.legacy.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator && location.protocol === 'https:') {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- Google Analytics (Lazy loaded) -->
+    <script>
+        // Lazy load Google Analytics after user interaction
+        window.addEventListener('scroll', function loadGA() {
+            window.removeEventListener('scroll', loadGA);
+            
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'GA_MEASUREMENT_ID', {
+                anonymize_ip: true,
+                cookie_flags: 'SameSite=Strict;Secure'
+            });
+            
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID';
+            document.head.appendChild(script);
+        }, { once: true });
+    </script>
+</body>
+</html>

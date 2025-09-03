@@ -1,11 +1,50 @@
 /**
  * LLM-based Review Generator with Hybrid Fallback System
- * Primary: OpenAI GPT-4o-mini (best quality/cost)
- * Fallback: Groq Mixtral (ultra-fast, free)
- * Emergency: Template system (always available)
+ *
+ * A robust review generation system that provides high-quality hotel reviews
+ * through multiple fallback layers:
+ * - Primary: OpenAI GPT-4o-mini (best quality/cost ratio)
+ * - Fallback: Groq Mixtral (ultra-fast, free)
+ * - Emergency: Template system (always available)
+ *
+ * Features include request caching, cost tracking, performance monitoring,
+ * and comprehensive error handling with graceful degradation.
+ *
+ * @class LLMReviewGenerator
+ * @since 1.0.0
+ * @author Hotel Review Generator Team
+ *
+ * @example
+ * const generator = new LLMReviewGenerator({
+ *   openaiKey: 'sk-...',
+ *   groqKey: 'gsk_...',
+ *   proxyUrl: 'https://api.example.com/proxy'
+ * });
+ *
+ * const result = await generator.generateReview({
+ *   hotelName: 'Grand Hotel',
+ *   rating: 4,
+ *   tripType: 'business',
+ *   highlights: ['wifi', 'location'],
+ *   voice: 'professional'
+ * });
+ *
+ * console.log(result.text); // Generated review
+ * console.log(result.source); // 'openai', 'groq', or 'template'
+ * console.log(`Cost: $${result.cost}`);
  */
 
 class LLMReviewGenerator {
+  /**
+   * Initialize the LLM Review Generator with API keys and configuration
+   *
+   * @constructor
+   * @param {Object} [config={}] - Configuration object
+   * @param {string} [config.openaiKey] - OpenAI API key for GPT-4o-mini
+   * @param {string} [config.groqKey] - Groq API key for Mixtral
+   * @param {string} [config.proxyUrl] - CORS proxy URL for browser requests
+   * @since 1.0.0
+   */
   constructor(config = {}) {
     // API Configuration
     this.openaiKey = config.openaiKey || null;
@@ -49,7 +88,41 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Generate review using best available method
+   * Generate a hotel review using the best available method
+   *
+   * Attempts generation in this order:
+   * 1. Check cache for existing result
+   * 2. Try OpenAI GPT-4o-mini (primary)
+   * 3. Try Groq Mixtral (fallback)
+   * 4. Use template system (emergency)
+   *
+   * @async
+   * @param {Object} params - Review generation parameters
+   * @param {string} params.hotelName - Name of the hotel
+   * @param {number} params.rating - Hotel rating from 1-5
+   * @param {string} [params.tripType='leisure'] - Type of trip ('leisure', 'business', 'family', 'romantic')
+   * @param {string[]} [params.highlights=[]] - Aspects to highlight in the review
+   * @param {number} [params.nights=3] - Number of nights stayed
+   * @param {string} [params.voice='friendly'] - Writing voice ('friendly', 'professional', 'enthusiastic', 'detailed')
+   * @param {string} [params.language='en'] - Review language code
+   * @returns {Promise<Object>} Generation result
+   * @returns {string} returns.text - Generated review text
+   * @returns {string} returns.source - Source used ('openai', 'groq', 'template', 'cache')
+   * @returns {string|null} returns.model - Model name used (null for template)
+   * @returns {number} returns.latency - Generation time in milliseconds
+   * @returns {number} returns.cost - Cost in USD (0 for free sources)
+   * @throws {Error} Never throws - always returns a result via fallback chain
+   * @since 1.0.0
+   *
+   * @example
+   * const result = await generator.generateReview({
+   *   hotelName: 'Sunset Beach Resort',
+   *   rating: 5,
+   *   tripType: 'romantic',
+   *   highlights: ['beachfront', 'spa', 'sunset views'],
+   *   nights: 7,
+   *   voice: 'enthusiastic'
+   * });
    */
   async generateReview(params) {
     const startTime = performance.now();
@@ -84,7 +157,9 @@ class LLMReviewGenerator {
         cost: this.models.primary.costPerRequest,
       };
     } catch (error) {
-
+      // Log primary LLM failure for monitoring
+      console.warn('Primary LLM (OpenAI) failed:', error.message);
+      this.stats.failures++;
     }
 
     // Try fallback LLM (Groq)
@@ -104,7 +179,9 @@ class LLMReviewGenerator {
         cost: 0,
       };
     } catch (error) {
-
+      // Log fallback LLM failure for monitoring
+      console.warn('Fallback LLM (Groq) failed:', error.message);
+      this.stats.failures++;
     }
 
     // Emergency fallback to templates
@@ -124,7 +201,14 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Generate with OpenAI GPT-4o-mini
+   * Generate review using OpenAI GPT-4o-mini model
+   *
+   * @private
+   * @async
+   * @param {Object} params - Review generation parameters
+   * @returns {Promise<string>} Generated review text
+   * @throws {Error} Throws if OpenAI API call fails or API key missing
+   * @since 1.0.0
    */
   async generateWithOpenAI(params) {
     if (!this.openaiKey) {
@@ -175,7 +259,14 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Generate with Groq (ultra-fast)
+   * Generate review using Groq Mixtral model (ultra-fast, free)
+   *
+   * @private
+   * @async
+   * @param {Object} params - Review generation parameters
+   * @returns {Promise<string>} Generated review text
+   * @throws {Error} Throws if Groq API call fails or API key missing
+   * @since 1.0.0
    */
   async generateWithGroq(params) {
     if (!this.groqKey) {
@@ -217,7 +308,12 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Build prompt from parameters
+   * Build a structured prompt from review parameters
+   *
+   * @private
+   * @param {Object} params - Review generation parameters
+   * @returns {string} Formatted prompt for LLM
+   * @since 1.0.0
    */
   buildPrompt(params) {
     const {
@@ -258,7 +354,12 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Get rating tone description
+   * Get tone description based on rating for prompt construction
+   *
+   * @private
+   * @param {number} rating - Hotel rating from 1-5
+   * @returns {string} Tone description for the rating
+   * @since 1.0.0
    */
   getRatingTone(rating) {
     const tones = {
@@ -272,7 +373,12 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Get language name from code
+   * Convert language code to full language name
+   *
+   * @private
+   * @param {string} code - ISO language code (e.g., 'en', 'es', 'fr')
+   * @returns {string} Full language name (e.g., 'English', 'Spanish', 'French')
+   * @since 1.0.0
    */
   getLanguageName(code) {
     const languages = {
@@ -291,7 +397,16 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Fetch with timeout
+   * Perform HTTP fetch with automatic timeout handling
+   *
+   * @private
+   * @async
+   * @param {string} url - Request URL
+   * @param {Object} options - Fetch options
+   * @param {number} timeout - Timeout in milliseconds
+   * @returns {Promise<Response>} Fetch response
+   * @throws {Error} Throws if request times out or fails
+   * @since 1.0.0
    */
   async fetchWithTimeout(url, options, timeout) {
     const controller = new AbortController();
@@ -314,7 +429,12 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Cache management
+   * Generate cache key from review parameters
+   *
+   * @private
+   * @param {Object} params - Review generation parameters
+   * @returns {string} JSON string cache key
+   * @since 1.0.0
    */
   getCacheKey(params) {
     return JSON.stringify({
@@ -326,6 +446,14 @@ class LLMReviewGenerator {
     });
   }
 
+  /**
+   * Cache a generated result with automatic expiration
+   *
+   * @private
+   * @param {string} key - Cache key
+   * @param {string} value - Generated review text to cache
+   * @since 1.0.0
+   */
   cacheResult(key, value) {
     this.cache.set(key, value);
 
@@ -336,13 +464,38 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Statistics tracking
+   * Update average latency statistics
+   *
+   * @private
+   * @param {number} latency - Request latency in milliseconds
+   * @since 1.0.0
    */
   updateAvgLatency(latency) {
     const total = this.stats.avgLatency * (this.stats.requests - 1) + latency;
     this.stats.avgLatency = total / this.stats.requests;
   }
 
+  /**
+   * Get comprehensive statistics about generator performance
+   *
+   * @returns {Object} Statistics object
+   * @returns {number} returns.requests - Total requests made
+   * @returns {number} returns.successes - Successful generations
+   * @returns {number} returns.failures - Failed generations
+   * @returns {number} returns.cacheHits - Cache hits
+   * @returns {string} returns.successRate - Success rate percentage
+   * @returns {string} returns.cacheHitRate - Cache hit rate percentage
+   * @returns {string} returns.avgLatency - Average latency with units
+   * @returns {string} returns.totalCost - Total cost with currency symbol
+   * @since 1.0.0
+   *
+   * @example
+   * const stats = generator.getStats();
+   * console.log(`Success Rate: ${stats.successRate}`);
+   * console.log(`Cache Hit Rate: ${stats.cacheHitRate}`);
+   * console.log(`Average Latency: ${stats.avgLatency}`);
+   * console.log(`Total Cost: ${stats.totalCost}`);
+   */
   getStats() {
     return {
       ...this.stats,
@@ -354,7 +507,19 @@ class LLMReviewGenerator {
   }
 
   /**
-   * Configure API keys
+   * Update API keys and configuration at runtime
+   *
+   * @param {Object} config - Configuration updates
+   * @param {string} [config.openaiKey] - New OpenAI API key
+   * @param {string} [config.groqKey] - New Groq API key
+   * @param {string} [config.proxyUrl] - New proxy URL
+   * @since 1.0.0
+   *
+   * @example
+   * generator.configure({
+   *   openaiKey: 'sk-new-key...',
+   *   groqKey: 'gsk-new-key...'
+   * });
    */
   configure(config) {
     if (config.openaiKey) this.openaiKey = config.openaiKey;
@@ -364,9 +529,48 @@ class LLMReviewGenerator {
 }
 
 /**
- * Template-based fallback generator
+ * Template-based Review Generator (Emergency Fallback)
+ *
+ * A lightweight, deterministic review generator that creates reviews using
+ * pre-defined templates. Used as the final fallback when all LLM providers
+ * are unavailable, ensuring the application always produces results.
+ *
+ * @class TemplateReviewGenerator
+ * @since 1.0.0
+ * @author Hotel Review Generator Team
+ *
+ * @example
+ * const templateGen = new TemplateReviewGenerator();
+ * const review = templateGen.generate({
+ *   hotelName: 'Beach Resort',
+ *   rating: 4,
+ *   tripType: 'family',
+ *   highlights: ['pool', 'kids club'],
+ *   nights: 5
+ * });
  */
 class TemplateReviewGenerator {
+  /**
+   * Generate a review using pre-defined templates
+   *
+   * @param {Object} params - Review generation parameters
+   * @param {string} params.hotelName - Name of the hotel
+   * @param {number} params.rating - Hotel rating from 1-5
+   * @param {string} [params.tripType='leisure'] - Type of trip
+   * @param {string[]} [params.highlights=[]] - Aspects to highlight
+   * @param {number} [params.nights=3] - Number of nights stayed
+   * @returns {string} Generated review text
+   * @since 1.0.0
+   *
+   * @example
+   * const review = generator.generate({
+   *   hotelName: 'Grand Plaza',
+   *   rating: 3,
+   *   tripType: 'business',
+   *   highlights: ['wifi', 'location'],
+   *   nights: 2
+   * });
+   */
   generate(params) {
     const { hotelName, rating, tripType, highlights = [], nights } = params;
 
@@ -382,6 +586,14 @@ class TemplateReviewGenerator {
     return templates[rating] || templates[3];
   }
 
+  /**
+   * Convert highlights array to natural language text
+   *
+   * @private
+   * @param {string[]} highlights - Array of highlight strings
+   * @returns {string} Natural language description of highlights
+   * @since 1.0.0
+   */
   highlightsToText(highlights) {
     if (highlights.length === 0) return 'The overall experience was as expected.';
     if (highlights.length === 1) return `The ${highlights[0]} stood out.`;

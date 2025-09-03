@@ -1427,7 +1427,6 @@ describe('Hotel Review Generator MVP - Comprehensive Test Suite', () => {
   describe('🚨 Error Handling Tests', () => {
     
     test('Network error handling with retry logic', async () => {
-      jest.setTimeout(10000); // Increase timeout for this test
       const networkManager = {
         maxRetries: 3,
         retryDelay: 1000,
@@ -1457,7 +1456,20 @@ describe('Hotel Review Generator MVP - Comprehensive Test Suite', () => {
         },
         
         delay: function(ms) {
-          return new Promise(resolve => setTimeout(resolve, ms));
+          return new Promise(resolve => {
+            const timer = setTimeout(resolve, ms);
+            // Store timer for cleanup if needed
+            if (!this.timers) this.timers = [];
+            this.timers.push(timer);
+            return timer;
+          });
+        },
+        
+        cleanup: function() {
+          if (this.timers) {
+            this.timers.forEach(timer => clearTimeout(timer));
+            this.timers = [];
+          }
         }
       };
 
@@ -1467,10 +1479,15 @@ describe('Hotel Review Generator MVP - Comprehensive Test Suite', () => {
         .mockRejectedValueOnce(new Error('Failed to fetch'))
         .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ success: true }) });
 
-      const result = await networkManager.fetchWithRetry('https://api.example.com/test');
-      expect(result.ok).toBe(true);
-      expect(global.fetch).toHaveBeenCalledTimes(3);
-    });
+      try {
+        const result = await networkManager.fetchWithRetry('https://api.example.com/test');
+        expect(result.ok).toBe(true);
+        expect(global.fetch).toHaveBeenCalledTimes(3);
+      } finally {
+        // Clean up any pending timers
+        networkManager.cleanup();
+      }
+    }, 5000); // 5 second timeout
 
     test('localStorage quota exceeded handling', () => {
       const storageManager = {

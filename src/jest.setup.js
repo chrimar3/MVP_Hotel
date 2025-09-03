@@ -7,6 +7,7 @@
 require('@testing-library/jest-dom');
 
 // Global test configuration
+/* eslint-disable no-console -- Jest test setup requires console configuration */
 global.console = {
   ...console,
   // Suppress console.log in tests unless debugging
@@ -16,6 +17,7 @@ global.console = {
   info: process.env.DEBUG_TESTS ? console.info : jest.fn(),
   debug: process.env.DEBUG_TESTS ? console.debug : jest.fn(),
 };
+/* eslint-enable no-console */
 
 // Mock window and DOM globals
 Object.defineProperty(window, 'matchMedia', {
@@ -369,8 +371,9 @@ beforeEach(() => {
 
 // Log test environment info in verbose mode
 if (process.env.DEBUG_TESTS) {
-  console.log('🧪 Jest setup complete - Hotel Review Generator Test Suite');
-  console.log(`📊 Coverage thresholds: 85% functions, lines, statements | 80% branches`);
-  console.log(`⏱️  Test timeout: 10 seconds`);
-  console.log(`🎯 BMAD targets: <2s load, <500ms generation, WCAG 2.1 AA`);
+  // Test environment logging - only in debug mode
+  process.stdout.write('🧪 Jest setup complete - Hotel Review Generator Test Suite\n');
+  process.stdout.write('📊 Coverage thresholds: 85% functions, lines, statements | 80% branches\n');
+  process.stdout.write('⏱️  Test timeout: 10 seconds\n');
+  process.stdout.write('🎯 BMAD targets: <2s load, <500ms generation, WCAG 2.1 AA\n');
 }

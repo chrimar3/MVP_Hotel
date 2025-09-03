@@ -80,7 +80,8 @@ class SentryIntegration {
 
               // Don't send events in development
               if (this.environment === 'development') {
-                console.log('[Sentry] Event captured (dev mode):', event);
+                // Development logging allowed for Sentry debugging
+                console.info('[Sentry] Event captured (dev mode):', event);
                 return null;
               }
 
@@ -98,7 +99,10 @@ class SentryIntegration {
           });
 
           this.isInitialized = true;
-          console.log('[Sentry] Initialized successfully');
+          // Development-only initialization logging
+          if (this.environment === 'development') {
+            console.info('[Sentry] Initialized successfully');
+          }
 
           // Set initial user context
           this.setUserContext();

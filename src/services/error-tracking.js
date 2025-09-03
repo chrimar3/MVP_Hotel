@@ -193,7 +193,11 @@ class ErrorTracking {
 
     // Log in development
     if (this.environment === 'development') {
-
+      console.error('Error captured:', {
+        message: error.message,
+        type: error.type,
+        timestamp: error.timestamp
+      });
     }
 
     // Send to free monitoring endpoint if critical

@@ -1,9 +1,55 @@
 /**
- * Rating Selector Component
- * Handles star rating selection with accessibility
+ * Rating Selector Component - Accessible Star Rating Interface
+ *
+ * A fully accessible star rating component that allows users to select
+ * a rating from 1-5 stars. Features keyboard navigation, screen reader
+ * support, visual previews, and ARIA compliance.
+ *
+ * @class RatingSelector
+ * @since 1.0.0
+ * @author Hotel Review Generator Team
+ *
+ * @example
+ * const ratingSelector = new RatingSelector(document.getElementById('rating'), {
+ *   defaultRating: 4,
+ *   labels: ['Terrible', 'Poor', 'Average', 'Good', 'Excellent'],
+ *   required: true,
+ *   onChange: (rating) => {
+ *     console.log('Rating selected:', rating);
+ *     updateReviewParameters({ rating });
+ *   }
+ * });
+ *
+ * // Get current rating
+ * const currentRating = ratingSelector.getRating();
+ *
+ * // Validate selection
+ * if (ratingSelector.validate()) {
+ *   console.log('Rating is valid');
+ * }
  */
 
 class RatingSelector {
+  /**
+   * Initialize the RatingSelector component
+   *
+   * @constructor
+   * @param {HTMLElement} container - DOM element to render the component into
+   * @param {Object} [options={}] - Configuration options
+   * @param {number} [options.defaultRating=5] - Initial rating value (1-5)
+   * @param {Function} [options.onChange] - Callback function when rating changes
+   * @param {string[]} [options.labels] - Array of 5 labels for each rating level
+   * @param {boolean} [options.required=false] - Whether rating selection is required
+   * @since 1.0.0
+   *
+   * @example
+   * const selector = new RatingSelector(container, {
+   *   defaultRating: 3,
+   *   labels: ['Poor', 'Fair', 'Good', 'Great', 'Excellent'],
+   *   required: true,
+   *   onChange: (rating) => console.log('New rating:', rating)
+   * });
+   */
   constructor(container, options = {}) {
     this.container = container;
     this.options = {
@@ -18,6 +64,12 @@ class RatingSelector {
     this.attachEvents();
   }
 
+  /**
+   * Render the rating selector HTML structure
+   *
+   * @private
+   * @since 1.0.0
+   */
   render() {
     const html = `
             <fieldset class="rating-selector" role="radiogroup" aria-required="${this.options.required}">
@@ -53,6 +105,12 @@ class RatingSelector {
     this.descriptionEl = this.container.querySelector('#rating-text');
   }
 
+  /**
+   * Attach event listeners for user interactions
+   *
+   * @private
+   * @since 1.0.0
+   */
   attachEvents() {
     this.buttons.forEach((button) => {
       // Click handler
@@ -107,6 +165,15 @@ class RatingSelector {
     });
   }
 
+  /**
+   * Set the current rating value and update UI
+   *
+   * @param {number} rating - Rating value from 1-5
+   * @since 1.0.0
+   *
+   * @example
+   * selector.setRating(4); // Sets rating to 4 stars
+   */
   setRating(rating) {
     if (rating === this.currentRating) return;
 
@@ -132,22 +199,58 @@ class RatingSelector {
     this.announce(`Rating set to ${rating} stars`);
   }
 
+  /**
+   * Show visual preview of rating on hover
+   *
+   * @private
+   * @param {number} rating - Rating to preview
+   * @since 1.0.0
+   */
   showPreview(rating) {
     this.buttons.forEach((btn, index) => {
       btn.classList.toggle('preview', index < rating);
     });
   }
 
+  /**
+   * Clear rating preview on mouse leave
+   *
+   * @private
+   * @since 1.0.0
+   */
   clearPreview() {
     this.buttons.forEach((btn) => {
       btn.classList.remove('preview');
     });
   }
 
+  /**
+   * Get the current rating value
+   *
+   * @returns {number} Current rating (1-5)
+   * @since 1.0.0
+   *
+   * @example
+   * const rating = selector.getRating();
+   * console.log('Current rating:', rating); // e.g., 4
+   */
   getRating() {
     return this.currentRating;
   }
 
+  /**
+   * Validate the current rating selection
+   *
+   * @returns {boolean} True if valid, false if required but not set
+   * @since 1.0.0
+   *
+   * @example
+   * if (!selector.validate()) {
+   *   console.log('Please select a rating');
+   *   return;
+   * }
+   * // Proceed with form submission
+   */
   validate() {
     if (this.options.required && !this.currentRating) {
       this.showError('Please select a rating');
@@ -156,6 +259,13 @@ class RatingSelector {
     return true;
   }
 
+  /**
+   * Display an error message to the user
+   *
+   * @private
+   * @param {string} message - Error message to display
+   * @since 1.0.0
+   */
   showError(message) {
     const errorEl = this.container.querySelector('.rating-error') || this.createErrorElement();
     errorEl.textContent = message;
@@ -163,6 +273,13 @@ class RatingSelector {
     this.announce(message, 'assertive');
   }
 
+  /**
+   * Create error display element if it doesn't exist
+   *
+   * @private
+   * @returns {HTMLElement} Error display element
+   * @since 1.0.0
+   */
   createErrorElement() {
     const error = document.createElement('div');
     error.className = 'rating-error';
@@ -172,6 +289,14 @@ class RatingSelector {
     return error;
   }
 
+  /**
+   * Announce a message to screen readers
+   *
+   * @private
+   * @param {string} message - Message to announce
+   * @param {string} [priority='polite'] - Announcement priority ('polite' or 'assertive')
+   * @since 1.0.0
+   */
   announce(message, priority = 'polite') {
     const announcement = document.createElement('div');
     announcement.className = 'sr-only';
@@ -183,10 +308,26 @@ class RatingSelector {
     setTimeout(() => announcement.remove(), 1000);
   }
 
+  /**
+   * Reset rating to default value
+   *
+   * @since 1.0.0
+   *
+   * @example
+   * selector.reset(); // Resets to defaultRating
+   */
   reset() {
     this.setRating(this.options.defaultRating);
   }
 
+  /**
+   * Destroy the component and clean up DOM
+   *
+   * @since 1.0.0
+   *
+   * @example
+   * selector.destroy(); // Clean up when component no longer needed
+   */
   destroy() {
     this.container.innerHTML = '';
   }

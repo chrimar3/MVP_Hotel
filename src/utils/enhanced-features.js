@@ -27,27 +27,8 @@ window.EnhancedReviewGenerator = {
         if (!deferredContent) return;
 
         deferredContent.innerHTML = `
-            <!-- Aspect Selection -->
-            <div class="form-group aspect-selection">
-                <label>What did you enjoy? (Select multiple)</label>
-                <div class="aspect-grid" id="aspectGrid">
-                    ${this.getAspectButtons()}
-                </div>
-            </div>
-
-            <!-- Staff Recognition -->
-            <div class="form-group">
-                <label for="staffName">
-                    <span>👏 Staff member to recognize (optional)</span>
-                    <span class="bonus-points">+20 points!</span>
-                </label>
-                <input 
-                    type="text" 
-                    id="staffName" 
-                    placeholder="e.g., Maria at reception"
-                    class="staff-input"
-                >
-            </div>
+            <div class="form-group aspect-selection"><label>What did you enjoy? (Select multiple)</label><div class="aspect-grid" id="aspectGrid">${this.getAspectButtons()}</div></div>
+            <div class="form-group"><label for="staffName"><span>👏 Staff member to recognize (optional)</span><span class="bonus-points">+20 points!</span></label><input type="text" id="staffName" placeholder="e.g., Maria at reception" class="staff-input"></div>
 
             <!-- Platform Selection -->
             <div class="form-group">
@@ -256,7 +237,10 @@ window.EnhancedReviewGenerator = {
 
     showShareModal() {
         // Implementation for share modal with QR code
-        console.log('Share modal would appear here');
+        // Development placeholder for share modal
+        if (window.location.hostname === 'localhost') {
+            console.info('Share modal would appear here');
+        }
     },
 
     triggerConfetti() {
@@ -335,7 +319,10 @@ window.EnhancedReviewGenerator = {
                 this.translations = module.default;
                 this.applyTranslations();
             }).catch(() => {
-                console.log('Translation not available, using English');
+                // Development logging for translation fallback
+                if (window.location.hostname === 'localhost') {
+                    console.info('Translation not available, using English');
+                }
             });
         }
     },
@@ -360,7 +347,10 @@ window.EnhancedReviewGenerator = {
     },
 
     trackEvent(action, label) {
-        console.log('Track:', action, label);
+        // Development logging for analytics tracking
+        if (window.location.hostname === 'localhost') {
+            console.info('Analytics Track:', action, label);
+        }
     },
 
     injectEnhancedStyles() {

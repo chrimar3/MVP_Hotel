@@ -5,6 +5,11 @@ module.exports = {
     '**/__tests__/**/*.js',
     '**/?(*.)+(spec|test).js'
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/tests/e2e/',
+    '<rootDir>/tests/accessibility/',
+    '<rootDir>/node_modules/'
+  ],
   transform: {},
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',

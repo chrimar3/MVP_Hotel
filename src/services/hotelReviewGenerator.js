@@ -212,7 +212,7 @@ class HotelReviewGenerator {
 
     let review = templates[Math.floor(Math.random() * templates.length)];
 
-    aspects.forEach((aspect, index) => {
+    aspects.forEach((aspect, _index) => {
       if (aspectSentences[aspect]) {
         const sentences = aspectSentences[aspect];
         review += sentences[Math.floor(Math.random() * sentences.length)] + ' ';
